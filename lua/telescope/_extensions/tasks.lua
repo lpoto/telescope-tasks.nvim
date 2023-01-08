@@ -1,6 +1,6 @@
 local enum = require "telescope._extensions.tasks.enum"
 local picker = require "telescope._extensions.tasks.picker"
-local finder = require "telescope._extensions.tasks.finder"
+local actions = require "telescope._extensions.tasks.actions"
 
 -- NOTE: ensure the telescope is loaded
 -- before registering the extension
@@ -22,8 +22,8 @@ vim.api.nvim_create_augroup(enum.TASKS_AUGROUP, { clear = true })
 -- NOTE: register the extension
 return telescope.register_extension {
   exports = {
-    tasks = picker.available_tasks_picker,
-    finder = finder.available_tasks_finder,
-    _picker = picker.available_tasks_picker,
+    tasks = picker,
+    actions = actions,
+    _picker = picker,
   },
 }

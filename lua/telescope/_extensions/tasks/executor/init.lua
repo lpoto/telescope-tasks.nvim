@@ -1,8 +1,6 @@
 local enum = require "telescope._extensions.tasks.enum"
 local Task = require "telescope._extensions.tasks.model.task"
 local run = require "telescope._extensions.tasks.executor.run_task"
-local task_output_window =
-  require "telescope._extensions.tasks.window.task_output"
 
 local executor = {}
 
@@ -68,11 +66,7 @@ function executor.start(name, prev_buf, on_exit)
     )
     return false
   end
-  if run.run(task, on_exit) == true then
-    task_output_window.set_as_previous(task)
-    return true
-  end
-  return false
+  return run.run(task, on_exit)
 end
 
 ---Kill the task identified by the provided name
