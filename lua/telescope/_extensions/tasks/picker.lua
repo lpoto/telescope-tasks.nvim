@@ -1,14 +1,12 @@
-local executor = require "telescope._extensions.tasks.executor"
 local Task = require "telescope._extensions.tasks.model.task"
 local enum = require "telescope._extensions.tasks.enum"
 local finder = require "telescope._extensions.tasks.finder"
 local previewer = require "telescope._extensions.tasks.previewer"
-local output_window = require "telescope._extensions.tasks.window.task_output"
+local actions = require "telescope._extensions.tasks.actions"
 
 local pickers = require "telescope.pickers"
 local conf = require("telescope.config").values
-local actions = require "telescope.actions"
-local action_state = require "telescope.actions.state"
+local telescope_actions = require "telescope.actions"
 
 local picker = {}
 local prev_buf = nil
@@ -19,61 +17,21 @@ local available_tasks_telescope_picker
 ---In the opened window.
 ---
 ---@param opts table?: options to pass to the picker
----@return table: a telescope picker
 function picker.available_tasks_picker(opts)
   available_tasks_telescope_picker(opts)
 end
 
-local function refresh_picker(p)
-  vim.defer_fn(function()
-    pcall(
-      p.refresh,
-      p,
-      finder.available_tasks_finder(prev_buf),
-      { reset_prompt = true }
-    )
-  end, 60)
-end
-
-local function select_task(p, task)
-  if executor.is_running(task.name) == true then
-    executor.kill(task.name, prev_buf)
-    return
-  end
-
-  executor.start(task.name, prev_buf, function()
-    refresh_picker(p)
-  end)
-  refresh_picker(p)
-end
-
-local function output_of_task_under_cursor(picker_buf)
-  local selection = action_state.get_selected_entry()
-  output_window.open(selection.value, function()
-    actions.close(picker_buf)
-  end)
-end
-
-local function delete_output_of_task_under_cursor(picker_buf)
-  local p = action_state.get_current_picker(picker_buf)
-  local selection = action_state.get_selected_entry()
-  executor.delete_task_buffer(selection.value.name)
-  refresh_picker(p)
-end
-
 local function attach_picker_mappings()
   return function(prompt_bufnr, map)
-    actions.select_default:replace(function()
-      local selection = action_state.get_selected_entry()
-      local p = action_state.get_current_picker(prompt_bufnr)
-      select_task(p, selection.value)
+    telescope_actions.select_default:replace(function()
+      actions.select_task(prompt_bufnr, prev_buf)
     end)
     for _, mode in ipairs { "i", "n" } do
       map(mode, "<C-o>", function()
-        output_of_task_under_cursor(prompt_bufnr)
+        actions.selected_task_output(prompt_bufnr)
       end)
       map(mode, "<C-d>", function()
-        delete_output_of_task_under_cursor(prompt_bufnr)
+        actions.delete_selected_task_output(prompt_bufnr, prev_buf)
       end)
     end
     return true
@@ -125,4 +83,4 @@ available_tasks_telescope_picker = function(options)
   tasks_picker(options)
 end
 
-return picker
+return picker.available_tasks_picker

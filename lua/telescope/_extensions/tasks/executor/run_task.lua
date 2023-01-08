@@ -1,4 +1,6 @@
 local enum = require "telescope._extensions.tasks.enum"
+local create_buffer =
+  require "telescope._extensions.tasks.executor.create_buffer"
 
 ---A table with tasks' names as keys
 ---and their job ids as values
@@ -76,44 +78,11 @@ function run.run(task, on_exit)
 
   --NOTE: if an output buffer for the same task already exists,
   --open terminal in that one instead of creating a new one
-  local term_buf = run.get_buf_num(task.name)
-  if term_buf == nil or vim.fn.bufexists(term_buf) ~= 1 then
-    local ok
-    ok, term_buf = pcall(vim.api.nvim_create_buf, false, true)
-    if ok == false then
-      vim.notify(term_buf, vim.log.levels.WARN, {
-        title = enum.TITLE,
-      })
-      return false
-    end
+  local term_buf = create_buffer.create(run.get_buf_num(task.name))
+  if not term_buf or not vim.api.nvim_buf_is_valid(term_buf) then
+    return false
   end
-  vim.api.nvim_buf_set_option(term_buf, "modified", false)
-  vim.api.nvim_buf_set_option(term_buf, "modifiable", true)
 
-  vim.api.nvim_clear_autocmds {
-    event = { "TermClose", "TermEnter" },
-    buffer = term_buf,
-    group = enum.TASKS_AUGROUP,
-  }
-  --NOTE: set the autocmd for the terminal buffer, so that
-  --when it finishes, we cannot enter the insert mode.
-  --(when we enter insert mode in the closed terminal, it is deleted)
-  vim.api.nvim_create_autocmd("TermClose", {
-    buffer = term_buf,
-    group = enum.TASKS_AUGROUP,
-    callback = function()
-      vim.cmd "stopinsert"
-      vim.api.nvim_create_autocmd("TermEnter", {
-        group = enum.TASKS_AUGROUP,
-        callback = function()
-          vim.cmd "stopinsert"
-        end,
-        buffer = term_buf,
-      })
-    end,
-    nested = true,
-    once = true,
-  })
   --NOTE: open a terminal in the created buffer
   --set the terminal's properties to match the task
   local ok, job_id
