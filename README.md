@@ -74,6 +74,11 @@ require("telescope").extensions.tasks.tasks()
 > -- or :Telescope tasks theme=ivy
 > ```
 
+The last opened output may then be toggled with:
+```lua
+ require("telescope").extensions.tasks.actions.toggle_last_output()
+```
+
 ## Roadmap
 
 - [x] Display currently available tasks in a telescope picker
