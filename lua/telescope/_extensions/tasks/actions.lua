@@ -41,6 +41,11 @@ function actions.delete_selected_task_output(picker_buf, prev_buf)
 end
 
 function actions.toggle_last_output()
+  if vim.api.nvim_buf_get_option(0, "filetype") == "TelescopePrompt" then
+    -- NOTE: close telescope popup if open
+    vim.api.nvim_buf_delete(0, { force = true })
+  end
+
   output_window.__toggle_last_task_output()
 end
 
