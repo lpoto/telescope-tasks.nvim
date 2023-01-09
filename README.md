@@ -44,27 +44,21 @@ require("telescope").load_extension("tasks")
 Add your tasks:
 
 ```lua
--- NOTE: This is the task used in the demo above
 vim.g.telescope_tasks = vim.tbl_extend(
   "force", vim.g.telescope_tasks or {},
   {
-    -- tasks should always be functions, as they
-    -- are called immediately before being executed,
-    -- so the fields may be dynamic
     ["Run current Python file"] = function()
-      env = {}, -- A table of environment variables (optional)
-      clear_env = false, -- If true, the environment will be cleared before running the task, and only values from `env` will be kept (optional)
-      cwd = nil, -- A valid path to set as the working directory for the task (optional)
-      filetypes = {"python"}, -- A table of filetypes that the task should be available in (optional)
-      patterns = {}, -- A table of lua patterns, the task is available only in files matching one of the patterns (optional)
-      ignore_patterns = {}, -- A table of lua patterns, the task is available only in files not matching any of the patterns (optional)
-      steps = { -- A table of steps to execute in order
-        {"python3", vim.api.nvim_buf_get_name(0)} -- This could also be a single string
+      return {
+        filetypes = {"python"},
+        steps = {
+          {"python3", vim.api.nvim_buf_get_name(0)}
+        }
       }
     end
   }
 )
 ```
+> This is the example used in the demo above
 
 Then use the extension:
 
