@@ -113,12 +113,15 @@ The last opened output may then be toggled with:
 
 | Key     | Action                                                   | Description                                                 |
 | ------- | -------------------------------------------------------- | ----------------------------------------------------------- |
-| `<CR>`  | `telescope.extensions.tasks.select_task`                 | Run the selected task, or kill it if it is already running. |
-| `<C-o>` | `telescope.extensions.tasks.selected_task_output`        | Display the output of the selected task in another window.  |
-| `<C-d>` | `telescope.extensions.tasks.delete_selected_task_output` | Delete the output of the selected task.                     |
-| `<C-k>` | `telescope.actions.preview_scrolling_up`                 | Scroll the previewer up.                                    |
-| `<C-j>` | `telescope.actions.preview_scrolling_down`               | Scroll the previewer down.                                  |
-
+| `<CR>`  | `tasks_actions.select_task`                              | Run the selected task, or kill it if it is already running. |
+| `<C-o>` | `tasks_actions.selected_task_output`                     | Display the output of the selected task in another window.  |
+| `<C-d>` | `tasks_actions.delete_selected_task_output`              | Delete the output of the selected task.                     |
+| `<C-k>` | `actions_preview_scrolling_up`                           | Scroll the previewer up.                                    |
+| `<C-j>` | `actions.preview_scrolling_down`                         | Scroll the previewer down.                                  |
+>```lua
+> tasks_actions = require("telescope").extensions.tasks.actions
+> actions = require("telescope.actions")
+>```
 ## Roadmap
 
 - [x] Display currently available tasks in a telescope picker
