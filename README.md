@@ -89,6 +89,8 @@ or in lua:
 require("telescope").extensions.tasks.tasks()
 ```
 
+> **_NOTE_**: See [Mappings](#mappings) for the default mappings in the tasks prompt
+
 The last opened output may then be toggled with:
 
 ```lua
@@ -106,6 +108,16 @@ The last opened output may then be toggled with:
 | **patterns**        | `table?`   | A table of lua patterns. The task is available only when this field is `nil` or the current filename matches one of the patterns.                      |
 | **ignore_patterns** | `table?`   | A table of lua patterns. The task is available only when this field is `nil` or the current filename does not match any of the patterns in this table. |
 | **steps**           | `table`    | A table of commands to execute. The commands may either be strings or tables of strings. There should always be at least one step.                     |
+
+## Mappings
+
+| Key     | Action                                                   | Description                                                 |
+| ------- | -------------------------------------------------------- | ----------------------------------------------------------- |
+| `<CR>`  | `telescope.extensions.tasks.select_task`                 | Run the selected task, or kill it if it is already running. |
+| `<C-o>` | `telescope.extensions.tasks.selected_task_output`        | Display the output of the selected task in another window.  |
+| `<C-d>` | `telescope.extensions.tasks.delete_selected_task_output` | Delete the output of the selected task.                     |
+| `<C-k>` | `telescope.actions.preview_scrolling_up`                 | Scroll the previewer up.                                    |
+| `<C-j>` | `telescope.actions.preview_scrolling_down`               | Scroll the previewer down.                                  |
 
 ## Roadmap
 
