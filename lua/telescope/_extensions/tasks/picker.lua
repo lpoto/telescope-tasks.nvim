@@ -6,7 +6,6 @@ local mappings = require "telescope._extensions.tasks.mappings"
 
 local pickers = require "telescope.pickers"
 local conf = require("telescope.config").values
-
 local picker = {}
 local prev_buf = nil
 
@@ -57,6 +56,7 @@ available_tasks_telescope_picker = function(options)
         previewer = previewer.task_previewer(),
         dynamic_preview_title = true,
         selection_strategy = "row",
+        scroll_strategy = "cycle",
         attach_mappings = mappings.get_attach_mappings(prev_buf),
       })
       :find()

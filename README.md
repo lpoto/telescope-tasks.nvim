@@ -78,13 +78,6 @@ or in lua:
 require("telescope").extensions.tasks.tasks()
 ```
 
-> **_NOTE_**: Additional configurations or themes may be passed to the picker.
->
-> ```lua
-> require("telescope").extensions.tasks.tasks(require("telescope.themes").get_ivy())
-> -- or :Telescope tasks theme=ivy
-> ```
-
 The last opened output may then be toggled with:
 
 ```lua
@@ -102,5 +95,5 @@ The last opened output may then be toggled with:
   - [x] Allow adding a custom picker setup
   - [x] Add a theme setup field
   - [ ] Allow configuring output window
-- [ ] Allow scrolling the task output preview
+- [x] Allow scrolling the task output preview
 - [ ] Redo tasks execution so that each step is it's own job
