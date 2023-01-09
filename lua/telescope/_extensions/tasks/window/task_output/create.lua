@@ -1,15 +1,20 @@
 local enum = require "telescope._extensions.tasks.enum"
 local setup = require "telescope._extensions.tasks.setup"
+local highlights = require "telescope._extensions.tasks.highlight"
 
 local create = {}
 
 local handle_window
+local clean_buffer
 local determine_output_window_type
+local add_autocmd
+local close_win
+local create_window_augroup = "TeleskopeTasks_CreateWindow"
 
 ---@param buf number: A buffer number to create a window for
 ---@return number: A window id, -1 when invalid
 function create.create_window(buf)
-  local winnr = vim.fn.winnr()
+  clean_buffer(buf)
 
   local ok, winid = pcall(determine_output_window_type(), buf)
   if ok == false then
@@ -32,16 +37,8 @@ function create.create_window(buf)
     })
   end
 
-  ok, err = pcall(
-    vim.api.nvim_exec,
-    "noautocmd keepjumps " .. winnr .. "wincmd w",
-    false
-  )
-  if ok == false then
-    vim.notify(err, vim.log.levels.ERROR, {
-      title = enum.TITLE,
-    })
-  end
+  add_autocmd(buf)
+
   return winid
 end
 
@@ -64,22 +61,38 @@ local function create_split_window(buf)
 end
 
 local function create_floating_window(buf)
-  vim.notify("Floating window is not supported yet", vim.log.levels.WARN, {
-    title = enum.TITLE,
-  })
-  return create_vsplit_window(buf)
-end
+  local width = vim.o.columns
+  local height = vim.o.columns
 
----Highlight the texts added to the output term in the
----window identified by the provided winid
-function create.set_highlights(winid)
-  pcall(vim.api.nvim_win_call, winid, function()
-    vim.fn.matchadd("Function", "^==> TASK: \\[\\_.\\{-}\\n\\n")
-    vim.fn.matchadd("Constant", "^==> STEP: \\[\\_.\\{-}\\n\\n")
-    vim.fn.matchadd("Comment", "^==> CWD: \\[\\_.\\{-}\\n\\n")
-    vim.fn.matchadd("Statement", "^\\[Process exited .*\\]$")
-    vim.fn.matchadd("Function", "^\\[Process exited 0\\]$")
-  end)
+  local w = math.min(80, width - 4)
+  local h = height - 8
+
+  local row = (height - h) / 2
+  local col = (width - w) / 2
+
+  local winid = vim.api.nvim_open_win(buf, true, {
+    relative = "editor",
+    width = w,
+    height = h,
+    row = row,
+    col = col,
+    focusable = true,
+    style = "minimal",
+    border = "rounded",
+  })
+
+  vim.keymap.set("n", "<Esc>", function()
+    close_win(buf)
+  end, {
+    buffer = buf,
+  })
+  vim.keymap.set("n", "q", function()
+    close_win(buf)
+  end, {
+    buffer = buf,
+  })
+
+  return winid
 end
 
 local function set_options(winid)
@@ -93,19 +106,37 @@ end
 
 handle_window = function(winid)
   set_options(winid)
-  create.set_highlights(winid)
+  highlights.set_output_window_highlights(winid)
+end
+
+clean_buffer = function(buf)
+  vim.api.nvim_create_augroup(create_window_augroup, {
+    clear = true,
+  })
+  pcall(vim.keymap.del, "n", "<Esc>", { buffer = buf })
+  pcall(vim.keymap.del, "n", "q", { buffer = buf })
 end
 
 ---@return function
 determine_output_window_type = function()
-  local win_type = setup.opts.output_window or "vsplit"
-  if win_type == "vsplit" then
+  local win_type = setup.opts.output_window
+    or setup.opts.output_win
+    or setup.opts.win
+    or setup.opts.window
+    or "float"
+
+  if
+    win_type == "vsplit"
+    or win_type == "vertical"
+    or win_type == "vertical split"
+  then
     return create_vsplit_window
-  elseif win_type == "split" then
+  elseif win_type == "split" or win_type == "normal" then
     return create_split_window
-  elseif win_type == "floating"
-      or win_type == "float"
-      or win_type == "popup"
+  elseif
+    win_type == "floating"
+    or win_type == "float"
+    or win_type == "popup"
   then
     return create_floating_window
   else
@@ -114,6 +145,34 @@ determine_output_window_type = function()
     })
   end
   return create_vsplit_window
+end
+
+add_autocmd = function(buf)
+  vim.api.nvim_clear_autocmds {
+    event = { "BufLeave" },
+    buffer = buf,
+    group = enum.TASKS_AUGROUP,
+  }
+  vim.api.nvim_create_autocmd("BufLeave", {
+    group = enum.TASKS_AUGROUP,
+    buffer = buf,
+    once = true,
+    callback = function()
+      local wid = vim.fn.bufwinid(buf)
+      if not wid or wid == -1 or not vim.api.nvim_win_is_valid(wid) then
+        return
+      end
+      close_win(buf)
+    end,
+  })
+end
+
+close_win = function(buf)
+  local wid = vim.fn.bufwinid(buf)
+  if not wid or wid == -1 or not vim.api.nvim_win_is_valid(wid) then
+    return
+  end
+  vim.api.nvim_win_close(wid, false)
 end
 
 return create

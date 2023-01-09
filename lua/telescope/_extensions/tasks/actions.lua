@@ -41,14 +41,12 @@ function actions.delete_selected_task_output(picker_buf, prev_buf)
 end
 
 function actions.toggle_last_output()
-  if
-    output_window.opened_win ~= nil
-    and vim.api.nvim_win_is_valid(output_window.opened_win)
-  then
-    vim.api.nvim_win_close(output_window.opened_win, false)
-    return
+  if vim.api.nvim_buf_get_option(0, "filetype") == "TelescopePrompt" then
+    -- NOTE: close telescope popup if open
+    vim.api.nvim_buf_delete(0, { force = true })
   end
-  output_window.__open_last_task_output()
+
+  output_window.__toggle_last_task_output()
 end
 
 refresh_picker = function(p, prev_buf)

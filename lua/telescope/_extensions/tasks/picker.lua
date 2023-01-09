@@ -22,20 +22,25 @@ end
 available_tasks_telescope_picker = function(options)
   local cur_buf = vim.fn.bufnr()
   if
-    vim.api.nvim_buf_get_option(cur_buf, "buftype") ~= "terminal"
-    or vim.api.nvim_buf_get_option(cur_buf, "filetype")
-      ~= enum.OUTPUT_BUFFER_FILETYPE
+    vim.api.nvim_buf_get_option(cur_buf, "buftype") == "terminal"
+    or vim.api.nvim_buf_get_option(cur_buf, "filetype") == enum.OUTPUT_BUFFER_FILETYPE
+    or (
+      vim.api.nvim_buf_get_option(cur_buf, "filetype"):len() == 0
+      and vim.api.nvim_buf_get_name(cur_buf):len() == 0
+    )
   then
-    prev_buf = vim.fn.bufnr()
+    cur_buf = prev_buf
   end
 
-  local tasks, err = Task.__available_tasks(prev_buf)
+  local tasks, err = Task.__available_tasks(cur_buf)
   if err ~= nil then
     vim.notify(err, vim.log.levels.WARN, {
       title = enum.TITLE,
     })
     return -1
   end
+
+  prev_buf = cur_buf
 
   if tasks == nil or next(tasks) == nil then
     vim.notify("There are no available tasks", vim.log.levels.WARN, {
@@ -46,7 +51,6 @@ available_tasks_telescope_picker = function(options)
 
   local function tasks_picker(opts)
     opts = opts or {}
-    print(vim.inspect(opts))
     pickers
       .new(opts, {
         prompt_title = "Tasks",
