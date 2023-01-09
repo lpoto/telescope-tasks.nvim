@@ -1,5 +1,6 @@
 local enum = require "telescope._extensions.tasks.enum"
 local picker = require "telescope._extensions.tasks.picker"
+local setup = require "telescope._extensions.tasks.setup"
 local actions = require "telescope._extensions.tasks.actions"
 
 -- NOTE: ensure the telescope is loaded
@@ -16,13 +17,22 @@ if not has_telescope then
   )
 end
 
+---Opens the tasks picker and merges the provided opts
+---with the default options provided during the setup.
+---@param opts table|nil
+local function tasks(opts)
+  opts = opts or {}
+  picker(vim.tbl_extend("force", setup.opts, opts))
+end
+
 -- NOTE: create the augroup used by the plugin
 vim.api.nvim_create_augroup(enum.TASKS_AUGROUP, { clear = true })
 
 -- NOTE: register the extension
 return telescope.register_extension {
+  setup = setup.setup,
   exports = {
-    tasks = picker,
+    tasks = tasks,
     actions = actions,
     _picker = picker,
   },

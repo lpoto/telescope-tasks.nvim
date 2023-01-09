@@ -24,9 +24,20 @@ Plug  "lpoto/telescope-tasks.nvim"
 
 ## Setup and usage
 
-First load the extension:
+First setup and load the extension:
 
 ```lua
+require("telescope").setup {
+  extensions = {
+    tasks = {
+      theme = "ivy",
+      -- other picker config fields
+      -- NOTE: this setup is optional
+    },
+  },
+}
+
+-- Load the tasks telescope extension
 require("telescope").load_extension("tasks")
 ```
 
@@ -75,6 +86,7 @@ require("telescope").extensions.tasks.tasks()
 > ```
 
 The last opened output may then be toggled with:
+
 ```lua
  require("telescope").extensions.tasks.actions.toggle_last_output()
 ```
@@ -86,8 +98,9 @@ The last opened output may then be toggled with:
 - [x] Show tasks' definitions or output(when available) in the telescope previewer
 - [x] Allow opening the task's output in a separate buffer
 - [x] Allow toggling the latest output
-- [ ] Add setup
-  - [ ] Allow setting a theme in config
-  - [ ] Allow custom mappings
+- [x] Add setup
+  - [x] Allow adding a custom picker setup
+  - [x] Add a theme setup field
   - [ ] Allow configuring output window
+- [ ] Allow scrolling the task output preview
 - [ ] Redo tasks execution so that each step is it's own job
