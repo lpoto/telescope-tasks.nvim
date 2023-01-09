@@ -32,7 +32,7 @@ require("telescope").setup {
     -- NOTE: this setup is optional
     tasks = {
       theme = "ivy",
-      output_window = "vsplit", -- "vsplit" | "split" | "float"
+      output_window = "float", -- "vsplit" | "split" | "float"
       -- other telescope picker config fields
     },
   },
@@ -129,10 +129,10 @@ The last opened output may then be toggled with:
 - [x] Add setup:
   - [x] Allow adding a custom picker setup
   - [x] Add a theme setup field
-  - [ ] Allow configuring output window:
+  - [x] Allow configuring output window:
     - [x] Support displaying output window in a split
     - [x] Support displaying output window in a vertical split
-    - [ ] Support displaying output window in a floating window
+    - [x] Support displaying output in a floating window
 - [x] Allow scrolling the task output preview
 - [ ] Redo tasks execution so that each step is it's own job
   - [ ] Allow setting task properties for each step individually

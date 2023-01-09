@@ -11,8 +11,11 @@ end
 function hi.set_previewer_highlights(winid)
   match_inserted_output_text_hi(winid)
 
-  vim.api.nvim_win_set_option(winid, "winhl", "TelescopePreviewNormal:Normal")
-  vim.api.nvim_win_set_option(winid, "winhl", "NormalNC:Normal")
+  vim.api.nvim_win_set_option(
+    winid,
+    "winhl",
+    "TelescopePreviewNormal:Normal,NormalNC:Normal"
+  )
 end
 
 match_inserted_output_text_hi = function(winid)
@@ -26,7 +29,11 @@ match_inserted_output_text_hi = function(winid)
 end
 
 hi_output_float = function(winid)
-  vim.api.nvim_win_set_option(winid, "winhl", "NormalFloat:Normal")
+  vim.api.nvim_win_set_option(
+    winid,
+    "winhl",
+    "FloatBorder:Normal,NormalFloat:Normal"
+  )
 end
 
 return hi
