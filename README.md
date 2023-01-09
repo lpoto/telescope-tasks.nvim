@@ -47,17 +47,31 @@ Add your tasks:
 vim.g.telescope_tasks = vim.tbl_extend(
   "force", vim.g.telescope_tasks or {},
   {
-    ["Run current Python file"] = function()
+    ["Run current Cargo binary"] = function()
       return {
-        filetypes = {"python"},
+        filetypes = { "rust" },
+        patterns = { ".*/src/bin/[^/]+.rs" },
+        cwd = find_root { ".git", "cargo.toml" },
         steps = {
-          {"python3", vim.api.nvim_buf_get_name(0)}
-        }
+          { "cargo", "run", "--bin", vim.fn.expand "%:p:t:r" },
+        },
       }
-    end
+    end,
+    ["Run current Cargo project"] = function()
+      return {
+        filetypes = { "rust" },
+        patterns = { ".*/src/.*.rs" },
+        ignore_patterns = { ".*/src/bin/[^/]+.rs" },
+        cwd = find_root { ".git", "cargo.toml" },
+        steps = {
+          { "cargo", "run" },
+        },
+      }
+    end,
   }
 )
 ```
+
 > This is the example used in the demo above.
 >
 > **_NOTE_**: See [Task Spec](#task-spec) for more on tasks' setup properties.
@@ -82,16 +96,15 @@ The last opened output may then be toggled with:
 
 ## Task Spec
 
-
-| Property            | Type                                                      | Description                                                                                                                                                                                                                               |
-| ------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **env**             | `table?`                                                  | A table of environment variables used during the task's execution  .
-| **clear_env**       | `boolean?`                                                | When set to `true`, environment variables _not_ preset in the `env` table are cleared for the duration of the task's execution.
-| **cwd**             | `string?`                                                 | A path to a directory that will be used as a working directory for the task.
-| **filetypes**       | `table?`                                                  | A table of filetypes that the task is available in, when `nil`, it is available in all filetypes.
-| **patterns**        | `table?`                                                  | A table of lua patterns. The task is available only when this field is `nil` or the current filename matches one of the patterns.
-| **ignore_patterns** | `table?`                                                  | A table of lua patterns. The task is available only when this field is `nil` or the current filename does not match any of the patterns in this table.
-| **steps**           | `table`                                                   | A table of commands to execute. The commands may either be strings or tables of strings. There should always be at least one step.
+| Property            | Type       | Description                                                                                                                                            |
+| ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **env**             | `table?`   | A table of environment variables used during the task's execution .                                                                                    |
+| **clear_env**       | `boolean?` | When set to `true`, environment variables _not_ preset in the `env` table are cleared for the duration of the task's execution.                        |
+| **cwd**             | `string?`  | A path to a directory that will be used as a working directory for the task.                                                                           |
+| **filetypes**       | `table?`   | A table of filetypes that the task is available in, when `nil`, it is available in all filetypes.                                                      |
+| **patterns**        | `table?`   | A table of lua patterns. The task is available only when this field is `nil` or the current filename matches one of the patterns.                      |
+| **ignore_patterns** | `table?`   | A table of lua patterns. The task is available only when this field is `nil` or the current filename does not match any of the patterns in this table. |
+| **steps**           | `table`    | A table of commands to execute. The commands may either be strings or tables of strings. There should always be at least one step.                     |
 
 ## Roadmap
 
