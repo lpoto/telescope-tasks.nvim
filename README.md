@@ -136,3 +136,6 @@ The last opened output may then be toggled with:
 - [x] Allow scrolling the task output preview
 - [ ] Redo tasks execution so that each step is it's own job
   - [ ] Allow setting task properties for each step individually
+  - [ ] Update task and steps info output texts
+    - [ ] Make texts span through the whole window width, remove redundant newlines
+    - [ ] Update texts highlights
