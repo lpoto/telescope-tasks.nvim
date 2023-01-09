@@ -35,9 +35,10 @@ function previewer.task_previewer()
       end
       local _, winid = pcall(vim.fn.bufwinid, self.state.bufnr)
       self.state.bufnr = nil
-      if type(winid) ~= "number"
-          or winid == -1
-          or not vim.api.nvim_win_is_valid(winid)
+      if
+        type(winid) ~= "number"
+        or winid == -1
+        or not vim.api.nvim_win_is_valid(winid)
       then
         return
       end
@@ -89,8 +90,9 @@ function previewer.task_previewer()
 end
 
 quote_string = function(v)
-  if type(v) == "string"
-      and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
+  if
+    type(v) == "string"
+    and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
   then
     if string.find(v, "'") == nil then
       v = "'" .. v .. "'"
