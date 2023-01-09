@@ -61,7 +61,7 @@ vim.g.telescope_tasks = vim.tbl_extend(
       return {
         filetypes = { "rust" },
         patterns = { ".*/src/.*.rs" },
-        ignore_patterns = { ".*/src/bin/[^/]+.rs" },
+        --ignore_patterns = { ".*/src/bin/[^/]+.rs" },
         cwd = find_root { ".git", "cargo.toml" },
         steps = {
           { "cargo", "run" },
