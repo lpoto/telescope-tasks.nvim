@@ -23,8 +23,11 @@ available_tasks_telescope_picker = function(options)
   local cur_buf = vim.fn.bufnr()
   if
     vim.api.nvim_buf_get_option(cur_buf, "buftype") ~= "terminal"
-    or vim.api.nvim_buf_get_option(cur_buf, "filetype")
-      ~= enum.OUTPUT_BUFFER_FILETYPE
+    and vim.api.nvim_buf_get_option(cur_buf, "filetype") ~= enum.OUTPUT_BUFFER_FILETYPE
+    and (
+      vim.api.nvim_buf_get_option(cur_buf, "filetype"):len() > 0
+      or vim.api.nvim_buf_get_name(cur_buf):len() > 0
+    )
   then
     prev_buf = vim.fn.bufnr()
   end
@@ -46,7 +49,6 @@ available_tasks_telescope_picker = function(options)
 
   local function tasks_picker(opts)
     opts = opts or {}
-    print(vim.inspect(opts))
     pickers
       .new(opts, {
         prompt_title = "Tasks",

@@ -25,16 +25,16 @@ function previewer.task_previewer()
     end,
     scroll_fn = scroll_fn,
     teardown = function(self)
+      self.state = nil
       pcall(
         vim.api.nvim_buf_delete,
         previewer.old_preview_buf,
         { force = true }
       )
-      if self.state == nil or self.state.bufnr == nil then
+      if self.status == nil or self.status.preview_win == nil then
         return
       end
-      local _, winid = pcall(vim.fn.bufwinid, self.state.bufnr)
-      self.state.bufnr = nil
+      local winid = self.status.preview_win
       if
         type(winid) ~= "number"
         or winid == -1
@@ -43,7 +43,7 @@ function previewer.task_previewer()
         return
       end
       local buf = vim.api.nvim_create_buf(false, true)
-      pcall(vim.api.nvim_win_set_buf, winid, buf)
+      vim.api.nvim_win_set_buf(winid, buf)
     end,
     preview_fn = function(self, entry, status)
       highlights.set_previewer_highlights(status.preview_win)
@@ -82,6 +82,7 @@ function previewer.task_previewer()
         vim.api.nvim_buf_delete(old_buf, { force = true })
       end
 
+      self.status = status
       self.state = self.state or {}
       self.state.winid = status.preview_win
       self.state.bufnr = vim.api.nvim_win_get_buf(status.preview_win)
