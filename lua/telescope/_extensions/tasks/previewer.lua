@@ -13,12 +13,16 @@ local get_task_definition
 ---@return table: a telescope previewer
 function previewer.task_previewer()
   return previewers.new {
+    title = "Task Preview",
     teardown = function(self)
       pcall(
         vim.api.nvim_buf_delete,
         previewer.old_preview_buf,
         { force = true }
       )
+      if self.state == nil or self.state.bufnr == nil then
+        return
+      end
       local _, winid = pcall(vim.fn.bufwinid, self.state.bufnr)
       self.state.bufnr = nil
       if
