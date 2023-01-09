@@ -78,13 +78,6 @@ or in lua:
 require("telescope").extensions.tasks.tasks()
 ```
 
-> **_NOTE_**: Additional configurations or themes may be passed to the picker.
->
-> ```lua
-> require("telescope").extensions.tasks.tasks(require("telescope.themes").get_ivy())
-> -- or :Telescope tasks theme=ivy
-> ```
-
 The last opened output may then be toggled with:
 
 ```lua
