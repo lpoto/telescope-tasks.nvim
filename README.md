@@ -6,7 +6,7 @@ definitions and outputs in the telescope's previewer.
 
 ## Demo
 
-https://user-images.githubusercontent.com/67372390/211316659-81cf3dc4-11f9-469f-9cf7-d6bd567acf8d.mp4
+https://user-images.githubusercontent.com/67372390/211383760-04a2a400-3557-4758-a510-922f6bc2d940.mp4
 
 ## Installation
 
