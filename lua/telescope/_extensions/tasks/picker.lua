@@ -50,7 +50,7 @@ available_tasks_telescope_picker = function(options)
     pickers
       .new(opts, {
         prompt_title = "Tasks",
-        results_title = mappings.get_description(),
+        results_title = "Available Tasks",
         finder = finder.available_tasks_finder(prev_buf),
         sorter = conf.generic_sorter(opts),
         previewer = previewer.task_previewer(),
