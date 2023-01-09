@@ -118,3 +118,5 @@ The last opened output may then be toggled with:
 | `<C-d>` | Delete the output of the selected task.                     |
 | `<C-k>` | Scroll the previewer up.                                    |
 | `<C-j>` | Scroll the previewer down.                                  |
+
+## [Roadmap](./ROADMAP.md)
