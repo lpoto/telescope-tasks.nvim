@@ -8,7 +8,6 @@ definitions and outputs in the telescope's previewer.
 
 https://user-images.githubusercontent.com/67372390/211316659-81cf3dc4-11f9-469f-9cf7-d6bd567acf8d.mp4
 
-
 ## Installation
 
 ### Packer
@@ -30,10 +29,11 @@ First setup and load the extension:
 ```lua
 require("telescope").setup {
   extensions = {
+    -- NOTE: this setup is optional
     tasks = {
       theme = "ivy",
-      -- other picker config fields
-      -- NOTE: this setup is optional
+      output_window = "vsplit", -- "vsplit" | "split" | "float"
+      -- other telescope picker config fields
     },
   },
 }
@@ -114,9 +114,13 @@ The last opened output may then be toggled with:
 - [x] Show tasks' definitions or output(when available) in the telescope previewer
 - [x] Allow opening the task's output in a separate buffer
 - [x] Allow toggling the latest output
-- [x] Add setup
+- [x] Add setup:
   - [x] Allow adding a custom picker setup
   - [x] Add a theme setup field
-  - [ ] Allow configuring output window
+  - [ ] Allow configuring output window:
+    - [x] Support displaying output window in a split
+    - [x] Support displaying output window in a vertical split
+    - [ ] Support displaying output window in a floating window
 - [x] Allow scrolling the task output preview
 - [ ] Redo tasks execution so that each step is it's own job
+  - [ ] Allow setting task properties for each step individually

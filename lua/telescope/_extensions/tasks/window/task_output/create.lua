@@ -1,15 +1,17 @@
 local enum = require "telescope._extensions.tasks.enum"
+local setup = require "telescope._extensions.tasks.setup"
 
 local create = {}
 
-local create_vsplit_window
 local handle_window
+local determine_output_window_type
 
 ---@param buf number: A buffer number to create a window for
 ---@return number: A window id, -1 when invalid
 function create.create_window(buf)
   local winnr = vim.fn.winnr()
-  local ok, winid = pcall(create_vsplit_window, buf)
+
+  local ok, winid = pcall(determine_output_window_type(), buf)
   if ok == false then
     vim.notify(winid, vim.log.levels.ERROR, {
       title = enum.TITLE,
@@ -24,17 +26,26 @@ function create.create_window(buf)
   end
 
   local ok2, err = pcall(handle_window, winid)
-  if ok2 == false then
+  if ok2 == false and type(err) == "string" then
     vim.notify(err, vim.log.levels.ERROR, {
       title = enum.TITLE,
     })
   end
 
-  vim.api.nvim_exec("noautocmd keepjumps " .. winnr .. "wincmd w", false)
+  ok, err = pcall(
+    vim.api.nvim_exec,
+    "noautocmd keepjumps " .. winnr .. "wincmd w",
+    false
+  )
+  if ok == false then
+    vim.notify(err, vim.log.levels.ERROR, {
+      title = enum.TITLE,
+    })
+  end
   return winid
 end
 
-create_vsplit_window = function(buf)
+local function create_vsplit_window(buf)
   local winid = vim.fn.win_getid(vim.fn.winnr())
 
   vim.fn.execute("noautocmd keepjumps vertical sb " .. buf, false)
@@ -44,6 +55,19 @@ create_vsplit_window = function(buf)
     vim.api.nvim_exec("vertical resize " .. 50, false)
   end
   return vim.fn.win_getid(vim.fn.winnr())
+end
+
+local function create_split_window(buf)
+  vim.fn.execute("noautocmd keepjumps sb " .. buf, false)
+
+  return vim.fn.win_getid(vim.fn.winnr())
+end
+
+local function create_floating_window(buf)
+  vim.notify("Floating window is not supported yet", vim.log.levels.WARN, {
+    title = enum.TITLE,
+  })
+  return create_vsplit_window(buf)
 end
 
 ---Highlight the texts added to the output term in the
@@ -70,6 +94,26 @@ end
 handle_window = function(winid)
   set_options(winid)
   create.set_highlights(winid)
+end
+
+---@return function
+determine_output_window_type = function()
+  local win_type = setup.opts.output_window or "vsplit"
+  if win_type == "vsplit" then
+    return create_vsplit_window
+  elseif win_type == "split" then
+    return create_split_window
+  elseif win_type == "floating"
+      or win_type == "float"
+      or win_type == "popup"
+  then
+    return create_floating_window
+  else
+    vim.notify("Invalid window type: " .. win_type, vim.log.levels.ERROR, {
+      title = enum.TITLE,
+    })
+  end
+  return create_vsplit_window
 end
 
 return create
