@@ -1,6 +1,6 @@
 local previewers = require "telescope.previewers"
 local executor = require "telescope._extensions.tasks.executor"
-local create = require "telescope._extensions.tasks.window.task_output.create"
+local highlights = require "telescope._extensions.tasks.highlight"
 local enum = require "telescope._extensions.tasks.enum"
 
 local previewer = {}
@@ -46,7 +46,7 @@ function previewer.task_previewer()
       pcall(vim.api.nvim_win_set_buf, winid, buf)
     end,
     preview_fn = function(self, entry, status)
-      create.set_highlights(status.preview_win)
+      highlights.set_previewer_highlights(status.preview_win)
       local running_buf = executor.get_task_output_buf(entry.value.name)
       local old_buf = previewer.old_preview_buf
       if running_buf and vim.api.nvim_buf_is_valid(running_buf) then

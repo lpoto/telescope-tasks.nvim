@@ -1,5 +1,6 @@
 local enum = require "telescope._extensions.tasks.enum"
 local setup = require "telescope._extensions.tasks.setup"
+local highlights = require "telescope._extensions.tasks.highlight"
 
 local create = {}
 
@@ -70,18 +71,6 @@ local function create_floating_window(buf)
   return create_vsplit_window(buf)
 end
 
----Highlight the texts added to the output term in the
----window identified by the provided winid
-function create.set_highlights(winid)
-  pcall(vim.api.nvim_win_call, winid, function()
-    vim.fn.matchadd("Function", "^==> TASK: \\[\\_.\\{-}\\n\\n")
-    vim.fn.matchadd("Constant", "^==> STEP: \\[\\_.\\{-}\\n\\n")
-    vim.fn.matchadd("Comment", "^==> CWD: \\[\\_.\\{-}\\n\\n")
-    vim.fn.matchadd("Statement", "^\\[Process exited .*\\]$")
-    vim.fn.matchadd("Function", "^\\[Process exited 0\\]$")
-  end)
-end
-
 local function set_options(winid)
   vim.api.nvim_win_set_option(winid, "wrap", true)
   vim.api.nvim_win_set_option(winid, "number", false)
@@ -93,19 +82,24 @@ end
 
 handle_window = function(winid)
   set_options(winid)
-  create.set_highlights(winid)
+  highlights.set_output_window_highlights(winid)
 end
 
 ---@return function
 determine_output_window_type = function()
   local win_type = setup.opts.output_window or "vsplit"
-  if win_type == "vsplit" then
+  if
+    win_type == "vsplit"
+    or win_type == "vertical"
+    or win_type == "vertical split"
+  then
     return create_vsplit_window
-  elseif win_type == "split" then
+  elseif win_type == "split" or win_type == "normal" then
     return create_split_window
-  elseif win_type == "floating"
-      or win_type == "float"
-      or win_type == "popup"
+  elseif
+    win_type == "floating"
+    or win_type == "float"
+    or win_type == "popup"
   then
     return create_floating_window
   else

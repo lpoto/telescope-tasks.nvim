@@ -111,7 +111,7 @@ The last opened output may then be toggled with:
 
 ## Mappings
 
-| Key     |Description                                                  |
+| Key     | Description                                                 |
 | ------- | ----------------------------------------------------------- |
 | `<CR>`  | Run the selected task, or kill it if it is already running. |
 | `<C-o>` | Display the output of the selected task in another window.  |
