@@ -5,18 +5,18 @@ local highlights = require "telescope._extensions.tasks.highlight"
 local create = {}
 
 local handle_window
-local clean_buffer
 local determine_output_window_type
 local add_autocmd
+local clean_buffer
 local close_win
-local create_window_augroup = "TeleskopeTasks_CreateWindow"
 
 ---@param buf number: A buffer number to create a window for
+---@rarapm title string?: The title of the window, relevant only for floats
 ---@return number: A window id, -1 when invalid
-function create.create_window(buf)
+function create.create_window(buf, title)
   clean_buffer(buf)
 
-  local ok, winid = pcall(determine_output_window_type(), buf)
+  local ok, winid = pcall(determine_output_window_type(), buf, title)
   if ok == false then
     vim.notify(winid, vim.log.levels.ERROR, {
       title = enum.TITLE,
@@ -60,15 +60,22 @@ local function create_split_window(buf)
   return vim.fn.win_getid(vim.fn.winnr())
 end
 
-local function create_floating_window(buf)
+local function create_floating_window(buf, title)
   local width = vim.o.columns
-  local height = vim.o.columns
+  local height = vim.o.lines
 
   local w = math.min(80, width - 4)
-  local h = height - 8
+  local h = height - 4
 
   local row = (height - h) / 2
   local col = (width - w) / 2
+  if title ~= nil then
+    title = " " .. title .. " "
+  end
+
+  if title ~= nil and title:len() > w - 2 and title:len() > 5 then
+    title = title:sub(0, w - 5) .. "..."
+  end
 
   local winid = vim.api.nvim_open_win(buf, true, {
     relative = "editor",
@@ -79,13 +86,11 @@ local function create_floating_window(buf)
     focusable = true,
     style = "minimal",
     border = "rounded",
+    title = title,
+    title_pos = "center",
+    noautocmd = true,
   })
 
-  vim.keymap.set("n", "<Esc>", function()
-    close_win(buf)
-  end, {
-    buffer = buf,
-  })
   vim.keymap.set("n", "q", function()
     close_win(buf)
   end, {
@@ -110,10 +115,6 @@ handle_window = function(winid)
 end
 
 clean_buffer = function(buf)
-  vim.api.nvim_create_augroup(create_window_augroup, {
-    clear = true,
-  })
-  pcall(vim.keymap.del, "n", "<Esc>", { buffer = buf })
   pcall(vim.keymap.del, "n", "q", { buffer = buf })
 end
 

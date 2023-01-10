@@ -50,23 +50,19 @@ vim.g.telescope_tasks = vim.tbl_extend(
   {
     ["Run current Cargo binary"] = function()
       return {
+        { "cargo", "run", "--bin", vim.fn.expand "%:p:t:r" },
         filetypes = { "rust" },
         patterns = { ".*/src/bin/[^/]+.rs" },
         cwd = find_root { ".git", "cargo.toml" },
-        steps = {
-          { "cargo", "run", "--bin", vim.fn.expand "%:p:t:r" },
-        },
       }
     end,
     ["Run current Cargo project"] = function()
       return {
+        { "cargo", "run" },
         filetypes = { "rust" },
         patterns = { ".*/src/.*.rs" },
         --ignore_patterns = { ".*/src/bin/[^/]+.rs" },
         cwd = find_root { ".git", "cargo.toml" },
-        steps = {
-          { "cargo", "run" },
-        },
       }
     end,
   }
@@ -99,15 +95,14 @@ The last opened output may then be toggled with:
 
 ## Task Spec
 
-| Property            | Type       | Description                                                                                                                                            |
-| ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **env**             | `table?`   | A table of environment variables used during the task's execution .                                                                                    |
-| **clear_env**       | `boolean?` | When set to `true`, environment variables _not_ preset in the `env` table are cleared for the duration of the task's execution.                        |
-| **cwd**             | `string?`  | A path to a directory that will be used as a working directory for the task.                                                                           |
-| **filetypes**       | `table?`   | A table of filetypes that the task is available in, when `nil`, it is available in all filetypes.                                                      |
-| **patterns**        | `table?`   | A table of lua patterns. The task is available only when this field is `nil` or the current filename matches one of the patterns.                      |
-| **ignore_patterns** | `table?`   | A table of lua patterns. The task is available only when this field is `nil` or the current filename does not match any of the patterns in this table. |
-| **steps**           | `table`    | A table of commands to execute. The commands may either be strings or tables of strings. There should always be at least one step.                     |
+| Property            | Type                | Description                                                                                                                                            |
+| ------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **env**             | `table?`            | A table of environment variables used during the task's execution .                                                                                    |
+| **cwd**             | `string?`           | A path to a directory that will be used as a working directory for the task.                                                                           |
+| **filetypes**       | `table?`            | A table of filetypes that the task is available in, when `nil`, it is available in all filetypes.                                                      |
+| **patterns**        | `table?`            | A table of lua patterns. The task is available only when this field is `nil` or the current filename matches one of the patterns.                      |
+| **ignore_patterns** | `table?`            | A table of lua patterns. The task is available only when this field is `nil` or the current filename does not match any of the patterns in this table. |
+| **cmd** or `[1]`    | `string` or `table` | A command to be executed. When a table, the first element should be an executable.                                                                     |
 
 ## Mappings
 

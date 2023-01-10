@@ -49,32 +49,10 @@ end
 ---@param on_exit function: A function called when a started task exits.
 ---@return boolean: whether the tasks started successfully
 function run.run(task, on_exit)
-  ---@type table
-  local steps = task.steps
-  ---@type table
-  local env = nil
-  if task.env ~= nil and next(task.env) ~= nil then
-    env = task.env
-  end
-  ---@type boolean|nil
-  local clear_env = task.clear_env
-  ---@type string|nil
+  local env = task.env ~= nil and next(task.env) ~= nil and task.env or nil
   local cwd = task.cwd
 
-  -- NOTE: join all steps into a single command
-  -- and echo current step
-  local cmd = "echo '==> TASK: [" .. vim.fn.shellescape(task.name) .. "]\n' "
-  if cwd ~= nil then
-    cmd = cmd .. " && echo '\n==> CWD: [" .. cwd .. "]\n'"
-  end
-  for _, step in ipairs(steps) do
-    cmd = cmd
-      .. " && "
-      .. "echo '\n==> STEP: ["
-      .. step:gsub("'", "'\\''")
-      .. "]\n'"
-    cmd = cmd .. " && " .. step
-  end
+  local cmd = task.cmd
 
   --NOTE: if an output buffer for the same task already exists,
   --open terminal in that one instead of creating a new one
@@ -90,7 +68,7 @@ function run.run(task, on_exit)
     ok, job_id = pcall(vim.fn.termopen, cmd, {
       cwd = cwd,
       env = env,
-      clear_env = clear_env,
+      clear_env = true,
       detach = false,
       on_exit = function(_, code)
         if running_tasks[task.name] ~= nil then
