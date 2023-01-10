@@ -5,9 +5,9 @@ local enum = require "telescope._extensions.tasks.enum"
 
 local previewer = {}
 
-local quote_string
-local get_task_definition
 local scroll_fn
+local teardown_fn
+local preview_fn
 
 ---Creates a new telescope previewer for the tasks.
 ---If a task is running or has an output, the previewr
@@ -24,120 +24,9 @@ function previewer.task_previewer()
       return "Task Definition"
     end,
     scroll_fn = scroll_fn,
-    teardown = function(self)
-      self.state = nil
-      pcall(
-        vim.api.nvim_buf_delete,
-        previewer.old_preview_buf,
-        { force = true }
-      )
-      if self.status == nil or self.status.preview_win == nil then
-        return
-      end
-      local winid = self.status.preview_win
-      if
-        type(winid) ~= "number"
-        or winid == -1
-        or not vim.api.nvim_win_is_valid(winid)
-      then
-        return
-      end
-      local buf = vim.api.nvim_create_buf(false, true)
-      vim.api.nvim_win_set_buf(winid, buf)
-    end,
-    preview_fn = function(self, entry, status)
-      highlights.set_previewer_highlights(status.preview_win)
-      local running_buf = executor.get_task_output_buf(entry.value.name)
-      local old_buf = previewer.old_preview_buf
-      if running_buf and vim.api.nvim_buf_is_valid(running_buf) then
-        vim.api.nvim_win_call(status.preview_win, function()
-          vim.api.nvim_win_set_buf(status.preview_win, running_buf)
-        end)
-      else
-        previewer.old_preview_buf = vim.api.nvim_create_buf(false, true)
-        pcall(
-          vim.api.nvim_buf_set_lines,
-          previewer.old_preview_buf,
-          0,
-          -1,
-          false,
-          get_task_definition(entry.value)
-        )
-        pcall(
-          vim.api.nvim_buf_set_option,
-          previewer.old_preview_buf,
-          "filetype",
-          "yaml"
-        )
-        local ok, e = pcall(
-          vim.api.nvim_win_set_buf,
-          status.preview_win,
-          previewer.old_preview_buf
-        )
-        if ok == false then
-          log.error(e)
-        end
-      end
-      if old_buf ~= nil and vim.api.nvim_buf_is_valid(old_buf) then
-        vim.api.nvim_buf_delete(old_buf, { force = true })
-      end
-
-      self.status = status
-      self.state = self.state or {}
-      self.state.winid = status.preview_win
-      self.state.bufnr = vim.api.nvim_win_get_buf(status.preview_win)
-    end,
+    teardown = teardown_fn,
+    preview_fn = preview_fn,
   }
-end
-
-quote_string = function(v)
-  if
-    type(v) == "string"
-    and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
-  then
-    if string.find(v, "'") == nil then
-      v = "'" .. v .. "'"
-    elseif string.find(v, '"') == nil then
-      v = '"' .. v .. '"'
-    elseif string.find(v, "`") == nil then
-      v = "`" .. v .. "`"
-    end
-  end
-  return v
-end
-
-get_task_definition = function(task)
-  local def = {}
-  if task.name ~= nil then
-    table.insert(def, "name: " .. quote_string(task.name))
-  end
-  local function generate(tbl, indent)
-    if not indent then
-      indent = 0
-    end
-    for k, v in pairs(tbl) do
-      if k ~= "name" then
-        v = quote_string(v)
-        if type(k) == "number" then
-          k = "- "
-        else
-          k = k .. ": "
-        end
-        local formatting = string.rep("  ", indent) .. k
-        if type(v) == "table" then
-          table.insert(def, formatting)
-          generate(v, indent + 1)
-        elseif type(v) == "boolean" then
-          table.insert(def, formatting .. tostring(v))
-        else
-          table.insert(def, formatting .. v)
-        end
-      end
-    end
-  end
-
-  generate(task, 0)
-  return def
 end
 
 scroll_fn = function(self, direction)
@@ -162,6 +51,77 @@ scroll_fn = function(self, direction)
       title = enum.TITLE,
     })
   end
+end
+
+local function display_running_buf(status, task)
+  local running_buf = executor.get_task_output_buf(task.name)
+  if running_buf and vim.api.nvim_buf_is_valid(running_buf) then
+    vim.api.nvim_win_set_buf(status.preview_win, running_buf)
+    return true
+  end
+  return false
+end
+
+local function display_definition_buf(status, task)
+  previewer.old_preview_buf = vim.api.nvim_create_buf(false, true)
+  pcall(
+    vim.api.nvim_buf_set_lines,
+    previewer.old_preview_buf,
+    0,
+    -1,
+    false,
+    task:to_yaml_definition()
+  )
+  pcall(
+    vim.api.nvim_buf_set_option,
+    previewer.old_preview_buf,
+    "syntax",
+    "yaml"
+  )
+  local ok, e = pcall(
+    vim.api.nvim_win_set_buf,
+    status.preview_win,
+    previewer.old_preview_buf
+  )
+  if ok == false then
+    log.error(e)
+  end
+end
+
+preview_fn = function(self, entry, status)
+  highlights.set_previewer_highlights(status.preview_win)
+  local old_buf = previewer.old_preview_buf
+
+  if not display_running_buf(status, entry.value) then
+    display_definition_buf(status, entry.value)
+  end
+
+  if old_buf ~= nil and vim.api.nvim_buf_is_valid(old_buf) then
+    vim.api.nvim_buf_delete(old_buf, { force = true })
+  end
+
+  self.status = status
+  self.state = self.state or {}
+  self.state.winid = status.preview_win
+  self.state.bufnr = vim.api.nvim_win_get_buf(status.preview_win)
+end
+
+teardown_fn = function(self)
+  self.state = nil
+  pcall(vim.api.nvim_buf_delete, previewer.old_preview_buf, { force = true })
+  if self.status == nil or self.status.preview_win == nil then
+    return
+  end
+  local winid = self.status.preview_win
+  if type(winid) ~= "number"
+      or winid == -1
+      or not vim.api.nvim_win_is_valid(winid)
+  then
+    return
+  end
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.cmd "noautocmd"
+  vim.api.nvim_win_set_buf(winid, buf)
 end
 
 return previewer

@@ -2,7 +2,8 @@ local enum = {}
 
 enum.TITLE = "Telescope Tasks"
 
-enum.OUTPUT_BUFFER_FILETYPE = "telescope_tasks_output"
+enum.OUTPUT_BUFFER_FILETYPE = "TelescopeTasksOutput"
+enum.TELESCOPE_PROMPT_FILETYPE = "TelescopePrompt"
 
 enum.TASKS_AUGROUP = "TelescopeTasks"
 

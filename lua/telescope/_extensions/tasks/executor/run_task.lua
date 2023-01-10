@@ -1,6 +1,6 @@
 local enum = require "telescope._extensions.tasks.enum"
 local create_buffer =
-  require "telescope._extensions.tasks.executor.create_buffer"
+require "telescope._extensions.tasks.executor.create_buffer"
 
 ---A table with tasks' names as keys
 ---and their job ids as values
@@ -68,7 +68,6 @@ function run.run(task, on_exit)
     ok, job_id = pcall(vim.fn.termopen, cmd, {
       cwd = cwd,
       env = env,
-      clear_env = true,
       detach = false,
       on_exit = function(_, code)
         if running_tasks[task.name] ~= nil then
