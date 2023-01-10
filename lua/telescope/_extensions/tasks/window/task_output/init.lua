@@ -2,7 +2,7 @@ local enum = require "telescope._extensions.tasks.enum"
 local run_task = require "telescope._extensions.tasks.executor.run_task"
 local create = require "telescope._extensions.tasks.window.task_output.create"
 
-local prev_buffer = nil
+local prev_task_name = nil
 
 local window = {}
 
@@ -28,18 +28,21 @@ function window.open(task, beforeOpening)
     beforeOpening()
   end
 
-  prev_buffer = buf
+  prev_task_name = task.name
 
   window.__open_last_task_output()
 end
 
 function window.__open_last_task_output()
   -- Get the buffer from the provided function
-  local buf = prev_buffer
+  if prev_task_name == nil then
+    return
+  end
+  local buf = run_task.get_buf_num(prev_task_name)
 
   -- NOTE: make sure a valid buffer was returned
   if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
-    prev_buffer = nil
+    prev_task_name = nil
     return
   end
 
@@ -52,7 +55,7 @@ function window.__open_last_task_output()
     return
   end
 
-  local ow = create.create_window(buf)
+  local ow = create.create_window(buf, prev_task_name)
   if not vim.api.nvim_win_is_valid(ow) then
     return
   end
@@ -60,11 +63,14 @@ end
 
 function window.__toggle_last_task_output()
   -- Get the buffer from the provided function
-  local buf = prev_buffer
+  if prev_task_name == nil then
+    return
+  end
+  local buf = run_task.get_buf_num(prev_task_name)
 
   -- NOTE: make sure a valid buffer was returned
   if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
-    prev_buffer = nil
+    prev_task_name = nil
     return
   end
 
