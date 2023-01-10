@@ -11,25 +11,24 @@ mappings.keys = {
   ["<C-j>"] = telescope_actions.preview_scrolling_down,
 }
 
----@param prev_buf number|nil
----@return function: Attach mappings function
-function mappings.get_attach_mappings(prev_buf)
-  return function(prompt_bufnr, map)
-    for key, f in pairs(mappings.keys or {}) do
-      if key == "<CR>" then
-        telescope_actions.select_default:replace(function()
-          f(prompt_bufnr, prev_buf)
+---@param prompt_bufnr number
+---@param map function
+---@return boolean
+function mappings.attach_mappings(prompt_bufnr, map)
+  for key, f in pairs(mappings.keys or {}) do
+    if key == "<CR>" then
+      telescope_actions.select_default:replace(function()
+        f(prompt_bufnr)
+      end)
+    else
+      for _, mode in ipairs { "n", "i" } do
+        map(mode, key, function()
+          f(prompt_bufnr)
         end)
-      else
-        for _, mode in ipairs { "n", "i" } do
-          map(mode, key, function()
-            f(prompt_bufnr, prev_buf)
-          end)
-        end
       end
     end
-    return true
   end
+  return true
 end
 
 return mappings

@@ -1,6 +1,7 @@
 local enum = require "telescope._extensions.tasks.enum"
 local Task = require "telescope._extensions.tasks.model.task"
 local run = require "telescope._extensions.tasks.executor.run_task"
+local generators = require "telescope._extensions.tasks.generators"
 
 local executor = {}
 
@@ -32,16 +33,14 @@ end
 
 ---Run the task identified by the provided name
 ---
----@param name string: name of the task
----@param prev_buf number?: number of the buffer from
----which the task is executed
+---@param name string: name of the task which the task is executed
 ---@param on_exit function: function called when the task exits.
 ---@return boolean: whether the task was started successfully
-function executor.start(name, prev_buf, on_exit)
+function executor.start(name, on_exit)
   --NOTE: fetch the task's data in the buffer from
   --which it has been started.
   ---@type Task|nil
-  local task, err = Task.__get(name, prev_buf)
+  local task, err = generators.__get_task_by_name(name)
   if err ~= nil then
     vim.notify(err, vim.log.levels.WARN, {
       title = enum.TITLE,
@@ -72,11 +71,10 @@ end
 ---Kill the task identified by the provided name
 ---
 ---@param name string: name of the task
----@param prev_buf number?
 ---@return boolean: whether the task has been successfully killed
-function executor.kill(name, prev_buf)
+function executor.kill(name)
   ---@type Task|nil
-  local task, err = Task.__get(name, prev_buf)
+  local task, err = generators.__get_task_by_name(name)
   if err ~= nil then
     vim.notify(err, vim.log.levels.WARN, {
       title = enum.TITLE,

@@ -16,14 +16,16 @@
 
 ##
 
-- [ ] Add task generators
-  > All tasks should be added through generators
-  - [ ] Expose api for defining custom generators
-  - [ ] Generators should have conditions that determine when they should be run
-    > This should replace the tasks' patterns and filetypes properties
-    - [ ] The conditions should be checked on BufEnter events
-    - [ ] The condition should be a function that receives the buffer name as a parameter and returns a boolean
-      > A generator is run when it's condition is either nil or returns true
+- [x] Add task generators
+  - [x] All tasks should be added through generators
+  - [x] Expose api for defining custom generators
+  - [ ] Support adding filetypes in which the generators don't run
+
+##
+
+- [ ] Optimize generators
+  - [ ] Add a cache so they are not redundantly run every time
+  - [ ] Run generators synchronously
 
 ##
 

@@ -29,7 +29,6 @@ First setup and load the extension:
 ```lua
 require("telescope").setup {
   extensions = {
-    -- NOTE: this setup is optional
     tasks = {
       theme = "ivy",
       output_window = "float", -- "vsplit" | "split" | "float"
@@ -37,41 +36,11 @@ require("telescope").setup {
     },
   },
 }
-
 -- Load the tasks telescope extension
 require("telescope").load_extension("tasks")
 ```
 
-Add your tasks:
-
-```lua
-vim.g.telescope_tasks = vim.tbl_extend(
-  "force", vim.g.telescope_tasks or {},
-  {
-    ["Run current Cargo binary"] = function()
-      return {
-        { "cargo", "run", "--bin", vim.fn.expand "%:p:t:r" },
-        filetypes = { "rust" },
-        patterns = { ".*/src/bin/[^/]+.rs" },
-        cwd = find_root { ".git", "cargo.toml" },
-      }
-    end,
-    ["Run current Cargo project"] = function()
-      return {
-        { "cargo", "run" },
-        filetypes = { "rust" },
-        patterns = { ".*/src/.*.rs" },
-        --ignore_patterns = { ".*/src/bin/[^/]+.rs" },
-        cwd = find_root { ".git", "cargo.toml" },
-      }
-    end,
-  }
-)
-```
-
-> This is the example used in the demo above.
->
-> **_NOTE_**: See [Task Spec](#task-spec) for more on tasks' setup properties.
+See [Generators](#generators) on how to generate tasks.
 
 Then use the extension:
 
@@ -93,16 +62,50 @@ The last opened output may then be toggled with:
  require("telescope").extensions.tasks.actions.toggle_last_output()
 ```
 
+## Generators
+
+Currently only custom generators are supported. Example generator used in the [demo](#demo) above:
+
+```lua
+require("telescope").extensions.tasks.generators.add(function(buf)
+  local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
+  if filetype == "rust" then
+    local tasks = {
+      {
+        "Run current Cargo project",
+        cwd = find_root {"cargo.toml"},
+        cmd = {"cargo", "run"}
+
+      }
+    }
+    if (vim.fn.expand "%:p"):gmatch(".*/src/bin/[^/]+.rs") then
+      table.insert(tasks, {
+        "Run current Cargo binary",
+        cwd = find_root {"cargo.toml"},
+        cmd = {"cargo", "run", "--bin", vim.fn.expand "%:p:t:r"}
+      })
+    end
+    return tasks
+  end
+  return nil
+end)
+```
+
+> _NOTE_ See [Task Spec](#task-spec) for the details on tasks' properties.
+
+**_NOTE_** In the future, default generators will be available that will auto generate
+tasks from the current project's config files.
+
+> Example: _cargo.toml_ targets or _package.json_ scripts
+
 ## Task Spec
 
-| Property            | Type                | Description                                                                                                                                            |
-| ------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **env**             | `table?`            | A table of environment variables used during the task's execution .                                                                                    |
-| **cwd**             | `string?`           | A path to a directory that will be used as a working directory for the task.                                                                           |
-| **filetypes**       | `table?`            | A table of filetypes that the task is available in, when `nil`, it is available in all filetypes.                                                      |
-| **patterns**        | `table?`            | A table of lua patterns. The task is available only when this field is `nil` or the current filename matches one of the patterns.                      |
-| **ignore_patterns** | `table?`            | A table of lua patterns. The task is available only when this field is `nil` or the current filename does not match any of the patterns in this table. |
-| **cmd** or `[1]`    | `string` or `table` | A command to be executed. When a table, the first element should be an executable.                                                                     |
+| Property          | Type                | Description                                                                        |
+| ----------------- | ------------------- | ---------------------------------------------------------------------------------- |
+| **name** or `[1]` | `string`            | The name of the task.                                                              |
+| **cmd**           | `string` or `table` | A command to be executed. When a table, the first element should be an executable. |
+| **env**           | `table?`            | A table of environment variables used during the task's execution .                |
+| **cwd**           | `string?`           | A path to a directory that will be used as a working directory for the task.       |
 
 ## Mappings
 
