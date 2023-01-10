@@ -16,14 +16,6 @@
 
 ##
 
-- [ ] Redo tasks execution so that each step is it's own job
-  - [ ] Suport setting task properties for each step individually
-  - [ ] Update task and steps info output texts
-    - [ ] Make texts span through the whole window width, remove redundant newlines
-    - [ ] Update texts highlights
-
-##
-
 - [ ] Add task generators
   > All tasks should be added through generators
   - [ ] Expose api for defining custom generators

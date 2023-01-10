@@ -1,8 +1,7 @@
 ---@class Task
 ---@field name string: This is taken from the key in vim.g.telescope_tasks table
 ---@field env table|nil: A table of environment variables.
----@field clear_env boolean: Whether env defined the whole environment and other environment variables should be deleted (default: false).
----@field steps table: A table of commands (strings or tables) to be executed in order.
+---@field cmd table|string: The command, may either be a string or a table. When a table, the first element should be executable.
 ---@field cwd string|nil: The working directory of the task.
 ---@field filetypes table|nil: Filetypes in which the task is available.
 ---@field patterns table|nil: Task is available ony in files with names that match a pattern in this table of lua patterns.
@@ -14,7 +13,7 @@ Task.__index = Task
 
 ---Create an task from a table
 ---
----@param o table: Task's fields.
+---@param o table|string: Task's fields or just a command.
 ---@param name string: Task's name.
 ---@return Task
 ---@return string?: An error that occured when creating an Task.
@@ -30,10 +29,42 @@ function Task.__create(name, o)
   if name == nil or type(name) ~= "string" then
     return a, "Task's 'name' should be a string!"
   end
-  if type(o) ~= "table" then
+  a.name = name
+
+  if type(o) == "string" then
+    o = { o }
+  elseif type(o) == "table" then
+    local ok = true
+    for k, v in pairs(o) do
+      if type(k) ~= "number" or type(v) ~= "string" then
+        ok = false
+        break
+      end
+    end
+    if ok then
+      o = { o }
+    end
+  else
     return a, "Task '" .. name .. "' should be a table!"
   end
-  a.name = name
+
+  local cmd = o.cmd or o[1]
+  if cmd == nil then
+    return a, "Task '" .. name .. "' should have a `cmd` field!"
+  end
+  if type(cmd) == "string" then
+    a.cmd = cmd
+  elseif type(cmd) == "table" then
+    for k, v in ipairs(cmd) do
+      if type(v) ~= "string" or type(k) ~= "number" then
+        return a, "Task '" .. name .. "'s command is invalid!"
+      end
+    end
+    a.cmd = cmd
+  else
+    return a, "Task '" .. name .. "'s command should be a string or a table!"
+  end
+
   if o.filetypes ~= nil and type(o.filetypes) ~= "table" then
     return a, "Task '" .. name .. "'s filetypes should be a table!"
   end
@@ -54,44 +85,6 @@ function Task.__create(name, o)
     return a, "Task '" .. name .. "'s env should be a table!"
   end
   a.env = o.env
-  if o.clear_env ~= nil and type(o.clear_env) ~= "boolean" then
-    return a, "Task '" .. name .. "'s clear_env should be a boolean!"
-  end
-  a.clear_env = o.clear_env
-  if o.steps == nil or type(o.steps) == "table" and next(o.steps) == nil then
-    return a, "Task '" .. name .. "' should have at least 1 step!"
-  end
-  if type(o.steps) ~= "table" then
-    return a, "Task '" .. name .. "'s steps should be a table!"
-  end
-
-  local steps = {}
-  --NOTE: verify task's steps
-  for _, s in ipairs(o.steps) do
-    if type(s) == "table" then
-      local s2 = ""
-      for _, v in ipairs(s) do
-        if type(v) ~= "string" then
-          return a,
-            "Task '"
-              .. name
-              .. "'s steps should be strings or tables of strings!"
-        end
-        if string.len(s2) == 0 then
-          s2 = v
-        else
-          s2 = s2 .. " " .. v
-        end
-      end
-      s = s2
-    end
-    if type(s) ~= "string" then
-      return a,
-        "Task '" .. name .. "'s steps should be strings or tables of string!"
-    end
-    table.insert(steps, s)
-  end
-  a.steps = steps
   return a
 end
 

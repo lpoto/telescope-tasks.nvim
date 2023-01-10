@@ -81,11 +81,6 @@ local function create_floating_window(buf)
     border = "rounded",
   })
 
-  vim.keymap.set("n", "<Esc>", function()
-    close_win(buf)
-  end, {
-    buffer = buf,
-  })
   vim.keymap.set("n", "q", function()
     close_win(buf)
   end, {
@@ -113,7 +108,6 @@ clean_buffer = function(buf)
   vim.api.nvim_create_augroup(create_window_augroup, {
     clear = true,
   })
-  pcall(vim.keymap.del, "n", "<Esc>", { buffer = buf })
   pcall(vim.keymap.del, "n", "q", { buffer = buf })
 end
 
