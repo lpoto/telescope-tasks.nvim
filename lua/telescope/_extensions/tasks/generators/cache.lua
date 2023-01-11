@@ -22,12 +22,14 @@ function cache.set_for_current_context(tasks)
   local buf = vim.fn.bufnr()
   local cwd = vim.fn.getcwd()
 
-  cached_tasks[buf] = {
-    cwd = cwd,
-    tasks = tasks,
-  }
-  current_tasks = tasks
-  return tasks
+  if tasks ~= nil then
+    cached_tasks[buf] = {
+      cwd = cwd,
+      tasks = tasks,
+    }
+  end
+  current_tasks = tasks or {}
+  return tasks or {}
 end
 
 ---Get the cached tasks based on the current buffer

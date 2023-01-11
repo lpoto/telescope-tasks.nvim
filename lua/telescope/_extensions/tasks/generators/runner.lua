@@ -52,9 +52,7 @@ function runner.run()
     end
   end)
 
-  if next(found_tasks) ~= nil then
-    cache.set_for_current_context(found_tasks)
-  end
+  cache.set_for_current_context(found_tasks)
 end
 
 ---Create the BufEnter and DirChanged autocomands.
