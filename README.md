@@ -127,6 +127,7 @@ tasks.generators.add {
   end,
   opts = {
     parent_dir_includes = {"Cargo.toml"}
+    -- ignore_patterns = { ".*/src/bin/[^/]+.rs"},
   }
 }
 ```
