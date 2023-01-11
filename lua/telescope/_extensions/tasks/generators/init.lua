@@ -65,7 +65,6 @@ function generators.__init()
   vim.api.nvim_create_autocmd("DirChanged", {
     group = enum.TASKS_AUGROUP,
     callback = function()
-      vim.notify "DIR CHANGED"
       if should_run_generators_on_dir_change() then
         run_generators()
       end
@@ -110,26 +109,31 @@ run_generators = function()
   end
 end
 
-local function should_run_generators_in_filetype()
+local function __should_run_generators()
   local buf = vim.fn.bufnr()
-  local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
-  return filetype:len() > 0
-    and filetype ~= enum.TELESCOPE_PROMPT_FILETYPE
-    and filetype ~= enum.OUTPUT_BUFFER_FILETYPE
+  local buftype = vim.api.nvim_buf_get_option(buf, "buftype")
+
+  return not vim.tbl_contains({
+    "nofile",
+    "prompt",
+    "terminal",
+    "help",
+    "quickfix",
+  }, buftype)
 end
 
 should_run_generators = function()
   return vim.fn.bufnr() ~= last_run_buffer
-    and should_run_generators_in_filetype()
+    and __should_run_generators()
 end
 
 should_run_generators_on_buf_win_enter = function()
-  return should_run_generators_in_filetype()
+  return __should_run_generators()
 end
 
 should_run_generators_on_dir_change = function()
   return vim.fn.getcwd() ~= last_run_cwd
-    and should_run_generators_in_filetype()
+    and __should_run_generators()
 end
 
 return generators
