@@ -1,10 +1,9 @@
 local enum = require "telescope._extensions.tasks.enum"
+local cache = require "telescope._extensions.tasks.generators.cache"
 local Task = require "telescope._extensions.tasks.model.task"
 
 local current_generators = {}
 local current_tasks = {}
-local last_run_buffer = nil
-local last_run_cwd = nil
 local should_run_on_add = false
 local run_generators
 local should_run_generators
@@ -50,11 +49,11 @@ end
 
 function generators.__init()
   vim.api.nvim_clear_autocmds {
-    event = { "BufWinEnter", "DirChanged" },
+    event = { "BufEnter", "DirChanged" },
     group = enum.TASKS_AUGROUP,
   }
 
-  vim.api.nvim_create_autocmd("BufWinEnter", {
+  vim.api.nvim_create_autocmd("BufEnter", {
     group = enum.TASKS_AUGROUP,
     callback = function()
       if should_run_generators_on_buf_win_enter() then
@@ -70,7 +69,7 @@ function generators.__init()
       end
     end,
   })
-  if next(current_tasks) == nil then
+  if cache.is_empty() then
     should_run_on_add = true
   else
     if should_run_generators() then
@@ -80,10 +79,13 @@ function generators.__init()
 end
 
 run_generators = function()
-  last_run_buffer = vim.fn.bufnr()
-  last_run_cwd = vim.fn.getcwd()
+  local cached_tasks = cache.get_for_current_context()
+  if cached_tasks then
+    current_tasks = cached_tasks
+    return
+  end
 
-  current_tasks = {}
+  local found_tasks = {}
 
   for _, g in ipairs(current_generators) do
     local ok, tasks = pcall(g.f, vim.fn.bufnr())
@@ -102,15 +104,20 @@ run_generators = function()
             title = enum.TITLE,
           })
         else
-          current_tasks[task.name] = task
+          found_tasks[task.name] = task
         end
       end
     end
+  end
+
+  if next(found_tasks) ~= nil then
+    current_tasks = cache.set_for_current_context(found_tasks)
   end
 end
 
 local function __should_run_generators()
   local buf = vim.fn.bufnr()
+
   local buftype = vim.api.nvim_buf_get_option(buf, "buftype")
 
   return not vim.tbl_contains({
@@ -123,8 +130,7 @@ local function __should_run_generators()
 end
 
 should_run_generators = function()
-  return vim.fn.bufnr() ~= last_run_buffer
-    and __should_run_generators()
+  return __should_run_generators()
 end
 
 should_run_generators_on_buf_win_enter = function()
@@ -132,8 +138,7 @@ should_run_generators_on_buf_win_enter = function()
 end
 
 should_run_generators_on_dir_change = function()
-  return vim.fn.getcwd() ~= last_run_cwd
-    and __should_run_generators()
+  return __should_run_generators()
 end
 
 return generators
