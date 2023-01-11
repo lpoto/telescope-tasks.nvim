@@ -31,3 +31,4 @@
 
 - [ ] Add default generators that generate tasks from project config files
   > _Example_: _cargo.toml_ targets or _package.json_ scripts
+  - [ ] For the default generators, add parsers to parse the errors in the output to a quickfix list
