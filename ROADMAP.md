@@ -26,6 +26,7 @@
   - [x] Add a cache so they are not redundantly run every time
     - [ ] Implement cache cleaner for invalid buffers
   - [x] Support adding filetypes and patterns conditions alongside the generators
+  - [ ] Support adding root patterns conditions alongside the generators
 
 ##
 
