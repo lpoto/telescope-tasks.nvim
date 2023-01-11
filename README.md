@@ -6,7 +6,10 @@ definitions and outputs in the telescope's previewer.
 
 ## Demo
 
-https://user-images.githubusercontent.com/67372390/211383760-04a2a400-3557-4758-a510-922f6bc2d940.mp4
+
+
+https://user-images.githubusercontent.com/67372390/211933030-5653244d-0c07-44dd-9914-3c5bc749158d.mp4
+
 
 ## Installation
 
@@ -37,7 +40,7 @@ require("telescope").setup {
   },
 }
 -- Load the tasks telescope extension
-require("telescope").load_extension("tasks")
+require("telescope").load_extension "tasks"
 ```
 
 See [Generators](#generators) on how to generate tasks.
