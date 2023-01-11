@@ -28,9 +28,11 @@ function runner.run()
       })
       return
     elseif type(tasks) ~= "table" then
-      vim.notify("Genrator should return a table", vim.log.levels.ERROR, {
-        title = enum.TITLE,
-      })
+      if tasks ~= nil then
+        vim.notify("Genrator should return a table", vim.log.levels.ERROR, {
+          title = enum.TITLE,
+        })
+      end
       return
     end
 
