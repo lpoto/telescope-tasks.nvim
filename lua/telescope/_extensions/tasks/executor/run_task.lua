@@ -76,7 +76,7 @@ function run.run(task, on_exit)
         on_exit(code)
         vim.notify(
           task.name .. ": exited with code: " .. code,
-          vim.log.levels.DEBUG,
+          vim.log.levels.INFO,
           {
             title = enum.TITLE,
           }
