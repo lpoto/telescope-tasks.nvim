@@ -41,8 +41,9 @@ function actions.delete_selected_task_output(picker_buf)
 end
 
 function actions.toggle_last_output()
-  if vim.api.nvim_buf_get_option(0, "filetype")
-      == enum.TELESCOPE_PROMPT_FILETYPE
+  if
+    vim.api.nvim_buf_get_option(0, "filetype")
+    == enum.TELESCOPE_PROMPT_FILETYPE
   then
     -- NOTE: close telescope popup if open
     vim.api.nvim_buf_delete(0, { force = true })

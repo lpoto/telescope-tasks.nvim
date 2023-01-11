@@ -19,12 +19,12 @@
 - [x] Add task generators
   - [x] All tasks should be added through generators
   - [x] Expose api for defining custom generators
-  - [ ] Support adding filetypes in which the generators don't run
 
 ##
 
 - [ ] Optimize generators
-  - [ ] Add a cache so they are not redundantly run every time
+  - [x] Add a cache so they are not redundantly run every time
+    - [ ] Synchronously clean cache, remove caches for invalid buffers 
   - [ ] Run generators synchronously
 
 ##

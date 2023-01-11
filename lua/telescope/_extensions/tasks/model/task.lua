@@ -12,7 +12,7 @@ Task.__index = Task
 ---Create an task from a table
 ---
 ---@param o table|string: Task's fields or just a command.
----@param generator_name stirng?: The name of the generator that created this task.
+---@param generator_name stirng|nil: The name of the generator that created this task.
 ---@return Task
 ---@return string?: An error that occured when creating an Task.
 function Task.__create(o, generator_name)
@@ -99,8 +99,9 @@ function Task:to_yaml_definition()
 end
 
 quote_string = function(v)
-  if type(v) == "string"
-      and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
+  if
+    type(v) == "string"
+    and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
   then
     if string.find(v, "'") == nil then
       v = "'" .. v .. "'"
