@@ -3,7 +3,7 @@
 ---@field env table: A table of environment variables.
 ---@field cmd table|string: The command, may either be a string or a table. When a table, the first element should be executable.
 ---@field cwd string: The working directory of the task.
----@field __generator_name string|nil
+---@field __generator_opts table|nil
 
 ---@type Task
 local Task = {}
@@ -12,12 +12,12 @@ Task.__index = Task
 ---Create an task from a table
 ---
 ---@param o table|string: Task's fields or just a command.
----@param generator_name string|nil: The name of the generator that created this task.
+---@param generator_opts table|nil: The options of the generator that created this task.
 ---@return Task
-function Task.new(o, generator_name)
+function Task.new(o, generator_opts)
   ---@type Task
   local a = {
-    __generator_name = generator_name,
+    __generator_opts = generator_opts,
   }
   setmetatable(a, Task)
 
@@ -87,17 +87,34 @@ function Task:to_yaml_definition()
     table.insert(def, "  " .. k .. ": " .. quote_string(v))
   end
 
-  if self.__generator_name ~= nil then
+  if self.__generator_opts then
     table.insert(def, "")
-    table.insert(def, "# generator: " .. quote_string(self.__generator_name))
+    table.insert(def, "# generator:")
+    if next(self.__generator_opts or {}) then
+      if self.__generator_opts.name then
+        table.insert(
+          def,
+          "#   name: " .. quote_string(self.__generator_opts.name)
+        )
+      end
+      for k, v in pairs(self.__generator_opts) do
+        if k ~= "name" and type(v) == "table" then
+          local s = {}
+          for _, v2 in ipairs(v) do
+            table.insert(s, quote_string(v2))
+          end
+          local str = table.concat(s, ", ")
+          table.insert(def, "#   " .. k .. ": " .. "[" .. str .. "]")
+        end
+      end
+    end
   end
   return def
 end
 
 quote_string = function(v)
-  if
-    type(v) == "string"
-    and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
+  if type(v) == "string"
+      and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
   then
     if string.find(v, "'") == nil then
       v = "'" .. v .. "'"
@@ -109,7 +126,5 @@ quote_string = function(v)
   end
   return v
 end
-
-get_task_definition = function(task) end
 
 return Task

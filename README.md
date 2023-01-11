@@ -89,7 +89,7 @@ generators.add_batch {
 > available, but it will be removed later as it is used only for testing purposes.
 >
 > Instead, other generators will be added in the future. For example, generating
-> tasks from _cargo.toml_ targets or _package.json_ scripts.
+> tasks from _Cargo.toml_ targets or _package.json_ scripts.
 
 ## Custom Generators
 
@@ -102,7 +102,7 @@ tasks.generators.add {
   generator = function(buf)
     return {
         "Run current Cargo binary",
-        cwd = tasks.util.find_current_file_root {"cargo.toml"},
+        cwd = tasks.util.find_current_file_root {"Cargo.toml"},
         cmd = {"cargo", "run", "--bin", vim.fn.expand "%:p:t:r"}
 
       }
@@ -113,20 +113,27 @@ tasks.generators.add {
   opts = {
     name = "Custom Cargo binary task generator",
     filetypes = {"rust"},
-    patterns = { ".*/src/bin/[^/]+.rs"}
+    patterns = { ".*/src/bin/[^/]+.rs"},
   }
 }
 
-tasks.generators.add(function(buf)
+tasks.generators.add {
+  generator = function(buf)
     return {
         "Run current Cargo project",
-        cwd = tasks.util.find_current_file_root {"cargo.toml"},
+        cwd = tasks.util.find_current_file_root {"Cargo.toml"},
         cmd = {"cargo", "run"}
     }
-end)
+  end,
+  opts = {
+    parent_dir_includes = {"Cargo.toml"}
+  }
+}
 ```
 
 > _NOTE_ See [Task Spec](#task-spec) for the details on tasks' properties.
+
+> _NOTE_ See [Generator Opts](#generator-opts) for the details on generators' options.
 
 ## Task Spec
 
@@ -136,6 +143,16 @@ end)
 | **cmd**           | `string` or `table` | A command to be executed. When a table, the first element should be an executable. |
 | **env**           | `table?`            | A table of environment variables used during the task's execution .                |
 | **cwd**           | `string?`           | A path to a directory that will be used as a working directory for the task.       |
+
+## Generator Opts
+
+| Property                | Type      | Description                                                                                                                                                              |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **name**                | `string?` | The name of the generator.                                                                                                                                               |
+| **filetypes**           | `table?`  | A table of filetypes in which the generator will be run.                                                                                                                 |
+| **patterns**            | `table?`  | A table lua patterns. The generator will only be run when the current filename matches **_at least one_** pattern.                                                       |
+| **ignore_patterns**     | `table?`  | A table lua patterns. The generator will only be run when the current filename **_does not_** match any patterns.                                                        |
+| **parent_dir_includes** | `table?`  | A table of filenames and directory names. The generator will only run when one of the current file's parent directories includes one of the listed files or directories. |
 
 ## Mappings
 

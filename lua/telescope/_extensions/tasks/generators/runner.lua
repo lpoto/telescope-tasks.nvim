@@ -21,7 +21,7 @@ function runner.run(to_run)
 
   local found_tasks = {}
 
-  current.iterate_available(function(generator, name)
+  current.iterate_available(function(generator, opts)
     local ok, tasks = pcall(generator, vim.fn.bufnr())
 
     if not ok and type(tasks) == "string" then
@@ -43,7 +43,7 @@ function runner.run(to_run)
     end
     for _, o in pairs(tasks) do
       local task
-      ok, task = pcall(Task.new, o, name)
+      ok, task = pcall(Task.new, o, opts)
       if not ok and type(task) == "string" then
         vim.notify(task, vim.log.levels.WARN, {
           title = enum.TITLE,

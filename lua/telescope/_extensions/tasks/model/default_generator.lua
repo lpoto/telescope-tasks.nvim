@@ -3,6 +3,7 @@
 ---@field filetypes table|nil
 ---@field patterns table|nil
 ---@field ignore_patterns table|nil
+---@field parent_dir_includes table|nil
 ---@field generator_fn function
 local Default_generator = {
   name = "Default generator",
@@ -22,6 +23,7 @@ function Default_generator:get_generator()
       filetypes = self.filetypes,
       patterns = self.patterns,
       ignore_patterns = self.ignore_patterns,
+      parent_dir_includes = self.parent_dir_includes,
     },
   }
 end
