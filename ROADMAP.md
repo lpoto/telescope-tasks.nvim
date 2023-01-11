@@ -29,6 +29,13 @@
 
 ##
 
-- [ ] Add default generators that generate tasks from project config files
-  > _Example_: _cargo.toml_ targets or _package.json_ scripts
-  - [ ] For the default generators, add parsers to parse the errors in the output to a quickfix list
+- [x] Support default generators
+- [ ] For the default generators, add parsers to parse the errors in the output to a quickfix list
+- [ ] Add default generators
+  - [ ] _cargo.toml_ targets
+  - [ ] _package.json_ scripts
+  - [ ] _Makefile_ targets
+  - [ ] _Rakefile_ targets
+  - [ ] _Run current file_ based on the filetype
+  > _TODO_ add more generators
+
