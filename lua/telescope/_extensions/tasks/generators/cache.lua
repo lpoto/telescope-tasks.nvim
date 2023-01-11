@@ -21,11 +21,13 @@ end
 function cache.set_for_current_context(tasks)
   local buf = vim.fn.bufnr()
   local cwd = vim.fn.getcwd()
+  local name = vim.api.nvim_buf_get_name(buf)
 
   if tasks ~= nil then
     cached_tasks[buf] = {
       cwd = cwd,
       tasks = tasks,
+      name = name,
     }
   end
   current_tasks = tasks or {}
@@ -41,9 +43,10 @@ end
 function cache.get_for_current_context()
   local buf = vim.fn.bufnr()
   local cwd = vim.fn.getcwd()
+  local name = vim.api.nvim_buf_get_name(buf)
 
   local cached = cached_tasks[buf]
-  if cached and cached.cwd == cwd then
+  if cached and cached.cwd == cwd and name == cached.name then
     current_tasks = cached.tasks
     return cached.tasks
   end

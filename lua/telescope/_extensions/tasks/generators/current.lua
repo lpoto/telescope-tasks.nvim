@@ -88,8 +88,8 @@ verify_parameters = function(generator, opts)
     assert(type(k) == "string", "Generator options keys must be strings")
     assert(
       (
-      ({ filetypes = true, patterns = true, ignore_patterns = true })[k]
-          and type(v) == "table"
+        ({ filetypes = true, patterns = true, ignore_patterns = true })[k]
+        and type(v) == "table"
       ) or k == "name" and type(v) == "string",
       "Invalid generator option: " .. k
     )
@@ -101,35 +101,35 @@ verify_batch_generators = function(batch)
 end
 
 call_generator_callback =
-function(filetype, filename, generator, name, opts, cb)
-  if opts.filetypes and not vim.tbl_contains(opts.filetypes, filetype) then
-    return
-  end
-  if opts.patterns then
-    local ok = false
-    for _, pattern in ipairs(opts.patterns) do
-      if filename:match(pattern) then
-        ok = true
-        break
-      end
-    end
-    if not ok then
+  function(filetype, filename, generator, name, opts, cb)
+    if opts.filetypes and not vim.tbl_contains(opts.filetypes, filetype) then
       return
     end
-  end
-  if opts.ignore_patterns then
-    local ok = true
-    for _, pattern in ipairs(opts.ignore_patterns) do
-      if filename:match(pattern) then
-        ok = false
-        break
+    if opts.patterns then
+      local ok = false
+      for _, pattern in ipairs(opts.patterns) do
+        if filename:match(pattern) then
+          ok = true
+          break
+        end
+      end
+      if not ok then
+        return
       end
     end
-    if not ok then
-      return
+    if opts.ignore_patterns then
+      local ok = true
+      for _, pattern in ipairs(opts.ignore_patterns) do
+        if filename:match(pattern) then
+          ok = false
+          break
+        end
+      end
+      if not ok then
+        return
+      end
     end
+    cb(generator, name)
   end
-  cb(generator, name)
-end
 
 return current_generators

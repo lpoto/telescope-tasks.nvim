@@ -1,3 +1,4 @@
+local util = require "telescope._extensions.tasks.util"
 local enum = require "telescope._extensions.tasks.enum"
 local picker = require "telescope._extensions.tasks.picker"
 local setup = require "telescope._extensions.tasks.setup"
@@ -11,7 +12,7 @@ local has_telescope, telescope = pcall(require, "telescope")
 if not has_telescope then
   vim.notify(
     "This extension requires telescope.nvim "
-      .. "(https://github.com/nvim-telescope/telescope.nvim)",
+    .. "(https://github.com/nvim-telescope/telescope.nvim)",
     log.levels.error,
     {
       title = enum.TITLE,
@@ -39,6 +40,7 @@ return telescope.register_extension {
     tasks = tasks,
     actions = actions,
     generators = generators,
+    util = util,
     _picker = picker,
   },
 }

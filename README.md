@@ -96,11 +96,13 @@ generators.add_batch {
 Example generators used in the [demo](#demo) above:
 
 ```lua
-require("telescope").extensions.tasks.generators.add {
+local tasks = require("telescope").extensions.tasks
+
+tasks.generators.add {
   generator = function(buf)
     return {
         "Run current Cargo binary",
-        cwd = find_root {"cargo.toml"},
+        cwd = tasks.util.find_current_file_root {"cargo.toml"},
         cmd = {"cargo", "run", "--bin", vim.fn.expand "%:p:t:r"}
 
       }
@@ -112,12 +114,13 @@ require("telescope").extensions.tasks.generators.add {
     name = "Custom Cargo binary task generator",
     filetypes = {"rust"},
     patterns = { ".*/src/bin/[^/]+.rs"}
+  }
 }
 
-require("telescope").extensions.tasks.generators.add(function(buf)
+tasks.generators.add(function(buf)
     return {
         "Run current Cargo project",
-        cwd = find_root {"cargo.toml"},
+        cwd = tasks.util.find_current_file_root {"cargo.toml"},
         cmd = {"cargo", "run"}
     }
 end)
