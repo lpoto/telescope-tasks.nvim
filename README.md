@@ -62,12 +62,42 @@ The last opened output may then be toggled with:
  require("telescope").extensions.tasks.actions.toggle_last_output()
 ```
 
-## Generators
+## Genrators
 
-Currently only custom generators are supported. Example generator used in the [demo](#demo) above:
+The generators api is exposed through:
 
 ```lua
-require("telescope").extensions.tasks.generators.add(function(buf)
+local generators = require("telescope").extensions.tasks.generators
+```
+
+Enable all default generators with:
+
+```lua
+generators.enable_default()
+```
+
+Or enable specific defaults generators with:
+
+```lua
+generators.add_batch {
+  generators.default.hello_world(),
+  -- ...
+}
+```
+
+> _NOTE_ Currenlty only the hello world default generator is
+> available, but it will be removed later as it is used only for testing purposes.
+>
+> Instead, other generators will be added in the future. For example, generating
+> tasks from _cargo.toml_ targets or _package.json_ scripts.
+
+## Custom Generators
+
+Example generators used in the [demo](#demo) above:
+
+```lua
+require("telescope").extensions.tasks.generators.add {
+  generator = function(buf)
     return {
         "Run current Cargo binary",
         cwd = find_root {"cargo.toml"},
@@ -77,11 +107,12 @@ require("telescope").extensions.tasks.generators.add(function(buf)
     -- NOTE: multiple tasks may be returned at once
     -- NOTE: You may return nil aswell in case you want to add custom
     -- conditions to the generator function itself
-end, {
-  name = "Custom Cargo binary task generator",
-  filetypes = {"rust"},
-  patterns = { ".*/src/bin/[^/]+.rs"}
-})
+  end,
+  opts = {
+    name = "Custom Cargo binary task generator",
+    filetypes = {"rust"},
+    patterns = { ".*/src/bin/[^/]+.rs"}
+}
 
 require("telescope").extensions.tasks.generators.add(function(buf)
     return {
@@ -89,18 +120,10 @@ require("telescope").extensions.tasks.generators.add(function(buf)
         cwd = find_root {"cargo.toml"},
         cmd = {"cargo", "run"}
     }
-end, {
-  filetypes = {"rust"},
-  -- ignore_patterns = { ".*/src/bin/[^/]+.rs"}
-})
+end)
 ```
 
 > _NOTE_ See [Task Spec](#task-spec) for the details on tasks' properties.
-
-**_NOTE_** In the future, default generators will be available that will auto generate
-tasks from the current project's config files.
-
-> Example: _cargo.toml_ targets or _package.json_ scripts
 
 ## Task Spec
 
