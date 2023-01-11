@@ -28,9 +28,11 @@ function runner.run()
       })
       return
     elseif type(tasks) ~= "table" then
-      vim.notify("Genrator should return a table", vim.log.levels.ERROR, {
-        title = enum.TITLE,
-      })
+      if tasks ~= nil then
+        vim.notify("Genrator should return a table", vim.log.levels.ERROR, {
+          title = enum.TITLE,
+        })
+      end
       return
     end
 
@@ -50,9 +52,7 @@ function runner.run()
     end
   end)
 
-  if next(found_tasks) ~= nil then
-    cache.set_for_current_context(found_tasks)
-  end
+  cache.set_for_current_context(found_tasks)
 end
 
 ---Create the BufEnter and DirChanged autocomands.
