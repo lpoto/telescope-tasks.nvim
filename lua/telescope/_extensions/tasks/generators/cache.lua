@@ -10,31 +10,29 @@ local cache = {}
 function cache.set_for_current_context(tasks)
   local buf = vim.fn.bufnr()
   local cwd = vim.fn.getcwd()
-  local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
 
-  cached_tasks[filetype] = {
+  cached_tasks[buf] = {
     cwd = cwd,
     tasks = tasks,
   }
   return tasks
 end
 
----Get the cached tasks based on the current filetype
+---Get the cached tasks based on the current buffer
 ---and working directory.
 ---When the working directory has changed, the cache
----is cleared for the filetype and nil is returned.
+---is cleared for the buffer and nil is returned.
 ---
 ---@return table|nil: The cached tasks
 function cache.get_for_current_context()
   local buf = vim.fn.bufnr()
   local cwd = vim.fn.getcwd()
-  local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
 
-  local cached = cached_tasks[filetype]
+  local cached = cached_tasks[buf]
   if cached and cached.cwd == cwd then
     return cached.tasks
   end
-  cached_tasks[filetype] = nil
+  cached_tasks[buf] = nil
   return nil
 end
 

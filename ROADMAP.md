@@ -24,6 +24,7 @@
 
 - [ ] Optimize generators
   - [x] Add a cache so they are not redundantly run every time
+    - [ ] Synchronously clean cache, remove caches for invalid buffers 
   - [ ] Run generators synchronously
 
 ##
