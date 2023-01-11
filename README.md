@@ -6,7 +6,10 @@ definitions and outputs in the telescope's previewer.
 
 ## Demo
 
-https://user-images.githubusercontent.com/67372390/211383760-04a2a400-3557-4758-a510-922f6bc2d940.mp4
+
+
+https://user-images.githubusercontent.com/67372390/211933030-5653244d-0c07-44dd-9914-3c5bc749158d.mp4
+
 
 ## Installation
 
@@ -64,43 +67,77 @@ The last opened output may then be toggled with:
 
 ## Generators
 
-Currently only custom generators are supported. Example generator used in the [demo](#demo) above:
+The generators api is exposed through:
 
 ```lua
-require("telescope").extensions.tasks.generators.add(function(buf)
+local generators = require("telescope").extensions.tasks.generators
+```
+
+Enable all default generators with:
+
+```lua
+generators.enable_default()
+```
+
+Or cherry pick some default generators:
+
+```lua
+generators.add_batch {
+  generators.default.hello_world(),
+  -- ...
+}
+```
+
+> _NOTE_ Currenlty only the hello world default generator is
+> available, but it will be removed later as it is used only for testing purposes.
+>
+> Instead, other generators will be added in the future. For example, generating
+> tasks from _Cargo.toml_ targets or _package.json_ scripts.
+
+## Custom Generators
+
+Example generators used in the [demo](#demo) above:
+
+```lua
+local tasks = require("telescope").extensions.tasks
+
+tasks.generators.add {
+  generator = function(buf)
     return {
         "Run current Cargo binary",
-        cwd = find_root {"cargo.toml"},
+        cwd = tasks.util.find_current_file_root {"Cargo.toml"},
         cmd = {"cargo", "run", "--bin", vim.fn.expand "%:p:t:r"}
 
       }
     -- NOTE: multiple tasks may be returned at once
     -- NOTE: You may return nil aswell in case you want to add custom
     -- conditions to the generator function itself
-end, {
-  name = "Custom Cargo binary task generator",
-  filetypes = {"rust"},
-  patterns = { ".*/src/bin/[^/]+.rs"}
-})
+  end,
+  opts = {
+    name = "Custom Cargo binary task generator",
+    filetypes = {"rust"},
+    patterns = { ".*/src/bin/[^/]+.rs"},
+  }
+}
 
-require("telescope").extensions.tasks.generators.add(function(buf)
+tasks.generators.add {
+  generator = function(buf)
     return {
         "Run current Cargo project",
-        cwd = find_root {"cargo.toml"},
+        cwd = tasks.util.find_current_file_root {"Cargo.toml"},
         cmd = {"cargo", "run"}
     }
-end, {
-  filetypes = {"rust"},
-  -- ignore_patterns = { ".*/src/bin/[^/]+.rs"}
-})
+  end,
+  opts = {
+    parent_dir_includes = {"Cargo.toml"}
+    -- ignore_patterns = { ".*/src/bin/[^/]+.rs"},
+  }
+}
 ```
 
 > _NOTE_ See [Task Spec](#task-spec) for the details on tasks' properties.
 
-**_NOTE_** In the future, default generators will be available that will auto generate
-tasks from the current project's config files.
-
-> Example: _cargo.toml_ targets or _package.json_ scripts
+> _NOTE_ See [Generator Opts](#generator-opts) for the details on generators' options.
 
 ## Task Spec
 
@@ -110,6 +147,16 @@ tasks from the current project's config files.
 | **cmd**           | `string` or `table` | A command to be executed. When a table, the first element should be an executable. |
 | **env**           | `table?`            | A table of environment variables used during the task's execution .                |
 | **cwd**           | `string?`           | A path to a directory that will be used as a working directory for the task.       |
+
+## Generator Opts
+
+| Property                | Type      | Description                                                                                                                                                              |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **name**                | `string?` | The name of the generator.                                                                                                                                               |
+| **filetypes**           | `table?`  | A table of filetypes in which the generator will be run.                                                                                                                 |
+| **patterns**            | `table?`  | A table lua patterns. The generator will only be run when the current filename matches **_at least one_** pattern.                                                       |
+| **ignore_patterns**     | `table?`  | A table lua patterns. The generator will only be run when the current filename **_does not_** match any patterns.                                                        |
+| **parent_dir_includes** | `table?`  | A table of filenames and directory names. The generator will only run when one of the current file's parent directories includes one of the listed files or directories. |
 
 ## Mappings
 

@@ -7,8 +7,10 @@ local should_run_generators
 
 local runner = {}
 
+---provided, the currently available generators from the cache will be run.
 ---Runs all the available generators and returns the found tasks.
-function runner.run()
+---@param to_run table|nil: A table of generators to run, if not
+function runner.run(to_run)
   if current.is_empty() or not should_run_generators() then
     return
   end
@@ -19,7 +21,7 @@ function runner.run()
 
   local found_tasks = {}
 
-  current.iterate_available(function(generator, name)
+  current.iterate_available(function(generator, opts)
     local ok, tasks = pcall(generator, vim.fn.bufnr())
 
     if not ok and type(tasks) == "string" then
@@ -41,7 +43,7 @@ function runner.run()
     end
     for _, o in pairs(tasks) do
       local task
-      ok, task = pcall(Task.new, o, name)
+      ok, task = pcall(Task.new, o, opts)
       if not ok and type(task) == "string" then
         vim.notify(task, vim.log.levels.WARN, {
           title = enum.TITLE,
@@ -50,7 +52,7 @@ function runner.run()
         found_tasks[task.name] = task
       end
     end
-  end)
+  end, to_run)
 
   cache.set_for_current_context(found_tasks)
 end
@@ -65,13 +67,17 @@ function runner.init()
 
   vim.api.nvim_create_autocmd("BufEnter", {
     group = enum.TASKS_AUGROUP,
-    callback = runner.run,
+    callback = function()
+      runner.run()
+    end,
   })
   vim.api.nvim_create_autocmd("DirChanged", {
     group = enum.TASKS_AUGROUP,
-    callback = runner.run,
+    callback = function()
+      runner.run()
+    end,
   })
-  if not cache.is_empty() then
+  if not current.is_empty() then
     runner.run()
   end
 end
