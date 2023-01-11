@@ -37,7 +37,7 @@ require("telescope").setup {
   },
 }
 -- Load the tasks telescope extension
-require("telescope").load_extension("tasks")
+require("telescope").load_extension "tasks"
 ```
 
 See [Generators](#generators) on how to generate tasks.
