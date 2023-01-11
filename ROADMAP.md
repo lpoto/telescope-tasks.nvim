@@ -24,8 +24,8 @@
 
 - [ ] Optimize generators
   - [x] Add a cache so they are not redundantly run every time
-    - [ ] Synchronously clean cache, remove caches for invalid buffers 
-  - [ ] Run generators synchronously
+    - [ ] Implement cache cleaner for invalid buffers
+  - [x] Support adding filetypes and patterns conditions alongside the generators
 
 ##
 
