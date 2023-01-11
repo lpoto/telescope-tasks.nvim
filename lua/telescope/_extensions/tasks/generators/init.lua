@@ -21,6 +21,8 @@ local generators = {}
 ---        matches one of the patterns.
 ---       - `ignore_patterns`: a table of lua patterns. Generator will only be run when the filename
 ---        does not match any of the patterns.
+---       - `parent_dir_includes`: A table of filenames and directory names. Generator will only be run when
+---        any of the current file's parent directories include any file or directory from the table.
 function generators.add(generator)
   local ok, added = pcall(current.add, generator)
   if not ok and type(added) == "string" then

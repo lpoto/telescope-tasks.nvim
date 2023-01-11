@@ -26,17 +26,16 @@
   - [x] Add a cache so they are not redundantly run every time
     - [ ] Implement cache cleaner for invalid buffers
   - [x] Support adding filetypes and patterns conditions alongside the generators
-  - [ ] Support adding root patterns conditions alongside the generators
+  - [x] Support adding parent_dir_includes condition, a table of filenames and dirnames that should be included in at least one of the current file's parent directories
 
 ##
 
 - [x] Support default generators
 - [ ] For the default generators, add parsers to parse the errors in the output to a quickfix list
 - [ ] Add default generators
-  - [ ] _cargo.toml_ targets
+  - [ ] _Cargo.toml_ targets
   - [ ] _package.json_ scripts
   - [ ] _Makefile_ targets
   - [ ] _Rakefile_ targets
   - [ ] _Run current file_ based on the filetype
-  > _TODO_ add more generators
-
+    > _TODO_ add more generators

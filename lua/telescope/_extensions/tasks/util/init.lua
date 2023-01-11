@@ -11,7 +11,8 @@ local find_root
 ---When no such parent is found, the current working directory is returned.
 ---@return string
 function path.find_parent_root(files_and_directories)
-  return find_root(files_and_directories, vim.loop.cwd())
+  local _, root = find_root(files_and_directories, vim.loop.cwd())
+  return root
 end
 
 ---Find a parent directory of the current file,
@@ -20,18 +21,30 @@ end
 ---When no such parent is found, the file's parent directory is returned.
 ---@return string
 function path.find_current_file_root(files_and_directories)
-  return find_root(files_and_directories, vim.fn.expand "%:p:h")
+  local _, root = find_root(files_and_directories, vim.fn.expand "%:p:h")
+  return root
+end
+
+---Returns true if any of the current file's
+---parent directories include any of the provided files or directories.
+---@return boolean
+function path.parent_dir_includes(files_and_directories)
+  local ok, _ = find_root(files_and_directories, vim.fn.expand "%:p:h")
+  return ok
 end
 
 find_root = function(patterns, start)
-  for _, parent in ipairs(Path:new(start):parents()) do
+  local parents = Path:new(start):parents()
+  table.insert(parents, start)
+
+  for _, parent in ipairs(parents) do
     for _, file_or_dir in ipairs(patterns) do
       if Path:new(parent):joinpath(file_or_dir):exists() then
-        return parent
+        return true, parent
       end
     end
   end
-  return start
+  return false, start
 end
 
 return path
