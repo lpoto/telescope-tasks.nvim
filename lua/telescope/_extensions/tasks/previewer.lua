@@ -113,9 +113,10 @@ teardown_fn = function(self)
     return
   end
   local winid = self.status.preview_win
-  if type(winid) ~= "number"
-      or winid == -1
-      or not vim.api.nvim_win_is_valid(winid)
+  if
+    type(winid) ~= "number"
+    or winid == -1
+    or not vim.api.nvim_win_is_valid(winid)
   then
     return
   end

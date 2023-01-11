@@ -38,7 +38,7 @@ end
 
 ---@return boolean: Whether there are no entries in the cache
 function cache.is_empty()
-  return not next(cached_tasks) == nil
+  return next(cached_tasks) == nil
 end
 
 return cache

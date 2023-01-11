@@ -79,6 +79,10 @@ function generators.__init()
 end
 
 run_generators = function()
+  if current_generators == nil or next(current_generators) == nil then
+    return
+  end
+
   local cached_tasks = cache.get_for_current_context()
   if cached_tasks then
     current_tasks = cached_tasks

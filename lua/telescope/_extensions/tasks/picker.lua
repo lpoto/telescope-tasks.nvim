@@ -31,18 +31,18 @@ available_tasks_telescope_picker = function(options)
   local function tasks_picker(opts)
     opts = opts or {}
     pickers
-        .new(opts, {
-          prompt_title = "Tasks",
-          results_title = "Available Tasks",
-          finder = finder.available_tasks_finder(),
-          sorter = conf.generic_sorter(opts),
-          previewer = previewer.task_previewer(),
-          dynamic_preview_title = true,
-          selection_strategy = "row",
-          scroll_strategy = "cycle",
-          attach_mappings = mappings.attach_mappings,
-        })
-        :find()
+      .new(opts, {
+        prompt_title = "Tasks",
+        results_title = "Available Tasks",
+        finder = finder.available_tasks_finder(),
+        sorter = conf.generic_sorter(opts),
+        previewer = previewer.task_previewer(),
+        dynamic_preview_title = true,
+        selection_strategy = "row",
+        scroll_strategy = "cycle",
+        attach_mappings = mappings.attach_mappings,
+      })
+      :find()
   end
 
   tasks_picker(options)
