@@ -62,7 +62,7 @@ The last opened output may then be toggled with:
  require("telescope").extensions.tasks.actions.toggle_last_output()
 ```
 
-## Genrators
+## Generators
 
 The generators api is exposed through:
 
