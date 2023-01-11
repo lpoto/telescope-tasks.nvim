@@ -1,6 +1,6 @@
 local enum = require "telescope._extensions.tasks.enum"
 local create_buffer =
-require "telescope._extensions.tasks.executor.create_buffer"
+  require "telescope._extensions.tasks.executor.create_buffer"
 
 ---A table with tasks' names as keys
 ---and their job ids as values
@@ -74,6 +74,13 @@ function run.run(task, on_exit)
           running_tasks[task.name].job = nil
         end
         on_exit(code)
+        vim.notify(
+          task.name .. ": exited with code: " .. code,
+          vim.log.levels.DEBUG,
+          {
+            title = enum.TITLE,
+          }
+        )
       end,
     })
   end)
