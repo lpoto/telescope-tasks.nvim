@@ -31,4 +31,22 @@ function generators.add(generator, opts)
   end
 end
 
+---Add a batch of generators at once. This is useful when you want to
+---Add multiple generators at once, so you can avoid calling `generators.add`
+---multiple times.
+---
+---@param generators_batch table: A table of generator functions and options.
+---The elements should be tables with the function on index 1 and opts on index 2.
+---These functions and options are the same as in `generators.add(generator, opts)`
+function generators.add_batch(generators_batch)
+  local ok, e = pcall(current.add_batch, generators_batch)
+  if not ok and type(e) == "string" then
+    vim.notify(e, vim.log.levels.WARN, {
+      title = enum.TITLE,
+    })
+  elseif cache.is_empty() then
+    runner.run()
+  end
+end
+
 return generators
