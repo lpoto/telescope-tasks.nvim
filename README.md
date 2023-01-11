@@ -76,7 +76,7 @@ Enable all default generators with:
 generators.enable_default()
 ```
 
-Or enable specific defaults generators with:
+Or cherry pick some default generators:
 
 ```lua
 generators.add_batch {
