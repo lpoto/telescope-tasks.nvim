@@ -1,6 +1,17 @@
 local cached_tasks = {}
+local current_tasks = {}
 
 local cache = {}
+
+---@return table: Currently available tasks
+function cache.get_current_tasks()
+  return current_tasks or {}
+end
+
+---@return table|nil: The task identified by the provided name
+function cache.get_current_task_by_name(name)
+  return cache.get_current_tasks()[name]
+end
 
 ---Cache the provided tasks based on the current
 ---filetype and working directory.
@@ -15,6 +26,7 @@ function cache.set_for_current_context(tasks)
     cwd = cwd,
     tasks = tasks,
   }
+  current_tasks = tasks
   return tasks
 end
 
@@ -30,6 +42,7 @@ function cache.get_for_current_context()
 
   local cached = cached_tasks[buf]
   if cached and cached.cwd == cwd then
+    current_tasks = cached.tasks
     return cached.tasks
   end
   cached_tasks[buf] = nil

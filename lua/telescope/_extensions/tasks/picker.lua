@@ -2,7 +2,7 @@ local enum = require "telescope._extensions.tasks.enum"
 local finder = require "telescope._extensions.tasks.finder"
 local previewer = require "telescope._extensions.tasks.previewer"
 local mappings = require "telescope._extensions.tasks.mappings"
-local generators = require "telescope._extensions.tasks.generators"
+local cache = require "telescope._extensions.tasks.generators.cache"
 
 local pickers = require "telescope.pickers"
 local conf = require("telescope.config").values
@@ -19,7 +19,7 @@ function picker.available_tasks_picker(opts)
 end
 
 available_tasks_telescope_picker = function(options)
-  local tasks = generators.__get_tasks()
+  local tasks = cache.get_current_tasks()
 
   if tasks == nil or next(tasks) == nil then
     vim.notify("There are no available tasks", vim.log.levels.WARN, {

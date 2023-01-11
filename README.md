@@ -1,7 +1,7 @@
 # Telescope tasks
 
 `telescope-tasks.nvim` is a [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) extension,
-that allows running custom synchronous tasks directly from the telescope prompt and displaying their
+that allows running custom tasks directly from the telescope prompt and displaying their
 definitions and outputs in the telescope's previewer.
 
 ## Demo
@@ -68,27 +68,31 @@ Currently only custom generators are supported. Example generator used in the [d
 
 ```lua
 require("telescope").extensions.tasks.generators.add(function(buf)
-  local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
-  if filetype == "rust" then
-    local tasks = {
-      {
-        "Run current Cargo project",
-        cwd = find_root {"cargo.toml"},
-        cmd = {"cargo", "run"}
-
-      }
-    }
-    if (vim.fn.expand "%:p"):gmatch(".*/src/bin/[^/]+.rs") then
-      table.insert(tasks, {
+    return {
         "Run current Cargo binary",
         cwd = find_root {"cargo.toml"},
         cmd = {"cargo", "run", "--bin", vim.fn.expand "%:p:t:r"}
-      })
-    end
-    return tasks
-  end
-  return nil
-end)
+
+      }
+    -- NOTE: multiple tasks may be returned at once
+    -- NOTE: You may return nil aswell in case you want to add custom
+    -- conditions to the generator function itself
+end, {
+  name = "Custom Cargo binary task generator",
+  filetypes = {"rust"},
+  patterns = { ".*/src/bin/[^/]+.rs"}
+})
+
+require("telescope").extensions.tasks.generators.add(function(buf)
+    return {
+        "Run current Cargo project",
+        cwd = find_root {"cargo.toml"},
+        cmd = {"cargo", "run"}
+    }
+end, {
+  filetypes = {"rust"},
+  -- ignore_patterns = { ".*/src/bin/[^/]+.rs"}
+})
 ```
 
 > _NOTE_ See [Task Spec](#task-spec) for the details on tasks' properties.

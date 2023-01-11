@@ -1,7 +1,7 @@
 local finders = require "telescope.finders"
 local entry_display = require "telescope.pickers.entry_display"
 local executor = require "telescope._extensions.tasks.executor"
-local generators = require "telescope._extensions.tasks.generators"
+local cache = require "telescope._extensions.tasks.generators.cache"
 
 local finder = {}
 
@@ -12,7 +12,7 @@ local get_task_display
 ---@return table: a telescope finder
 function finder.available_tasks_finder()
   local tasks = {}
-  for _, task in pairs(generators.__get_tasks()) do
+  for _, task in pairs(cache.get_current_tasks()) do
     table.insert(tasks, task)
   end
 

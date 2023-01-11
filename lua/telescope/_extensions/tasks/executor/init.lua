@@ -1,7 +1,6 @@
 local enum = require "telescope._extensions.tasks.enum"
-local Task = require "telescope._extensions.tasks.model.task"
 local run = require "telescope._extensions.tasks.executor.run_task"
-local generators = require "telescope._extensions.tasks.generators"
+local cache = require "telescope._extensions.tasks.generators.cache"
 
 local executor = {}
 
@@ -40,7 +39,7 @@ function executor.start(name, on_exit)
   --NOTE: fetch the task's data in the buffer from
   --which it has been started.
   ---@type Task|nil
-  local task, err = generators.__get_task_by_name(name)
+  local task, err = cache.get_current_task_by_name(name)
   if err ~= nil then
     vim.notify(err, vim.log.levels.WARN, {
       title = enum.TITLE,
@@ -74,7 +73,7 @@ end
 ---@return boolean: whether the task has been successfully killed
 function executor.kill(name)
   ---@type Task|nil
-  local task, err = generators.__get_task_by_name(name)
+  local task, err = cache.get_current_task_by_name(name)
   if err ~= nil then
     vim.notify(err, vim.log.levels.WARN, {
       title = enum.TITLE,

@@ -12,10 +12,9 @@ Task.__index = Task
 ---Create an task from a table
 ---
 ---@param o table|string: Task's fields or just a command.
----@param generator_name stirng|nil: The name of the generator that created this task.
+---@param generator_name string|nil: The name of the generator that created this task.
 ---@return Task
----@return string?: An error that occured when creating an Task.
-function Task.__create(o, generator_name)
+function Task.new(o, generator_name)
   ---@type Task
   local a = {
     __generator_name = generator_name,
@@ -25,16 +24,9 @@ function Task.__create(o, generator_name)
   --NOTE: verify task's fields,
   --if any errors occur, stop with the creation and return
   --the error string.
-
-  local name = o.name or o[1]
-  if name == nil or type(name) ~= "string" then
-    return a, "Task's 'name' should be a string!"
-  end
-  a.name = name
-
   if type(o) == "string" then
     o = { o }
-  elseif type(o) == "table" then
+  elseif type(o) ~= "table" then
     local ok = true
     for k, v in pairs(o) do
       if type(k) ~= "number" or type(v) ~= "string" then
@@ -45,30 +37,34 @@ function Task.__create(o, generator_name)
     if ok then
       o = { o }
     end
-  else
-    return a, "Task '" .. a.name .. "' should be a table!"
   end
+  assert(type(o) == "table", "Task should be a table or a string!")
 
-  if o.cmd == nil then
-    return a, "Task '" .. a.name .. "' should have a `cmd` field!"
-  end
-  if type(o.cmd) == "string" then
-    a.cmd = o.cmd
-  elseif type(o.cmd) == "table" then
-    for k, v in ipairs(o.cmd) do
-      if type(v) ~= "string" or type(k) ~= "number" then
-        return a, "Task '" .. a.name .. "'s command is invalid!"
-      end
-    end
-    a.cmd = o.cmd
-  else
-    return a, "Task '" .. a.name .. "'s command should be a string or a table!"
-  end
-  a.cwd = o.cwd or vim.fn.getcwd()
-  if o.env ~= nil and type(o.env) ~= "table" then
-    return a, "Task '" .. a.name .. "'s env should be a table!"
-  end
+  local name = o.name or o[1]
+  assert(type(name) == "string", "Task's 'name' should be a string!")
+  a.name = name
+
+  local cmd = o.cmd
+  assert(
+    type(cmd) == "table" or type(cmd) == "string",
+    "Task '" .. a.name .. "' should have a string or a table `cmd` field!"
+  )
+  a.cmd = cmd
+
+  local cwd = o.cwd
+  assert(
+    cwd == nil or type(cwd) == "string",
+    "Task '" .. a.name .. "'s `cwd` field should be a string!"
+  )
+  a.cwd = cwd or vim.fn.getcwd()
+
+  local env = o.env
+  assert(
+    env == nil or type(env) == "table",
+    "Task '" .. a.name .. "'s env should be a table!"
+  )
   a.env = o.env or {}
+
   return a
 end
 
