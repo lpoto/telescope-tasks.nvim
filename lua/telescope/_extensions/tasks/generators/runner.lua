@@ -1,17 +1,20 @@
 local enum = require "telescope._extensions.tasks.enum"
 local cache = require "telescope._extensions.tasks.generators.cache"
-local Task = require "telescope._extensions.tasks.model.task"
-local current = require "telescope._extensions.tasks.generators.current"
 
 local should_run_generators
 
 local runner = {}
 
+runner.__current_generators = {}
+
 ---provided, the currently available generators from the cache will be run.
 ---Runs all the available generators and returns the found tasks.
----@param to_run table|nil: A table of generators to run, if not
-function runner.run(to_run)
-  if current.is_empty() or not should_run_generators() then
+---@param generators table|nil: A table of generators to run.
+---If not provided, all available generators are run.
+function runner.run(generators)
+  if
+    not next(runner.__current_generators or {}) or not should_run_generators()
+  then
     return
   end
   local cached_tasks = cache.get_for_current_context()
@@ -21,38 +24,11 @@ function runner.run(to_run)
 
   local found_tasks = {}
 
-  current.iterate_available(function(generator, opts)
-    local ok, tasks = pcall(generator, vim.fn.bufnr())
-
-    if not ok and type(tasks) == "string" then
-      vim.notify(tasks, vim.log.levels.ERROR, {
-        title = enum.TITLE,
-      })
-      return
-    elseif type(tasks) ~= "table" then
-      if tasks ~= nil then
-        vim.notify("Genrator should return a table", vim.log.levels.ERROR, {
-          title = enum.TITLE,
-        })
-      end
-      return
+  for _, generator in ipairs(generators or runner.__current_generators or {}) do
+    if generator:available() then
+      found_tasks = vim.tbl_extend("force", found_tasks, generator:run() or {})
     end
-
-    if tasks.name or tasks.cmd or tasks.env then
-      tasks = { tasks }
-    end
-    for _, o in pairs(tasks) do
-      local task
-      ok, task = pcall(Task.new, o, opts)
-      if not ok and type(task) == "string" then
-        vim.notify(task, vim.log.levels.WARN, {
-          title = enum.TITLE,
-        })
-      else
-        found_tasks[task.name] = task
-      end
-    end
-  end, to_run)
+  end
 
   cache.set_for_current_context(found_tasks)
 end
@@ -77,7 +53,7 @@ function runner.init()
       runner.run()
     end,
   })
-  if not current.is_empty() then
+  if not next(runner.__current_generators or {}) then
     runner.run()
   end
 end
