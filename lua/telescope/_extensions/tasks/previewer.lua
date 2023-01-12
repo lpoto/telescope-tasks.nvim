@@ -92,7 +92,6 @@ local function display_definition_buf(status, task)
 end
 
 preview_fn = function(self, entry, status)
-  vim.notify "PREVIER"
   highlights.set_previewer_highlights(status.preview_win)
   local old_buf = previewer.old_preview_buf
 
