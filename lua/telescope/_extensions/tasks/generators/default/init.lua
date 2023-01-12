@@ -1,7 +1,6 @@
 local function require_generator_module(name)
   return function()
-    local module = "telescope._extensions.tasks.generators.default"
-    return require(module .. "." .. name):get_generator()
+    return require("telescope._extensions.tasks.generators.default." .. name)
   end
 end
 
