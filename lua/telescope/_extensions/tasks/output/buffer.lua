@@ -1,11 +1,13 @@
 local enum = require "telescope._extensions.tasks.enum"
 
-local create_buffer = {}
+local buffer = {}
+
+local handle_buffer
 
 ---@param buf? number: An existing buffer, if it is valid
 ---it will be used instead.
 ---@return number: buffer number, -1 when invalid
-function create_buffer.create(buf)
+function buffer.create(buf)
   if buf == nil or not vim.api.nvim_buf_is_valid(buf) then
     buf = vim.api.nvim_create_buf(false, true)
     local ok
@@ -17,7 +19,7 @@ function create_buffer.create(buf)
       return -1
     end
   end
-  local ok, err = pcall(create_buffer.handle_buffer, buf)
+  local ok, err = pcall(handle_buffer, buf)
   if ok == false and type(err) == "string" then
     vim.notify(err, vim.log.levels.WARN, {
       title = enum.TITLE,
@@ -26,7 +28,7 @@ function create_buffer.create(buf)
   return buf
 end
 
-function create_buffer.handle_buffer(buf)
+handle_buffer = function(buf)
   vim.api.nvim_buf_set_option(buf, "bufhidden", "hide")
   vim.api.nvim_buf_set_option(buf, "modified", false)
   vim.api.nvim_buf_set_option(buf, "modifiable", true)
@@ -59,4 +61,4 @@ function create_buffer.handle_buffer(buf)
   })
 end
 
-return create_buffer
+return buffer

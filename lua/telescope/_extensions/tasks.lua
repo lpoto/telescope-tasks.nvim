@@ -2,7 +2,7 @@ local util = require "telescope._extensions.tasks.util"
 local enum = require "telescope._extensions.tasks.enum"
 local picker = require "telescope._extensions.tasks.picker"
 local setup = require "telescope._extensions.tasks.setup"
-local actions = require "telescope._extensions.tasks.actions"
+local actions = require "telescope._extensions.tasks.picker.actions"
 local generators = require "telescope._extensions.tasks.generators"
 local runner = require "telescope._extensions.tasks.generators.runner"
 

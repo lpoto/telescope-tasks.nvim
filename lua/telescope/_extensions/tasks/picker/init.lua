@@ -1,7 +1,7 @@
 local enum = require "telescope._extensions.tasks.enum"
-local finder = require "telescope._extensions.tasks.finder"
-local previewer = require "telescope._extensions.tasks.previewer"
-local mappings = require "telescope._extensions.tasks.mappings"
+local finder = require "telescope._extensions.tasks.picker.finder"
+local previewer = require "telescope._extensions.tasks.picker.previewer"
+local mappings = require "telescope._extensions.tasks.picker.mappings"
 local cache = require "telescope._extensions.tasks.generators.cache"
 
 local pickers = require "telescope.pickers"

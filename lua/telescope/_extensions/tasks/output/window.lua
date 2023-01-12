@@ -1,8 +1,8 @@
 local enum = require "telescope._extensions.tasks.enum"
 local setup = require "telescope._extensions.tasks.setup"
-local highlights = require "telescope._extensions.tasks.highlight"
+local highlight = require "telescope._extensions.tasks.output.highlight"
 
-local create = {}
+local window = {}
 
 local handle_window
 local determine_output_window_type
@@ -13,7 +13,7 @@ local close_win
 ---@param buf number: A buffer number to create a window for
 ---@rarapm title string?: The title of the window, relevant only for floats
 ---@return number: A window id, -1 when invalid
-function create.create_window(buf, title)
+function window.create(buf, title)
   clean_buffer(buf)
 
   local ok, winid = pcall(determine_output_window_type(), buf, title)
@@ -111,7 +111,7 @@ end
 
 handle_window = function(winid)
   set_options(winid)
-  highlights.set_output_window_highlights(winid)
+  highlight.set_output_window_highlights(winid)
 end
 
 clean_buffer = function(buf)
@@ -176,4 +176,4 @@ close_win = function(buf)
   vim.api.nvim_win_close(wid, false)
 end
 
-return create
+return window
