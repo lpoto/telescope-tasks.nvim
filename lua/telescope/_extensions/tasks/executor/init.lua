@@ -22,7 +22,7 @@ function executor.get_task_output_buf(name)
 end
 
 function executor.is_running(name)
-  return running_tasks[name] and running_tasks[name].job
+  return executor.get_job_id(name) ~= nil
 end
 
 ---Returns the buffer number for the task identified
@@ -35,6 +35,17 @@ function executor.get_job_id(name)
     return nil
   end
   return running_tasks[name].job
+end
+
+---Get all currently running tasks
+---
+---@return table
+function executor.get_running_tasks()
+  local tasks = {}
+  for _, o in pairs(running_tasks or o) do
+    table.insert(tasks, o.task)
+  end
+  return tasks
 end
 
 ---Returns the number of currently running tasks.
@@ -58,7 +69,7 @@ function executor.run(name, on_exit)
     })
     return false
   end
-  local task, err = cache.get_current_task_by_name(name)
+  local task, err = cache.get_task_by_name(name)
   if err ~= nil then
     vim.notify(err, vim.log.levels.WARN, {
       title = enum.TITLE,
@@ -80,7 +91,7 @@ end
 ---
 ---@param name string: Name of the task to be stopped
 function executor.kill(name)
-  local task, err = cache.get_current_task_by_name(name)
+  local task, err = cache.get_task_by_name(name)
   if err ~= nil then
     vim.notify(err, vim.log.levels.WARN, {
       title = enum.TITLE,
@@ -194,8 +205,9 @@ run_task = function(task, on_exit)
 
   --NOTE: open a terminal in the created buffer and run
   --the task in it
+  local job_id = nil
   vim.api.nvim_buf_call(term_buf, function()
-    vim.fn.termopen(cmd, opts)
+    job_id = vim.fn.termopen(cmd, opts)
   end)
 
   name_output_buf(term_buf, task)
@@ -203,6 +215,7 @@ run_task = function(task, on_exit)
   running_tasks[task.name] = {
     job = job_id,
     buf = term_buf,
+    task = task,
   }
   return true
 end

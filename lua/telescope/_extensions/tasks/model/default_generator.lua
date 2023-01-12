@@ -13,6 +13,12 @@ local Default_generator = {
 }
 Default_generator.__index = Default_generator
 
+---@paran o table?
+---@return Default_generator
+function Default_generator:new(o)
+  return setmetatable(o or {}, Default_generator)
+end
+
 ---@return table: Generator function on index 1 and
 ---options on index 2.
 function Default_generator:get_generator()

@@ -25,7 +25,9 @@ function previewer.task_previewer()
     end,
     scroll_fn = scroll_fn,
     teardown = teardown_fn,
-    preview_fn = preview_fn,
+    preview_fn = function(self, entry, status)
+      preview_fn(self, entry, status)
+    end,
   }
 end
 
