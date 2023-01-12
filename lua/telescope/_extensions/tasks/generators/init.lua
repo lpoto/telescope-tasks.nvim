@@ -1,6 +1,6 @@
 local enum = require "telescope._extensions.tasks.enum"
 local runner = require "telescope._extensions.tasks.generators.runner"
-local current = require "telescope._extensions.tasks.generators.current"
+local Generator = require "telescope._extensions.tasks.model.generator"
 local default = require "telescope._extensions.tasks.generators.default"
 
 local generators = {}
@@ -12,24 +12,21 @@ local generators = {}
 ---they won't be run multiple times unless one of those has been changed.
 ---Additional options may be provided.
 ---
----@param generator table|function: A generator.
+---@param generator Generator|function: A generator.
 ---The generator may be just a generator function or a table with keys
 ---  - `generator` (function) The generator function.
----  - `opts` (Generator_opts|nil) The generator conditions. This is a table with fields:
----       - `filetypes`: A table of filetypes for the generator to run in.
----       - `patterns`: A table of lua patterns. Generator will only be run when the filename
----        matches one of the patterns.
----       - `ignore_patterns`: a table of lua patterns. Generator will only be run when the filename
----        does not match any of the patterns.
----       - `parent_dir_includes`: A table of filenames and directory names. Generator will only be run when
----        any of the current file's parent directories include any file or directory from the table.
+---  - `opts` (Generator_opts|nil) The generator conditions.
 function generators.add(generator)
-  local ok, added = pcall(current.add, generator)
+  local ok, added = pcall(function()
+    generator = Generator.new(generator)
+    table.insert(runner.__current_generators, generator)
+    return generator
+  end)
   if not ok and type(added) == "string" then
     vim.notify(added, vim.log.levels.WARN, {
       title = enum.TITLE,
     })
-  else
+  elseif added then
     runner.run { added }
   end
 end
@@ -41,12 +38,24 @@ end
 ---@param generators_batch table: A table of generators.
 ---Each generator is the same as the parameter for the `generators.add(generator)` function.
 function generators.add_batch(generators_batch)
-  local ok, added = pcall(current.add_batch, generators_batch)
+  local ok, added = pcall(function()
+    assert(
+      type(generators_batch) == "table",
+      "A batch of generators must be a table"
+    )
+    local inserted = {}
+    for _, generator in ipairs(generators_batch) do
+      generator = Generator.new(generator)
+      table.insert(inserted, generator)
+      table.insert(runner.__current_generators, generator)
+    end
+    return inserted
+  end)
   if not ok and type(added) == "string" then
     vim.notify(added, vim.log.levels.WARN, {
       title = enum.TITLE,
     })
-  else
+  elseif next(added or {}) then
     runner.run(added)
   end
 end
