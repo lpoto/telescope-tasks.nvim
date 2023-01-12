@@ -1,6 +1,6 @@
 local previewers = require "telescope.previewers"
 local executor = require "telescope._extensions.tasks.executor"
-local highlights = require "telescope._extensions.tasks.highlight"
+local highlight = require "telescope._extensions.tasks.output.highlight"
 local enum = require "telescope._extensions.tasks.enum"
 
 local previewer = {}
@@ -92,7 +92,7 @@ local function display_definition_buf(status, task)
 end
 
 preview_fn = function(self, entry, status)
-  highlights.set_previewer_highlights(status.preview_win)
+  highlight.set_previewer_highlights(status.preview_win)
   local old_buf = previewer.old_preview_buf
 
   if not display_running_buf(status, entry.value) then

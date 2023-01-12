@@ -1,7 +1,6 @@
 local enum = require "telescope._extensions.tasks.enum"
 local cache = require "telescope._extensions.tasks.generators.cache"
-local create_buffer =
-  require "telescope._extensions.tasks.executor.create_buffer"
+local output_buffer = require "telescope._extensions.tasks.output.buffer"
 
 local running_tasks = {}
 local buffers_to_delete = {}
@@ -188,7 +187,7 @@ run_task = function(task, on_exit)
   --NOTE: if an output buffer for the same task already exists,
   --open terminal in that one instead of creating a new one
   local term_buf =
-    create_buffer.create(executor.get_task_output_buf(task.name))
+    output_buffer.create(executor.get_task_output_buf(task.name))
   if not term_buf or not vim.api.nvim_buf_is_valid(term_buf) then
     return false
   end
