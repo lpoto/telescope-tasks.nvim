@@ -11,9 +11,15 @@ local get_task_display
 ---
 ---@return table: a telescope finder
 function finder.available_tasks_finder()
+  local cached_tasks = cache.get_current_tasks()
   local tasks = {}
-  for _, task in pairs(cache.get_current_tasks()) do
+  for _, task in pairs(cached_tasks) do
     table.insert(tasks, task)
+  end
+  for _, task in pairs(executor.get_running_tasks()) do
+    if not cached_tasks[task.name] then
+      table.insert(tasks, task)
+    end
   end
 
   return finders.new_table {

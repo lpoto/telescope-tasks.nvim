@@ -9,8 +9,18 @@ function cache.get_current_tasks()
 end
 
 ---@return table|nil: The task identified by the provided name
-function cache.get_current_task_by_name(name)
-  return cache.get_current_tasks()[name]
+function cache.get_task_by_name(name)
+  local task = cache.get_current_tasks()[name]
+  if task then
+    return task
+  end
+  for _, tbl in pairs(cached_tasks) do
+    task = (tbl.tasks or {})[name]
+    if task then
+      return task
+    end
+  end
+  return nil
 end
 
 ---Cache the provided tasks based on the current
@@ -32,6 +42,30 @@ function cache.set_for_current_context(tasks)
   end
   current_tasks = tasks or {}
   return tasks or {}
+end
+
+---Same as cache.set_for_current_context, but the
+---cached tasks are updated instead of replaced
+---@param tasks table
+---@return table
+function cache.add_to_current_context(tasks)
+  local buf = vim.fn.bufnr()
+  local cwd = vim.fn.getcwd()
+  local name = vim.api.nvim_buf_get_name(buf)
+
+  local existing_tasks = not cached_tasks[buf] and {}
+    or cached_tasks[buf].tasks
+    or {}
+
+  if tasks ~= nil then
+    existing_tasks = vim.tbl_extend("force", existing_tasks, tasks)
+    cached_tasks[buf] = {
+      cwd = cwd,
+      tasks = existing_tasks,
+      name = name,
+    }
+  end
+  current_tasks = existing_tasks
 end
 
 ---Get the cached tasks based on the current buffer

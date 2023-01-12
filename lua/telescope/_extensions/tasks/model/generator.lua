@@ -1,7 +1,7 @@
 local enum = require "telescope._extensions.tasks.enum"
 local Task = require "telescope._extensions.tasks.model.task"
 local Generator_opts =
-require "telescope._extensions.tasks.model.generator_opts"
+  require "telescope._extensions.tasks.model.generator_opts"
 
 ---@class Generator
 ---@field generator function
@@ -13,7 +13,7 @@ Generator.__index = Generator
 
 ---@param o table|function
 ---@return Generator
-function Generator.new(o)
+function Generator:new(o)
   if type(o) == "function" then
     o = { generator = o }
   end
@@ -27,7 +27,7 @@ function Generator.new(o)
     return generator
   end
 
-  generator.opts = Generator_opts.new(generator.opts)
+  generator.opts = Generator_opts:new(generator.opts)
   local name = generator.opts.name or generator.name
 
   generator.name = name
@@ -65,14 +65,15 @@ function Generator:run()
   end
   local found_tasks = {}
   for _, o in pairs(tasks) do
-    local task
-    ok, task = pcall(Task.new, o, self.opts)
-    if not ok and type(task) == "string" then
-      vim.notify(task, vim.log.levels.WARN, {
+    local err
+    ok, err = pcall(function()
+      local task = Task:new(o, self.opts)
+      found_tasks[task.name] = task
+    end)
+    if not ok and type(err) == "string" then
+      vim.notify(err, vim.log.levels.WARN, {
         title = enum.TITLE,
       })
-    else
-      found_tasks[task.name] = task
     end
   end
   return found_tasks

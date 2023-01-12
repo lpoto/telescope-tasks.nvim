@@ -11,62 +11,63 @@ Generator_opts.__index = Generator_opts
 
 ---@param o table: A table to generate the options from
 ---@return Generator_opts
-function Generator_opts.new(o)
-    assert(o == nil or type(o) == "table", "Generator options must be a table")
-    local opts = setmetatable(o or {}, Generator_opts)
-    for k, v in pairs(opts) do
-        assert(type(k) == "string", "Generator options keys must be strings")
-        assert(
-            (
-            ({
-                filetypes = true,
-                patterns = true,
-                ignore_patterns = true,
-                parent_dir_includes = true,
-            })[k] and type(v) == "table"
-            ) or k == "name" and type(v) == "string",
-            "Invalid generator option: " .. k
-        )
-    end
-    return opts
+function Generator_opts:new(o)
+  assert(o == nil or type(o) == "table", "Generator options must be a table")
+  local opts = setmetatable(o or {}, Generator_opts)
+  for k, v in pairs(opts) do
+    assert(type(k) == "string", "Generator options keys must be strings")
+    assert(
+      (
+        ({
+          filetypes = true,
+          patterns = true,
+          ignore_patterns = true,
+          parent_dir_includes = true,
+        })[k] and type(v) == "table"
+      ) or k == "name" and type(v) == "string",
+      "Invalid generator option: " .. k
+    )
+  end
+  return opts
 end
 
 ---@return boolean: Whether the options are OK in the current context
 function Generator_opts:check_in_current_context()
-    local buf = vim.fn.bufnr()
-    local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
-    local filename = vim.api.nvim_buf_get_name(buf)
+  local buf = vim.fn.bufnr()
+  local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
+  local filename = vim.api.nvim_buf_get_name(buf)
 
-    if next(self.filetypes or {})
-        and not vim.tbl_contains(self.filetypes, filetype)
-    then
+  if
+    next(self.filetypes or {})
+    and not vim.tbl_contains(self.filetypes, filetype)
+  then
+    return false
+  end
+  if next(self.ignore_patterns or {}) then
+    for _, pattern in ipairs(self.ignore_patterns) do
+      if filename:match(pattern) then
         return false
+      end
     end
-    if next(self.ignore_patterns or {}) then
-        for _, pattern in ipairs(self.ignore_patterns) do
-            if filename:match(pattern) then
-                return false
-            end
-        end
+  end
+  if next(self.patterns or {}) then
+    local ok = false
+    for _, pattern in ipairs(self.patterns) do
+      if filename:match(pattern) then
+        ok = true
+        break
+      end
     end
-    if next(self.patterns or {}) then
-        local ok = false
-        for _, pattern in ipairs(self.patterns) do
-            if filename:match(pattern) then
-                ok = true
-                break
-            end
-        end
-        if not ok then
-            return false
-        end
+    if not ok then
+      return false
     end
-    if next(self.parent_dir_includes or {}) then
-        if not util.parent_dir_includes(self.parent_dir_includes) then
-            return false
-        end
+  end
+  if next(self.parent_dir_includes or {}) then
+    if not util.parent_dir_includes(self.parent_dir_includes) then
+      return false
     end
-    return true
+  end
+  return true
 end
 
 return Generator_opts

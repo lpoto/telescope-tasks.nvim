@@ -14,7 +14,7 @@ Task.__index = Task
 ---@param o table|string: Task's fields or just a command.
 ---@param generator_opts table|nil: The options of the generator that created this task.
 ---@return Task
-function Task.new(o, generator_opts)
+function Task:new(o, generator_opts)
   ---@type Task
   local a = {
     __generator_opts = generator_opts,

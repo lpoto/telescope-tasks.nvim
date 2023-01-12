@@ -1,27 +1,20 @@
 local enum = require "telescope._extensions.tasks.enum"
 local finder = require "telescope._extensions.tasks.picker.finder"
+local executor = require "telescope._extensions.tasks.executor"
 local previewer = require "telescope._extensions.tasks.picker.previewer"
 local mappings = require "telescope._extensions.tasks.picker.mappings"
 local cache = require "telescope._extensions.tasks.generators.cache"
 
 local pickers = require "telescope.pickers"
 local conf = require("telescope.config").values
-local picker = {}
 
-local available_tasks_telescope_picker
-
----Displays available tasks in a telescope prompt.
----In the opened window.
----
----@param opts table?: options to pass to the picker
-function picker.available_tasks_picker(opts)
-  available_tasks_telescope_picker(opts)
-end
-
-available_tasks_telescope_picker = function(options)
+local available_tasks_telescope_picker = function(options)
   local tasks = cache.get_current_tasks()
 
-  if tasks == nil or next(tasks) == nil then
+  if
+    next(tasks or {}) == nil
+    and next(executor.get_running_tasks() and {}) == nil
+  then
     vim.notify("There are no available tasks", vim.log.levels.WARN, {
       title = enum.TITLE,
     })
@@ -45,7 +38,11 @@ available_tasks_telescope_picker = function(options)
       :find()
   end
 
-  tasks_picker(options)
+  vim.defer_fn(function()
+    tasks_picker(options)
+  end, 0)
 end
 
-return picker.available_tasks_picker
+return function(opts)
+  available_tasks_telescope_picker(opts)
+end
