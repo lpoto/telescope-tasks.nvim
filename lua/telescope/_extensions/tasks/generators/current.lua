@@ -93,12 +93,12 @@ verify_parameters = function(generator, opts)
     assert(type(k) == "string", "Generator options keys must be strings")
     assert(
       (
-      ({
-        filetypes = true,
-        patterns = true,
-        ignore_patterns = true,
-        parent_dir_includes = true,
-      })[k] and type(v) == "table"
+        ({
+          filetypes = true,
+          patterns = true,
+          ignore_patterns = true,
+          parent_dir_includes = true,
+        })[k] and type(v) == "table"
       ) or k == "name" and type(v) == "string",
       "Invalid generator option: " .. k
     )
@@ -110,42 +110,43 @@ verify_batch_generators = function(batch)
 end
 
 call_generator_callback =
-function(filetype, filename, generator, name, opts, cb)
-  if next(opts.filetypes or {})
+  function(filetype, filename, generator, name, opts, cb)
+    if
+      next(opts.filetypes or {})
       and not vim.tbl_contains(opts.filetypes, filetype)
-  then
-    return
-  end
-  if next(opts.ignore_patterns or {}) then
-    local ok = true
-    for _, pattern in ipairs(opts.ignore_patterns) do
-      if filename:match(pattern) then
-        ok = false
-        break
+    then
+      return
+    end
+    if next(opts.ignore_patterns or {}) then
+      local ok = true
+      for _, pattern in ipairs(opts.ignore_patterns) do
+        if filename:match(pattern) then
+          ok = false
+          break
+        end
+      end
+      if not ok then
+        return
       end
     end
-    if not ok then
-      return
-    end
-  end
-  if next(opts.patterns or {}) then
-    local ok = false
-    for _, pattern in ipairs(opts.patterns) do
-      if filename:match(pattern) then
-        ok = true
-        break
+    if next(opts.patterns or {}) then
+      local ok = false
+      for _, pattern in ipairs(opts.patterns) do
+        if filename:match(pattern) then
+          ok = true
+          break
+        end
+      end
+      if not ok then
+        return
       end
     end
-    if not ok then
-      return
+    if next(opts.parent_dir_includes or {}) then
+      if not util.parent_dir_includes(opts.parent_dir_includes) then
+        return
+      end
     end
+    cb(generator, opts)
   end
-  if next(opts.parent_dir_includes or {}) then
-    if not util.parent_dir_includes(opts.parent_dir_includes) then
-      return
-    end
-  end
-  cb(generator, opts)
-end
 
 return current_generators

@@ -7,6 +7,4 @@ enum.TELESCOPE_PROMPT_FILETYPE = "TelescopePrompt"
 
 enum.TASKS_AUGROUP = "TelescopeTasks"
 
-enum.MAX_RUNNING_JOBS = 50
-
 return enum

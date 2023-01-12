@@ -54,6 +54,9 @@ scroll_fn = function(self, direction)
 end
 
 local function display_running_buf(status, task)
+  if executor.buffer_is_to_be_deleted(task.name) then
+    return false
+  end
   local running_buf = executor.get_task_output_buf(task.name)
   if running_buf and vim.api.nvim_buf_is_valid(running_buf) then
     vim.api.nvim_win_set_buf(status.preview_win, running_buf)
@@ -89,6 +92,7 @@ local function display_definition_buf(status, task)
 end
 
 preview_fn = function(self, entry, status)
+  vim.notify "PREVIER"
   highlights.set_previewer_highlights(status.preview_win)
   local old_buf = previewer.old_preview_buf
 
@@ -97,7 +101,7 @@ preview_fn = function(self, entry, status)
   end
 
   if old_buf ~= nil and vim.api.nvim_buf_is_valid(old_buf) then
-    vim.api.nvim_buf_delete(old_buf, { force = true })
+    pcall(vim.api.nvim_buf_delete, old_buf, { force = true })
   end
 
   self.status = status

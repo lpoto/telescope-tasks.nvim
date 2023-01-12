@@ -1,5 +1,5 @@
 local enum = require "telescope._extensions.tasks.enum"
-local run_task = require "telescope._extensions.tasks.executor.run_task"
+local executor = require "telescope._extensions.tasks.executor"
 local create = require "telescope._extensions.tasks.window.task_output.create"
 
 local prev_task_name = nil
@@ -17,7 +17,7 @@ function window.open(task, beforeOpening)
     return
   end
   -- NOTE: make sure the provided task is running.
-  local buf = run_task.get_buf_num(task.name)
+  local buf = executor.get_task_output_buf(task.name)
   if buf == nil or vim.fn.bufexists(buf) ~= 1 then
     vim.notify("Task '" .. task.name .. "' has no output!", vim.log.levels.WARN, {
       title = enum.TITLE,
@@ -38,7 +38,7 @@ function window.__open_last_task_output()
   if prev_task_name == nil then
     return
   end
-  local buf = run_task.get_buf_num(prev_task_name)
+  local buf = executor.get_task_output_buf(prev_task_name)
 
   -- NOTE: make sure a valid buffer was returned
   if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
@@ -66,12 +66,26 @@ function window.__toggle_last_task_output()
   if prev_task_name == nil then
     return
   end
-  local buf = run_task.get_buf_num(prev_task_name)
+  local buf = executor.get_task_output_buf(prev_task_name)
 
   -- NOTE: make sure a valid buffer was returned
   if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
-    prev_task_name = nil
+    vim.notify(
+      prev_task_name .. ": output no longer available",
+      vim.log.levels.WARN,
+      {
+        title = enum.TITLE,
+      }
+    )
     return
+  end
+
+  if
+    vim.api.nvim_buf_get_option(0, "filetype")
+    == enum.TELESCOPE_PROMPT_FILETYPE
+  then
+    -- NOTE: close telescope popup if open
+    vim.api.nvim_buf_delete(0, { force = true })
   end
 
   local existing_winid = vim.fn.bufwinid(buf)

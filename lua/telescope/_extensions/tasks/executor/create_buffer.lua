@@ -27,8 +27,10 @@ function create_buffer.create(buf)
 end
 
 function create_buffer.handle_buffer(buf)
+  vim.api.nvim_buf_set_option(buf, "bufhidden", "hide")
   vim.api.nvim_buf_set_option(buf, "modified", false)
   vim.api.nvim_buf_set_option(buf, "modifiable", true)
+  vim.api.nvim_buf_set_option(buf, "filetype", enum.OUTPUT_BUFFER_FILETYPE)
 
   vim.api.nvim_clear_autocmds {
     event = { "TermClose", "TermEnter" },
