@@ -35,10 +35,14 @@ end
 
 function actions.delete_selected_task_output(picker_buf)
   local selection = action_state.get_selected_entry()
-  executor.set_buffer_as_to_be_deleted(selection.value.name)
+  local task = selection.value
+  executor.set_buffer_as_to_be_deleted(task.name)
+  local running = executor.is_running(task.name)
   refresh_previewer(picker_buf)
   executor.delete_task_buffer(selection.value.name)
-  refresh_picker(picker_buf)
+  if not running then
+    refresh_picker(picker_buf)
+  end
 end
 
 function actions.toggle_last_output()
@@ -50,9 +54,7 @@ refresh_picker = function(picker_buf)
   if p == nil then
     return
   end
-  local ok, e = pcall(p.refresh, p, finder.available_tasks_finder(), {
-    reset_prompt = true,
-  })
+  local ok, e = pcall(p.refresh, p, finder.available_tasks_finder())
   if not ok and type(e) == "string" then
     vim.notify(e, vim.log.levels.ERROR, {
       title = enum.TITLE,

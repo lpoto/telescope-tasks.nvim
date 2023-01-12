@@ -1,6 +1,8 @@
-return require("telescope._extensions.tasks.model.default_generator"):new {
-  name = "Hello World Generator",
-  generator_fn = function()
+return require("telescope._extensions.tasks.model.generator"):new {
+  opts = {
+    name = "Hello World Generator",
+  },
+  generator = function()
     return {
       "Hello world!",
       env = { HELLO_WORLD = "Hello World!" },
