@@ -1,5 +1,4 @@
 local enum = require "telescope._extensions.tasks.enum"
-local cache = require "telescope._extensions.tasks.generators.cache"
 local output_buffer = require "telescope._extensions.tasks.output.buffer"
 
 local running_tasks = {}
@@ -43,7 +42,7 @@ end
 function executor.get_running_tasks()
   local tasks = {}
   for _, o in pairs(running_tasks or o) do
-    table.insert(tasks, o.task)
+    tasks[o.task.name] = o.task
   end
   return tasks
 end
@@ -59,19 +58,12 @@ function executor.get_running_tasks_count()
   return i
 end
 
----@param name string: The name of the task to run
+---@param task Task: The task to run
 ---@param on_exit function: A function called when a started task exits.
 ---@return boolean: whether the tasks started successfully
-function executor.run(name, on_exit)
-  if executor.is_running(name) == true then
+function executor.run(task, on_exit)
+  if executor.is_running(task.name) == true then
     vim.notify("Task '" .. name .. "' is already running!", vim.log.levels.WARN, {
-      title = enum.TITLE,
-    })
-    return false
-  end
-  local task, err = cache.get_task_by_name(name)
-  if err ~= nil then
-    vim.notify(err, vim.log.levels.WARN, {
       title = enum.TITLE,
     })
     return false
@@ -89,17 +81,8 @@ end
 
 ---Stop a running task.
 ---
----@param name string: Name of the task to be stopped
-function executor.kill(name)
-  local task, err = cache.get_task_by_name(name)
-  if err ~= nil then
-    vim.notify(err, vim.log.levels.WARN, {
-      title = enum.TITLE,
-    })
-    return false
-  elseif task == nil then
-    return false
-  end
+---@param task Task: The task to kill
+function executor.kill(task)
   if running_tasks[task.name] == nil then
     return false
   end
@@ -109,15 +92,15 @@ function executor.kill(name)
 end
 
 ---Delete the task buffer and kill it's job if is is running.
----@param name string: A running task's name
-function executor.delete_task_buffer(name)
-  buffers_to_delete[name] = nil
+---@param task Task: The task to delete the buffer for
+function executor.delete_task_buffer(task)
+  buffers_to_delete[task.name] = nil
 
-  local job = executor.get_job_id(name)
-  local buf = executor.get_task_output_buf(name)
+  local job = executor.get_job_id(task.name)
+  local buf = executor.get_task_output_buf(task.name)
   if buf == nil then
     vim.notify(
-      "Task '" .. name .. "' has no output buffer!",
+      "Task '" .. task.name .. "' has no output buffer!",
       vim.log.levels.WARN,
       {
         title = enum.TITLE,
@@ -130,7 +113,7 @@ function executor.delete_task_buffer(name)
       pcall(vim.fn.jobstop, job)
     end
     vim.api.nvim_buf_delete(buf, { force = true })
-    vim.notify(name .. ": output buffer deleted", vim.log.levels.INFO, {
+    vim.notify(task.name .. ": output buffer deleted", vim.log.levels.INFO, {
       title = enum.TITLE,
     })
   end)
@@ -141,7 +124,7 @@ function executor.delete_task_buffer(name)
     return
   end
 
-  running_tasks[name] = nil
+  running_tasks[task.name] = nil
 end
 
 function executor.buffer_is_to_be_deleted(name)
@@ -207,8 +190,19 @@ run_task = function(task, on_exit)
   --the task in it
   local job_id = nil
   vim.api.nvim_buf_call(term_buf, function()
-    job_id = vim.fn.termopen(cmd, opts)
+    local ok, id = pcall(vim.fn.termopen, cmd, opts)
+    if not ok and type(id) == "string" then
+      vim.notify(id, vim.log.levels.ERROR, {
+        title = enum.TITLE,
+      })
+    else
+      job_id = id
+    end
   end)
+
+  if not job_id then
+    pcall(vim.api.nvim_buf_delete, term_buf, { force = true })
+  end
 
   name_output_buf(term_buf, task)
 

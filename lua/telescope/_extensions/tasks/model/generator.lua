@@ -46,7 +46,8 @@ end
 ---errors.
 ---@return table|nil:  A table of Task objects
 function Generator:run()
-  local ok, tasks = pcall(self.generator, vim.fn.bufnr())
+  local buf = vim.api.nvim_get_current_buf()
+  local ok, tasks = pcall(self.generator, buf)
   if not ok and type(tasks) == "string" then
     vim.notify(tasks, vim.log.levels.ERROR, {
       title = enum.TITLE,

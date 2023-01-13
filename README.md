@@ -6,10 +6,7 @@ definitions and outputs in the telescope's previewer.
 
 ## Demo
 
-
-
 https://user-images.githubusercontent.com/67372390/211933030-5653244d-0c07-44dd-9914-3c5bc749158d.mp4
-
 
 ## Installation
 
@@ -83,16 +80,17 @@ Or cherry pick some default generators:
 
 ```lua
 generators.add_batch {
-  generators.default.hello_world(),
+  generators.default.run_project(),
   -- ...
 }
 ```
 
-> _NOTE_ Currenlty only the hello world default generator is
-> available, but it will be removed later as it is used only for testing purposes.
+> _NOTE_ The default generators are currently highly experimental and unfinished.
+> Not many are added yet, and those added were not yet properly tested, hence
+> [Custom Generators][#custom-generators] are preffered at the moment.
 >
-> Instead, other generators will be added in the future. For example, generating
-> tasks from _Cargo.toml_ targets or _package.json_ scripts.
+> The default generators build their tasks from the [ENV](./lua/telescope/_extensions/tasks/generators/env.lua) variables.
+> These may be modified by setting the `extensions.tasks.env` field in the setup.
 
 ## Custom Generators
 
@@ -150,13 +148,14 @@ tasks.generators.add {
 
 ## Generator Opts
 
-| Property                | Type      | Description                                                                                                                                                              |
-| ----------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **name**                | `string?` | The name of the generator.                                                                                                                                               |
-| **filetypes**           | `table?`  | A table of filetypes in which the generator will be run.                                                                                                                 |
-| **patterns**            | `table?`  | A table lua patterns. The generator will only be run when the current filename matches **_at least one_** pattern.                                                       |
-| **ignore_patterns**     | `table?`  | A table lua patterns. The generator will only be run when the current filename **_does not_** match any patterns.                                                        |
-| **parent_dir_includes** | `table?`  | A table of filenames and directory names. The generator will only run when one of the current file's parent directories includes one of the listed files or directories. |
+| Property                    | Type      | Description                                                                                                                                                              |
+| --------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **name**                    | `string?` | The name of the generator.                                                                                                                                               |
+| **filetypes**               | `table?`  | A table of filetypes in which the generator will be run.                                                                                                                 |
+| **patterns**                | `table?`  | A table lua patterns. The generator will only be run when the current filename matches **_at least one_** pattern.                                                       |
+| **ignore_patterns**         | `table?`  | A table lua patterns. The generator will only be run when the current filename **_does not_** match any patterns.                                                        |
+| **parent_dir_includes**     | `table?`  | A table of filenames and directory names. The generator will only run when one of the current file's parent directories includes one of the listed files or directories. |
+| **parent_dir_not_includes** | `table?`  | A table of filenames and directory names. The generator will only run when none of the current file's parent directories include any of the listed files or directories. |
 
 ## Mappings
 
@@ -168,4 +167,12 @@ tasks.generators.add {
 | `<C-k>` | Scroll the previewer up.                                    |
 | `<C-j>` | Scroll the previewer down.                                  |
 
-## [Roadmap](./ROADMAP.md)
+## Roadmap
+
+- [x] Display tasks in a telescope picker
+  - [x] Display tasks' definitions in a previewer
+  - [x] Display tasks' output in a previewer, when available
+- [x] Expose API for adding custom task generators
+- [x] Enable default generators
+  - [x] Support changing variables used by the default generators
+  - [ ] Add generators for running the current project based on filetype
