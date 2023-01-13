@@ -6,7 +6,7 @@ definitions and outputs in the telescope's previewer.
 
 ## Demo
 
-https://user-images.githubusercontent.com/67372390/211933030-5653244d-0c07-44dd-9914-3c5bc749158d.mp4
+https://user-images.githubusercontent.com/67372390/212438209-183b6fb0-7f7a-4d47-839b-9a3f1f05ed16.mp4
 
 > The demo uses the default `run_project` generator and the custom generator from the [Example](#custom-generators).
 
