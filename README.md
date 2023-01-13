@@ -8,6 +8,8 @@ definitions and outputs in the telescope's previewer.
 
 https://user-images.githubusercontent.com/67372390/211933030-5653244d-0c07-44dd-9914-3c5bc749158d.mp4
 
+> The demo uses the default `run_project` generator and the custom generator from the [Example](#custom-generators).
+
 ## Installation
 
 ### Packer
@@ -94,7 +96,7 @@ generators.add_batch {
 
 ## Custom Generators
 
-Example generators used in the [demo](#demo) above:
+Example custom generator:
 
 ```lua
 local tasks = require("telescope").extensions.tasks
@@ -102,35 +104,22 @@ local tasks = require("telescope").extensions.tasks
 tasks.generators.add {
   generator = function(buf)
     return {
-        "Run current Cargo binary",
-        cwd = tasks.util.find_current_file_root {"Cargo.toml"},
-        cmd = {"cargo", "run", "--bin", vim.fn.expand "%:p:t:r"}
-
+        "Example Task",
+        cwd = tasks.util.find_current_file_root {".bashrc"},
+        cmd = {"cat", ".bashrc"}
+        -- env = {...}
       }
     -- NOTE: multiple tasks may be returned at once
     -- NOTE: You may return nil aswell in case you want to add custom
     -- conditions to the generator function itself
   end,
   opts = {
-    name = "Custom Cargo binary task generator",
-    filetypes = {"rust"},
-    patterns = { ".*/src/bin/[^/]+.rs"},
+    name = "Example Custom Generator",
+    filetypes = {"python", "sh"},
+    patterns = { os.getenv("HOME") .. "/.*"},
   }
 }
-
-tasks.generators.add {
-  generator = function(buf)
-    return {
-        "Run current Cargo project",
-        cwd = tasks.util.find_current_file_root {"Cargo.toml"},
-        cmd = {"cargo", "run"}
-    }
-  end,
-  opts = {
-    parent_dir_includes = {"Cargo.toml"}
-    -- ignore_patterns = { ".*/src/bin/[^/]+.rs"},
-  }
-}
+---Multiple generators may be added at once with `tasks.generators.add_batch`
 ```
 
 > _NOTE_ See [Task Spec](#task-spec) for the details on tasks' properties.

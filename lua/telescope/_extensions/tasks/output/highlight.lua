@@ -29,7 +29,7 @@ hi_output_float = function(winid)
   vim.api.nvim_win_set_option(
     winid,
     "winhl",
-    "FloatBorder:Normal,NormalFloat:Normal"
+    "FloatBorder:TelescopePromptBorder,FloatTitle:TelescopePromptTitle,NormalFloat:TelescopePromptNormal"
   )
 end
 
