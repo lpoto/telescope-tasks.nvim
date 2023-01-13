@@ -1,8 +1,11 @@
 # Telescope tasks
 
 `telescope-tasks.nvim` is a [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) extension,
-that allows running custom tasks directly from the telescope prompt and displaying their
+that allows running tasks directly from the telescope prompt and displaying their
 definitions and outputs in the telescope's previewer.
+
+The tasks may either be [auto-generated](#generators) based on the current project, or added with [custom generators](#custom-generators).
+> Note that auto-generating is still in progress and experimental.
 
 ## Demo
 
