@@ -1,41 +1,32 @@
-local enum = require "telescope._extensions.tasks.enum"
 local finder = require "telescope._extensions.tasks.picker.finder"
-local executor = require "telescope._extensions.tasks.executor"
 local previewer = require "telescope._extensions.tasks.picker.previewer"
 local mappings = require "telescope._extensions.tasks.picker.mappings"
-local cache = require "telescope._extensions.tasks.generators.cache"
 
 local pickers = require "telescope.pickers"
 local conf = require("telescope.config").values
 
 local available_tasks_telescope_picker = function(options)
-  local tasks = cache.get_current_tasks()
-
-  if
-    next(tasks or {}) == nil
-    and next(executor.get_running_tasks() and {}) == nil
-  then
-    vim.notify("There are no available tasks", vim.log.levels.WARN, {
-      title = enum.TITLE,
-    })
-    return -1
+  local buf = vim.api.nvim_get_current_buf()
+  local tasks_finder = finder.available_tasks_finder(buf, true)
+  if not tasks_finder then
+    return
   end
 
   local function tasks_picker(opts)
     opts = opts or {}
-    pickers
-      .new(opts, {
-        prompt_title = "Tasks",
-        results_title = "Available Tasks",
-        finder = finder.available_tasks_finder(),
-        sorter = conf.generic_sorter(opts),
-        previewer = previewer.task_previewer(),
-        dynamic_preview_title = true,
-        selection_strategy = "row",
-        scroll_strategy = "cycle",
-        attach_mappings = mappings.attach_mappings,
-      })
-      :find()
+    local picker = pickers.new(opts, {
+      prompt_title = "Tasks",
+      results_title = "Available Tasks",
+      finder = tasks_finder,
+      sorter = conf.generic_sorter(opts),
+      previewer = previewer.task_previewer(),
+      dynamic_preview_title = true,
+      selection_strategy = "row",
+      scroll_strategy = "cycle",
+      attach_mappings = mappings.attach_mappings,
+    })
+    picker.starting_buffer = buf
+    picker:find()
   end
 
   vim.defer_fn(function()

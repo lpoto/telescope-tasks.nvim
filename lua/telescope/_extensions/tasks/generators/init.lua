@@ -28,10 +28,7 @@ end
 ---@param generators_batch table: A table of generators.
 ---Each generator is the same as the parameter for the `generators.add(generator)` function.
 function generators.add_batch(generators_batch)
-  runner.__adding = true
-  runner.__adding = true
   add_batch(generators_batch)
-  runner.__adding = false
 end
 
 ---A table containing the functions, each returning the
@@ -48,25 +45,19 @@ function generators.enable_default()
 end
 
 add_batch = function(generators_batch)
-  local ok, added = pcall(function()
+  local ok, err = pcall(function()
     assert(
       type(generators_batch) == "table",
       "A batch of generators must be a table"
     )
-    local inserted = {}
     for _, generator in ipairs(generators_batch) do
-      generator = Generator:new(generator)
-      table.insert(inserted, generator)
-      table.insert(runner.__current_generators, generator)
+      runner.add_generator(Generator:new(generator))
     end
-    return inserted
   end)
-  if not ok and type(added) == "string" then
-    pcall(vim.notify, added, vim.log.levels.WARN, {
+  if not ok and type(err) == "string" then
+    pcall(vim.notify, err, vim.log.levels.WARN, {
       title = enum.TITLE,
     })
-  elseif next(added or {}) then
-    pcall(runner.run, buf, added, true, true)
   end
 end
 

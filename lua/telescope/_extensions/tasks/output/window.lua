@@ -65,9 +65,9 @@ local function create_floating_window(buf, title)
   local height = vim.o.lines
 
   local w = math.min(80, width - 4)
-  local h = height - 4
+  local h = height - 5
 
-  local row = (height - h) / 2
+  local row = 2
   local col = (width - w) / 2
   if title ~= nil then
     title = " " .. title .. " "

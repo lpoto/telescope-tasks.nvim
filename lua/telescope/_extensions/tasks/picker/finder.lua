@@ -1,7 +1,8 @@
 local finders = require "telescope.finders"
+local enum = require "telescope._extensions.tasks.enum"
 local entry_display = require "telescope.pickers.entry_display"
 local executor = require "telescope._extensions.tasks.executor"
-local cache = require "telescope._extensions.tasks.generators.cache"
+local runner = require "telescope._extensions.tasks.generators.runner"
 
 local finder = {}
 
@@ -9,17 +10,17 @@ local get_task_display
 
 ---Create a telescope finder for the currently available tasks.
 ---
----@return table: a telescope finder
-function finder.available_tasks_finder()
-  local cached_tasks = cache.get_current_tasks()
-  local tasks = {}
-  for _, task in pairs(cached_tasks) do
-    table.insert(tasks, task)
-  end
-  for _, task in pairs(executor.get_running_tasks()) do
-    if not cached_tasks[task.name] then
-      table.insert(tasks, task)
-    end
+---@param buf number?: Buffer from where the picker was opened
+---(current buffer by default)
+---@param exit_on_no_results boolean?: Return nil and warn if no results found.
+---@return table?: a telescope finder
+function finder.available_tasks_finder(buf, exit_on_no_results)
+  local tasks = vim.tbl_values(runner.run(buf) or {})
+  if exit_on_no_results and not next(tasks) then
+    vim.notify("There are no available tasks", vim.log.levels.WARN, {
+      title = enum.TITLE,
+    })
+    return nil
   end
 
   return finders.new_table {

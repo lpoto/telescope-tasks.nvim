@@ -74,14 +74,22 @@ function Task:to_yaml_definition()
   table.insert(def, "name: " .. quote_string(self.name))
   local cmd = self.cmd
   if type(cmd) == "string" then
-    table.insert(def, "cmd: " .. cmd)
+    table.insert(def, "cmd: " .. quote_string(cmd))
   elseif type(cmd) == "table" then
     table.insert(def, "cmd: ")
     for _, v in ipairs(cmd) do
-      table.insert(def, "  - " .. v)
+      if type(v) == "string" then
+        table.insert(def, "  - " .. quote_string(v))
+      else
+        table.insert(def, "  - " .. quote_string(vim.inspect(v)))
+      end
     end
   end
-  table.insert(def, "cwd: " .. self.cwd)
+  if type(self.cwd) == "string" then
+    table.insert(def, "cwd: " .. quote_string(self.cwd))
+  else
+    table.insert(def, "cwd: " .. quote_string(vim.inspect(self.cwd)))
+  end
   table.insert(def, "env: ")
   for k, v in pairs(self.env) do
     table.insert(def, "  " .. k .. ": " .. quote_string(v))

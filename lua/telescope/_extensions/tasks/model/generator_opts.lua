@@ -5,6 +5,7 @@ local util = require "telescope._extensions.tasks.util"
 ---@field patterns table|nil
 ---@field ignore_patterns table|nil
 ---@field parent_dir_includes table|nil
+---@field parent_dir_not_includes table|nil
 ---@field name string|nil
 local Generator_opts = {}
 Generator_opts.__index = Generator_opts
@@ -23,6 +24,7 @@ function Generator_opts:new(o)
           patterns = true,
           ignore_patterns = true,
           parent_dir_includes = true,
+          parent_dir_not_includes = true,
         })[k] and type(v) == "table"
       ) or k == "name" and type(v) == "string",
       "Invalid generator option: " .. k
@@ -33,7 +35,7 @@ end
 
 ---@return boolean: Whether the options are OK in the current context
 function Generator_opts:check_in_current_context()
-  local buf = vim.fn.bufnr()
+  local buf = vim.api.nvim_get_current_buf()
   local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
   local filename = vim.api.nvim_buf_get_name(buf)
 
@@ -64,6 +66,11 @@ function Generator_opts:check_in_current_context()
   end
   if next(self.parent_dir_includes or {}) then
     if not util.parent_dir_includes(self.parent_dir_includes) then
+      return false
+    end
+  end
+  if next(self.parent_dir_not_includes or {}) then
+    if util.parent_dir_includes(self.parent_dir_not_includes) then
       return false
     end
   end
