@@ -21,8 +21,9 @@ The `run_project` is currently available for the following filetypes/projects:
 
 ## Current roadmap
 
-- [x] Implement default generators for `Go`.
-- [ ] Implement default generators for `Cargo`.
-- [ ] Implement default generators for `Python` (and venv).
+- [x] Implement default generators for `Go`
+- [ ] Implement default generators for `Cargo`
+- [ ] Implement default generators for `Python`
+  > (and venv)
 - [ ] Implement default generators for `Node`
   > and more after these
