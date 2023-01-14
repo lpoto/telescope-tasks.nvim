@@ -5,6 +5,7 @@ that allows running tasks directly from the telescope prompt and displaying thei
 definitions and outputs in the telescope's previewer.
 
 The tasks may either be [auto-generated](#generators) based on the current project, or added with [custom generators](#custom-generators).
+
 > Note that auto-generating is still in progress and experimental.
 
 ## Demo
@@ -90,9 +91,8 @@ generators.add_batch {
 }
 ```
 
-> _NOTE_ The default generators are currently highly experimental and unfinished.
-> Not many are added yet, and those added were not yet properly tested, hence
-> [Custom Generators][#custom-generators] are preffered at the moment.
+> _NOTE_ see [DEFAULT_GENERATORS](./DEFAULT_GENERATORS.md) to see the currently
+> implemented default generators.
 >
 > The default generators build their tasks from the [ENV](./lua/telescope/_extensions/tasks/generators/env.lua) variables.
 > These may be modified by setting the `extensions.tasks.env` field in the setup.
@@ -158,13 +158,3 @@ tasks.generators.add {
 | `<C-d>` | Delete the output of the selected task.                     |
 | `<C-k>` | Scroll the previewer up.                                    |
 | `<C-j>` | Scroll the previewer down.                                  |
-
-## Roadmap
-
-- [x] Display tasks in a telescope picker
-  - [x] Display tasks' definitions in a previewer
-  - [x] Display tasks' output in a previewer, when available
-- [x] Expose API for adding custom task generators
-- [x] Enable default generators
-  - [x] Support changing variables used by the default generators
-  - [ ] Add generators for running the current project based on filetype
