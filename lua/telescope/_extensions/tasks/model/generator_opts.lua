@@ -7,6 +7,7 @@ local util = require "telescope._extensions.tasks.util"
 ---@field parent_dir_includes table|nil
 ---@field parent_dir_not_includes table|nil
 ---@field name string|nil
+---@field experimental boolean|nil
 local Generator_opts = {}
 Generator_opts.__index = Generator_opts
 
@@ -19,14 +20,16 @@ function Generator_opts:new(o)
     assert(type(k) == "string", "Generator options keys must be strings")
     assert(
       (
-        ({
-          filetypes = true,
-          patterns = true,
-          ignore_patterns = true,
-          parent_dir_includes = true,
-          parent_dir_not_includes = true,
-        })[k] and type(v) == "table"
-      ) or k == "name" and type(v) == "string",
+      ({
+        filetypes = true,
+        patterns = true,
+        ignore_patterns = true,
+        parent_dir_includes = true,
+        parent_dir_not_includes = true,
+      })[k] and type(v) == "table"
+      )
+      or (k == "name" and type(v) == "string")
+      or (k == "experimental" and type(v) == "boolean"),
       "Invalid generator option: " .. k
     )
   end
@@ -39,9 +42,8 @@ function Generator_opts:check_in_current_context()
   local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
   local filename = vim.api.nvim_buf_get_name(buf)
 
-  if
-    next(self.filetypes or {})
-    and not vim.tbl_contains(self.filetypes, filetype)
+  if next(self.filetypes or {})
+      and not vim.tbl_contains(self.filetypes, filetype)
   then
     return false
   end

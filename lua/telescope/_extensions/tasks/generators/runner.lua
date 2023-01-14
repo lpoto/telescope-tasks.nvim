@@ -7,7 +7,7 @@ local runner = {}
 
 local generators_updated = false
 local current_generators = {}
-local cache = {}
+--local cache = {}
 local last_tasks = {}
 
 ---Runs all the available generators.
@@ -22,12 +22,19 @@ function runner.run(buf)
       buf = vim.api.nvim_get_current_buf()
     end
     local cwd = vim.loop.cwd()
+    local name = vim.api.nvim_buf_get_name(buf)
+    local ftime = vim.fn.getftime(name)
     local found_tasks = {}
 
     if not should_run_generators(buf) then
       found_tasks = last_tasks
-    elseif not generators_updated and cache[buf] and cache[buf].cwd == cwd then
-      found_tasks = cache[buf].tasks or {}
+      --elseif not generators_updated
+      --    and cache[buf]
+      --    and cache[buf].cwd == cwd
+      --    and cache[buf].ftime == ftime
+      --    and cache[buf].name == name
+      --then
+      --  found_tasks = cache[buf].tasks or {}
     else
       for _, generator in ipairs(generators or current_generators or {}) do
         if generator:available() then
@@ -35,12 +42,14 @@ function runner.run(buf)
           vim.tbl_extend("force", found_tasks, generator:run() or {})
         end
       end
-      cache[buf] = {
-        cwd = cwd,
-        tasks = found_tasks,
-      }
+      --cache[buf] = {
+      --  cwd = cwd,
+      --  tasks = found_tasks,
+      --  name = name,
+      --  ftime = ftime,
+      --}
+      --generators_updated = false
       last_tasks = found_tasks
-      generators_updated = false
     end
 
     found_tasks =

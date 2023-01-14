@@ -8,6 +8,11 @@ local get_opts_string
 ---
 ---python [options] [package] [arguments]
 local gen = function(buf)
+  local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
+  if filetype ~= "python" then
+    return nil
+  end
+
   local executable = env.get({ "PYTHON", "EXECUTABLE" }, "go")
   local arguments = env.get({ "PYTHON", "ARGUMENTS" }, {})
   local python_env = env.get({ "PYTHON", "ENV" }, {})

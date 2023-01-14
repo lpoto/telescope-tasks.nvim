@@ -7,7 +7,6 @@ local ENV = {
       BUILD_FLAGS = {},
       ARGUMENTS = {},
     },
-    MOD_FILE = "go.mod",
     ENV = {
       -- GOOS = "linux"
       -- ...
