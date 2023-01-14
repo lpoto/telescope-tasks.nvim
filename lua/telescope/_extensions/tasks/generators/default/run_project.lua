@@ -2,8 +2,8 @@ local get_task_by_filetype
 
 local existing_run_project_generator_modules = {
   "go",
-  "python",
-  "cargo",
+  -- "python", -- IN PROGRESS
+  -- "cargo", -- IN PROGRESS
 }
 
 local get_gen = function()
