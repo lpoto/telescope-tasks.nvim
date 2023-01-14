@@ -2,7 +2,7 @@ local get_task_by_filetype
 
 local existing_run_project_generator_modules = {
   "go",
-  -- "python", -- IN PROGRESS
+  --"python", -- IN PROGRESS
   -- "cargo", -- IN PROGRESS
 }
 
@@ -32,7 +32,9 @@ get_task_by_filetype = function()
       if f.cmd or f.name then
         f = { f }
       end
-      tasks = vim.tbl_extend("force", tasks, f)
+      for _, task in ipairs(f) do
+        table.insert(tasks, task)
+      end
     end
   end
 
@@ -44,7 +46,7 @@ end
 
 function require_project_generator(filetype)
   local name = "telescope._extensions.tasks.generators.default.run_project."
-      .. filetype
+    .. filetype
   local ok, module = pcall(require, name)
   if not ok or not type(module) == "function" then
     return nil

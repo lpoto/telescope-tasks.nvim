@@ -15,9 +15,9 @@
 
 The `run_project` is currently available for the following filetypes/projects:
 
-| Name | Description                                                                                                                                                                                                                                                                     |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Go` | When one of the current file's parent directories includes a `go.mod` file, tasks are generated for every file with the `main` package. If there is `go.mod` file, but the current file is a `go` file with a `main` package, a task is generated for running the current file. |
+| Name | Description                                                                                                                                                                                                                                                                                    |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Go` | When one of the current cwd or any of it's parent directories includes a `go.mod` file, tasks are generated for every file with the `main` package. If there is no `go.mod` file, but the current file is a `go` file with a `main` package, a task is generated for running the current file. |
 
 ## Current roadmap
 

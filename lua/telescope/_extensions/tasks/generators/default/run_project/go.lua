@@ -6,7 +6,7 @@ local scan = require "plenary.scandir"
 local go = {}
 
 ---Returns tasks for running a go project. If there is a go.mod
----file in one of the parent directories, tasks are created for all
+---file in one of the cwd's parent directories, tasks are created for all
 ---go files with main packages.
 ---If there is no go.mod file and the current file is a go file and
 ---has a main package, the task for running the current file is returned.
@@ -69,7 +69,7 @@ end
 ---Returns nil if there is no go.mod in the file's parent directoires.
 ---If there is, returns a task for every file with the main function.
 function go.run_current_project_generator(opts)
-  local cwd = Path:new(util.find_current_file_root { "go.mod" })
+  local cwd = Path:new(util.find_parent_root { "go.mod" })
   if not (cwd:joinpath "go.mod"):is_file() then
     return nil
   end
