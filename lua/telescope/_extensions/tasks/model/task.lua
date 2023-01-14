@@ -123,8 +123,9 @@ function Task:to_yaml_definition()
 end
 
 quote_string = function(v)
-  if type(v) == "string"
-      and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
+  if
+    type(v) == "string"
+    and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
   then
     if string.find(v, "'") == nil then
       v = "'" .. v .. "'"

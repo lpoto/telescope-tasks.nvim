@@ -5,7 +5,7 @@ local should_run_generators
 
 local runner = {}
 
-local generators_updated = false
+--local generators_updated = false
 local current_generators = {}
 --local cache = {}
 local last_tasks = {}
@@ -21,11 +21,14 @@ function runner.run(buf)
     if type(buf) ~= "number" or not vim.api.nvim_buf_is_valid(buf) then
       buf = vim.api.nvim_get_current_buf()
     end
-    local cwd = vim.loop.cwd()
-    local name = vim.api.nvim_buf_get_name(buf)
-    local ftime = vim.fn.getftime(name)
+    --local cwd = vim.loop.cwd()
+    --local name = vim.api.nvim_buf_get_name(buf)
+    --local ftime = vim.fn.getftime(name)
+
     local found_tasks = {}
 
+    -- NOTE: should run only when current buftype is "" and
+    -- the provided buf's buftype is ""
     if not should_run_generators(buf) then
       found_tasks = last_tasks
       --elseif not generators_updated
@@ -36,10 +39,13 @@ function runner.run(buf)
       --then
       --  found_tasks = cache[buf].tasks or {}
     else
+      vim.notify(
+        "SHOULD RUN: " .. vim.api.nvim_buf_get_option(buf, "filetype")
+      )
       for _, generator in ipairs(generators or current_generators or {}) do
         if generator:available() then
           found_tasks =
-          vim.tbl_extend("force", found_tasks, generator:run() or {})
+            vim.tbl_extend("force", found_tasks, generator:run() or {})
         end
       end
       --cache[buf] = {
@@ -53,7 +59,7 @@ function runner.run(buf)
     end
 
     found_tasks =
-    vim.tbl_extend("force", found_tasks, executor.get_running_tasks() or {})
+      vim.tbl_extend("force", found_tasks, executor.get_running_tasks() or {})
 
     return found_tasks
   end)
@@ -75,8 +81,10 @@ end
 ---@param buf number
 ---@return boolean: Whether the generators should be run
 should_run_generators = function(buf)
+  local cur_buf = vim.api.nvim_get_current_buf()
   local buftype = vim.api.nvim_buf_get_option(buf, "buftype")
-  return buftype:len() == 0
+  local cur_buftype = vim.api.nvim_buf_get_option(cur_buf, "buftype")
+  return buftype:len() == 0 and cur_buftype:len() == 0
 end
 
 return runner
