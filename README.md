@@ -10,9 +10,10 @@ The tasks may either be [auto-generated](#generators) based on the current proje
 
 ## Demo
 
-https://user-images.githubusercontent.com/67372390/212438209-183b6fb0-7f7a-4d47-839b-9a3f1f05ed16.mp4
 
-> The demo uses the default `run_project` generator and the custom generator from the [Example](#custom-generators).
+https://user-images.githubusercontent.com/67372390/212492248-72411619-525f-4e65-b702-b602e42dc4ce.mp4
+
+> The demo uses the default `run_project` generator for `Go` and python projects.
 
 ## Installation
 
