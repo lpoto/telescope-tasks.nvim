@@ -113,6 +113,8 @@ function Task:to_yaml_definition()
           end
           local str = table.concat(s, ", ")
           table.insert(def, "#   " .. k .. ": " .. "[" .. str .. "]")
+        elseif k == "experimental" and v then
+          table.insert(def, "#   " .. k .. ": " .. "true")
         end
       end
     end
@@ -121,9 +123,8 @@ function Task:to_yaml_definition()
 end
 
 quote_string = function(v)
-  if
-    type(v) == "string"
-    and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
+  if type(v) == "string"
+      and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
   then
     if string.find(v, "'") == nil then
       v = "'" .. v .. "'"

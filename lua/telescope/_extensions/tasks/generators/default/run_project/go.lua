@@ -1,55 +1,161 @@
 local util = require "telescope._extensions.tasks.util"
 local env = require "telescope._extensions.tasks.generators.env"
+local Path = require "plenary.path"
+local scan = require "plenary.scandir"
 
----Check if there exists a go.mod file
----in any of the parent directories. If so,  return
----a task that runs the go project from the same directory the go.mod
----file is in, else return the task that runs just the current go file.
+local go = {}
+
+---Returns tasks for running a go project. If there is a go.mod
+---file in one of the parent directories, tasks are created for all
+---go files with main packages.
+---If there is no go.mod file and the current file is a go file and
+---has a main package, the task for running the current file is returned.
 ---
 ---go run [build flags] [-exec xprog] package [arguments...]
 ---
-return function(buf)
-  local executable = env.get({ "GO", "EXECUTABLE" }, "go")
-  local mod_file = env.get({ "GO", "MOD_FILE" }, "go.mod")
-  local build_flags = env.get({ "GO", "RUN", "BUILD_FLAGS" }, {})
-  local arguments = env.get({ "GO", "RUN", "ARGUMENTS" }, {})
-  local xprog = env.get({ "GO", "RUN", "XPROG" }, false)
-  local go_env = env.get({ "GO", "ENV" }, nil)
-  local package
-  local cwd
-  local name
+function go.gen(buf)
+  local opts = {
+    executable = env.get({ "GO", "EXECUTABLE" }, "go"),
+    build_flags = env.get({ "GO", "RUN", "BUILD_FLAGS" }, {}),
+    arguments = env.get({ "GO", "RUN", "ARGUMENTS" }, {}),
+    xprog = env.get({ "GO", "RUN", "XPROG" }, false),
+    go_env = env.get({ "GO", "ENV" }, nil),
+    package = nil,
+    cwd = nil,
+    name = nil,
+  }
 
-  if util.parent_dir_includes { mod_file } then
-    package = "."
-    cwd = util.find_current_file_root { mod_file }
-    name = "Run current Go project"
-  else
-    package = vim.api.nvim_buf_get_name(buf)
-    cwd = nil
-    name = "Run current Go file"
+  local run_project_task = go.run_current_project_generator(opts)
+  if next(run_project_task or {}) then
+    return run_project_task
   end
+  local run_cur_file_task = go.run_current_file_generator(buf, opts)
 
+  if run_cur_file_task then
+    return { run_cur_file_task }
+  end
+  return nil
+end
+
+---Returns the run_current_file task only if the
+---current filetype is 'go' and the current file contains
+---the 'main' function.
+---Otherwise returns nil.
+function go.run_current_file_generator(buf, opts)
+  local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
+  if filetype ~= "go" then
+    return nil
+  end
+  local name = vim.api.nvim_buf_get_name(buf)
+  if go.file_is_main_package(name) then
+    opts.package = name
+    opts.name = "Run current Go file"
+    return go.build_task_from_opts(opts)
+  end
+  return nil
+end
+
+---Returns nil if there is no go.mod in the file's parent directoires.
+---If there is, returns a task for every file with the main function.
+function go.run_current_project_generator(opts)
+  local cwd = Path:new(util.find_current_file_root { "go.mod" })
+  if not (cwd:joinpath "go.mod"):is_file() then
+    return nil
+  end
+  local tasks = {}
+  for _, name in ipairs(scan.scan_dir(cwd:__tostring(), { hidden = false })) do
+    local path = Path:new(name)
+    if name:match ".*.go$"
+        and path:is_file()
+        and go.file_is_main_package(name, true)
+    then
+      opts.cwd = path:parent():__tostring()
+      path:make_relative(cwd:__tostring())
+      opts.name = "Run Go project: " .. path:__tostring()
+      opts.package = "."
+      table.insert(tasks, go.build_task_from_opts(opts))
+    end
+  end
+  if next(tasks or {}) then
+    return tasks
+  end
+  return nil
+end
+
+function go.build_task_from_opts(opts)
   local cmd = {
-    executable,
+    opts.executable,
     "run",
   }
-  if next(build_flags) then
-    table.insert(cmd, table.concat(build_flags, " "))
+  local flags_string = go.get_opts_string(opts.build_flags or {})
+  if flags_string then
+    table.insert(cmd, flags_string)
   end
-  if xprog == true then
+  if opts.xprog then
     table.insert(cmd, "-exec xprog")
   end
-
-  table.insert(cmd, package)
-
-  if next(arguments) then
-    table.insert(cmd, table.concat(arguments, " "))
+  table.insert(cmd, opts.package)
+  local args_string = go.get_opts_string(opts.arguments or {})
+  if args_string then
+    table.insert(cmd, args_string)
   end
-
   return {
-    name,
+    opts.name,
     cmd = cmd,
-    env = go_env,
-    cwd = cwd,
+    env = opts.env,
+    cwd = opts.cwd,
   }
 end
+
+function go.get_opts_string(opts)
+  if not opts or next(opts) == nil then
+    return nil
+  end
+  local s = ""
+  for k, v in pairs(opts) do
+    if s:len() > 0 then
+      s = s .. " "
+    end
+    if type(k) == "string" then
+      s = s .. k .. " "
+    end
+    if type(v) == "string" then
+      s = s .. v
+    else
+      s = s .. vim.inspect(v)
+    end
+  end
+  if s:len() == 0 then
+    return nil
+  end
+  return s
+end
+
+function go.file_is_main_package(file)
+  local ok, ok2 = pcall(function()
+    local path = Path:new(file)
+    if not path:is_file() then
+      return false
+    end
+    local lines = path:readlines() or {}
+
+    local package_pattern = "^%s*package%s+main%s*$"
+    if type(lines[1]) ~= "string" or not lines[1]:match(package_pattern) then
+      return false
+    end
+
+    --local pattern = "^%s*func%s+main%s*%("
+    --for _, line in ipairs((path:readlines() or {})) do
+    --  if type(line) == "string" then
+    --    if line:match(pattern) ~= nil then
+    --      return true
+    --    end
+    --  end
+    --end
+    --return false
+    return true
+  end)
+  return ok and ok2
+end
+
+return go.gen
