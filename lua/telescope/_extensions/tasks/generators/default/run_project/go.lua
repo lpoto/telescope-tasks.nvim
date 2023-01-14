@@ -25,14 +25,25 @@ function go.gen(buf)
     name = nil,
   }
 
-  local run_project_task = go.run_current_project_generator(opts)
-  if next(run_project_task or {}) then
-    return run_project_task
+  local tasks = {}
+  local run_project_task, checked_files =
+  go.run_current_project_generator(opts)
+
+  if run_project_task and next(run_project_task) then
+    tasks = run_project_task
+  end
+
+  local name = vim.api.nvim_buf_get_name(buf)
+  if checked_files and checked_files[name] then
+    return tasks
   end
   local run_cur_file_task = go.run_current_file_generator(buf, opts)
-
   if run_cur_file_task then
-    return { run_cur_file_task }
+    table.insert(tasks, run_cur_file_task)
+  end
+
+  if next(tasks or {}) then
+    return tasks
   end
   return nil
 end
@@ -63,11 +74,14 @@ function go.run_current_project_generator(opts)
     return nil
   end
   local tasks = {}
+  local checked_files = {}
+
   for _, name in ipairs(scan.scan_dir(cwd:__tostring(), { hidden = false })) do
     local path = Path:new(name)
+    checked_files[path:__tostring()] = true
     if name:match ".*.go$"
         and path:is_file()
-        and go.file_is_main_package(name, true)
+        and go.file_is_main_package(name)
     then
       opts.cwd = path:parent():__tostring()
       path:make_relative(cwd:__tostring())
@@ -77,9 +91,9 @@ function go.run_current_project_generator(opts)
     end
   end
   if next(tasks or {}) then
-    return tasks
+    return tasks, checked_files
   end
-  return nil
+  return nil, checked_files
 end
 
 function go.build_task_from_opts(opts)
@@ -137,23 +151,18 @@ function go.file_is_main_package(file)
     if not path:is_file() then
       return false
     end
-    local lines = path:readlines() or {}
 
-    local package_pattern = "^%s*package%s+main%s*$"
-    if type(lines[1]) ~= "string" or not lines[1]:match(package_pattern) then
+    local text = path:read()
+    if type(text) ~= "string" then
       return false
     end
 
-    --local pattern = "^%s*func%s+main%s*%("
-    --for _, line in ipairs((path:readlines() or {})) do
-    --  if type(line) == "string" then
-    --    if line:match(pattern) ~= nil then
-    --      return true
-    --    end
-    --  end
-    --end
-    --return false
-    return true
+    -- TODO: handle any comments before the package definition ...
+    text = text:gsub("\n", " ")
+    local main_package_pattern = "^%s*package%s+main;?%s+"
+
+    local r = text:find(main_package_pattern)
+    return r ~= nil
   end)
   return ok and ok2
 end
