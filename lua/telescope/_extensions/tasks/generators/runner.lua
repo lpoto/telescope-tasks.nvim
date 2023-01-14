@@ -39,9 +39,6 @@ function runner.run(buf)
       --then
       --  found_tasks = cache[buf].tasks or {}
     else
-      vim.notify(
-        "SHOULD RUN: " .. vim.api.nvim_buf_get_option(buf, "filetype")
-      )
       for _, generator in ipairs(generators or current_generators or {}) do
         if generator:available() then
           found_tasks =
