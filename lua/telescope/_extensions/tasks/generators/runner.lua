@@ -22,11 +22,18 @@ function runner.run(buf)
       buf = vim.api.nvim_get_current_buf()
     end
     local cwd = vim.loop.cwd()
+    local name = vim.api.nvim_buf_get_name(buf)
+    local ftime = vim.fn.getftime(name)
     local found_tasks = {}
 
     if not should_run_generators(buf) then
       found_tasks = last_tasks
-    elseif not generators_updated and cache[buf] and cache[buf].cwd == cwd then
+    elseif not generators_updated
+        and cache[buf]
+        and cache[buf].cwd == cwd
+        and cache[buf].ftime == ftime
+        and cache[buf].name == name
+    then
       found_tasks = cache[buf].tasks or {}
     else
       for _, generator in ipairs(generators or current_generators or {}) do
@@ -38,6 +45,8 @@ function runner.run(buf)
       cache[buf] = {
         cwd = cwd,
         tasks = found_tasks,
+        name = name,
+        ftime = ftime,
       }
       last_tasks = found_tasks
       generators_updated = false
