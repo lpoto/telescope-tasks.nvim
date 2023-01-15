@@ -6,6 +6,7 @@ end
 
 return {
   run_project = require_generator_module "run_project",
-  -- TODO: add generators for running tests,
-  -- generators to read tasks from project's config files.. example: _Cargo.toml_ targets, _package.json_ scripts ...
+  all = function()
+    return require_generator_module "run_project"().all()
+  end,
 }

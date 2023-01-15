@@ -87,16 +87,21 @@ local generators = require("telescope").extensions.tasks.generators
 Enable all default generators with:
 
 ```lua
-generators.enable_default()
+generators.enable_all_default()
 ```
 
 Or cherry pick some default generators:
 
 ```lua
-generators.add_batch {
-  generators.default.run_project(),
+generators.add(
+  generators.default.run_project().all()
+)
+-- or even
+generators.add(
+  generators.default.run_project().go(),
+  generators.default.run_project().cargo()
   -- ...
-}
+)
 ```
 
 > _NOTE_ see [DEFAULT_GENERATORS](./DEFAULT_GENERATORS.md) to see the currently
@@ -130,7 +135,7 @@ tasks.generators.add {
     patterns = { os.getenv("HOME") .. "/.*"},
   }
 }
----Multiple generators may be added at once with `tasks.generators.add_batch`
+---Multiple generators may be passed to the add function
 ```
 
 > _NOTE_ See [Task Spec](#task-spec) for the details on tasks' properties.

@@ -1,59 +1,37 @@
-local get_task_by_filetype
+local create_generator
 
-local existing_run_project_generator_modules = {
-  "go",
-  --"python", -- IN PROGRESS
-  -- "cargo", -- IN PROGRESS
-}
+local run_project = {}
 
-local get_gen = function()
+function run_project.all()
+  return run_project.go(), run_project.cargo(), run_project.python()
+end
+
+function run_project.go()
+  return create_generator(
+    require "telescope._extensions.tasks.generators.default.run_project.go"
+  )
+end
+
+function run_project.cargo()
+  return create_generator(
+    require "telescope._extensions.tasks.generators.default.run_project.cargo"
+  )
+end
+
+function run_project.python()
+  return create_generator(
+    require "telescope._extensions.tasks.generators.default.run_project.python"
+  )
+end
+
+create_generator = function(generator_fn)
   return require("telescope._extensions.tasks.model.generator"):new {
     opts = {
       name = "Run project Generator",
       experimental = true,
     },
-    generator = get_task_by_filetype,
+    generator = generator_fn,
   }
 end
 
-local require_project_generator
-
-get_task_by_filetype = function()
-  local buf = vim.api.nvim_get_current_buf()
-
-  local tasks = {}
-
-  for _, module in ipairs(existing_run_project_generator_modules) do
-    local f = require_project_generator(module)
-    if type(f) == "function" then
-      f = f(buf)
-    end
-    if type(f) == "table" then
-      if f.cmd or f.name then
-        f = { f }
-      end
-      for _, task in ipairs(f) do
-        table.insert(tasks, task)
-      end
-    end
-  end
-
-  if next(tasks or {}) == nil then
-    return nil
-  end
-  return tasks
-end
-
-function require_project_generator(filetype)
-  local name = "telescope._extensions.tasks.generators.default.run_project."
-    .. filetype
-  local ok, module = pcall(require, name)
-  if not ok or not type(module) == "function" then
-    return nil
-  end
-  return module
-end
-
-local function x() end
-
-return get_gen()
+return run_project

@@ -6,29 +6,15 @@ local default = require "telescope._extensions.tasks.generators.default"
 local generators = {}
 local add_batch
 
----Add a custom generator. The generator will run on every BufEnter
----Or DirChanged event in the buffers with `buftype`="".
+---Add custom generators. These generators will run before the
+---tasks prompt is opened, unless the current buftype is not "".
 ---
----Generated tasks will be cached based on the buffer number and cwd, so
----they won't be run multiple times unless one of those has been changed.
----Additional options may be provided.
----
----@param generator Generator|function: A generator.
----The generator may be just a generator function or a table with keys
+---@param ... Generator|function: One or more generators,
+---where each generator may be just a generator function or a table with keys:
 ---  - `generator` (function) The generator function.
 ---  - `opts` (Generator_opts|nil) The generator conditions.
-function generators.add(generator)
-  generators.add_batch { generator }
-end
-
----Add a batch of generators at once. This is useful when you want to
----Add multiple generators at once, so you can avoid calling `generators.add`
----multiple times.
----
----@param generators_batch table: A table of generators.
----Each generator is the same as the parameter for the `generators.add(generator)` function.
-function generators.add_batch(generators_batch)
-  add_batch(generators_batch)
+function generators.add(...)
+  add_batch { select(1, ...) }
 end
 
 ---A table containing the functions, each returning the
@@ -36,12 +22,8 @@ end
 generators.default = default
 
 ---Enable all default generators.
-function generators.enable_default()
-  local defaults = {}
-  for _, generator in pairs(default) do
-    table.insert(defaults, generator())
-  end
-  generators.add_batch(defaults)
+function generators.enable_all_default()
+  generators.add(default.all())
 end
 
 add_batch = function(generators_batch)
