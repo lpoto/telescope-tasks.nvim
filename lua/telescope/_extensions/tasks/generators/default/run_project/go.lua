@@ -27,7 +27,7 @@ function go.gen(buf)
 
   local tasks = {}
   local run_project_task, checked_files =
-  go.run_current_project_generator(opts)
+    go.run_current_project_generator(opts)
 
   if run_project_task and next(run_project_task) then
     tasks = run_project_task
@@ -79,9 +79,10 @@ function go.run_current_project_generator(opts)
   for _, name in ipairs(scan.scan_dir(cwd:__tostring(), { hidden = false })) do
     local path = Path:new(name)
     checked_files[path:__tostring()] = true
-    if name:match ".*.go$"
-        and path:is_file()
-        and go.file_is_main_package(name)
+    if
+      name:match ".*.go$"
+      and path:is_file()
+      and go.file_is_main_package(name)
     then
       opts.cwd = path:parent():__tostring()
       path:make_relative(cwd:__tostring())

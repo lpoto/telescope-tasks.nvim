@@ -27,3 +27,5 @@ The `run_project` is currently available for the following filetypes/projects:
   > (and venv)
 - [ ] Implement default generators for `Node`
   > and more after these
+- [ ] Add errorformats for the default generators
+- [ ] Support sending outputs to the quickfix list

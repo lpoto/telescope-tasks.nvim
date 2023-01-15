@@ -1,6 +1,7 @@
 local enum = require "telescope._extensions.tasks.enum"
 local setup = require "telescope._extensions.tasks.setup"
 local highlight = require "telescope._extensions.tasks.output.highlight"
+local float = require "telescope._extensions.tasks.output.float"
 
 local window = {}
 
@@ -62,52 +63,6 @@ local function create_split_window(buf)
   return vim.fn.win_getid(vim.fn.winnr())
 end
 
-local function create_floating_window(buf, title)
-  local width = vim.o.columns
-  local height = vim.o.lines
-
-  local w = math.min(78, width)
-  local h = math.max(height - 5, 0)
-
-  local row = 1
-  local col = (width - w) / 2
-  if width % 2 ~= 0 and col > 0 then
-    col = col - 1
-  end
-  if w == width then
-    col = 0
-  end
-  if title ~= nil then
-    title = " " .. title .. " "
-  end
-
-  if title ~= nil and title:len() > w - 2 and title:len() > 5 then
-    title = title:sub(0, w - 5) .. "..."
-  end
-
-  local winid = vim.api.nvim_open_win(buf, true, {
-    relative = "editor",
-    width = w,
-    height = h,
-    row = row,
-    col = col,
-    focusable = true,
-    style = "minimal",
-    border = "rounded",
-    title = title,
-    title_pos = "center",
-    noautocmd = true,
-  })
-
-  vim.keymap.set("n", "q", function()
-    close_win(buf)
-  end, {
-    buffer = buf,
-  })
-
-  return winid
-end
-
 local function set_options(winid)
   vim.api.nvim_win_set_option(winid, "wrap", true)
   vim.api.nvim_win_set_option(winid, "number", false)
@@ -128,24 +83,22 @@ end
 
 ---@return function
 determine_output_window_type = function()
-  local win_type = setup.opts.output_window
-      or setup.opts.output_win
-      or setup.opts.win
-      or setup.opts.window
-      or "float"
+  local win_type = setup.opts.output and setup.opts.output.style or "float"
 
-  if win_type == "vsplit"
-      or win_type == "vertical"
-      or win_type == "vertical split"
+  if
+    win_type == "vsplit"
+    or win_type == "vertical"
+    or win_type == "vertical split"
   then
     return create_vsplit_window
   elseif win_type == "split" or win_type == "normal" then
     return create_split_window
-  elseif win_type == "floating"
-      or win_type == "float"
-      or win_type == "popup"
+  elseif
+    win_type == "floating"
+    or win_type == "float"
+    or win_type == "popup"
   then
-    return create_floating_window
+    return float.create
   else
     vim.notify("Invalid window type: " .. win_type, vim.log.levels.ERROR, {
       title = enum.TITLE,
@@ -171,6 +124,12 @@ add_autocmd = function(buf)
       end
       close_win(buf)
     end,
+  })
+
+  vim.keymap.set("n", "q", function()
+    close_win(buf)
+  end, {
+    buffer = buf,
   })
 end
 
