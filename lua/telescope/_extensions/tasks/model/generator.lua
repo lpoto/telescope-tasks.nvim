@@ -1,7 +1,7 @@
 local enum = require "telescope._extensions.tasks.enum"
 local Task = require "telescope._extensions.tasks.model.task"
 local Generator_opts =
-  require "telescope._extensions.tasks.model.generator_opts"
+require "telescope._extensions.tasks.model.generator_opts"
 
 ---@class Generator
 ---@field generator function

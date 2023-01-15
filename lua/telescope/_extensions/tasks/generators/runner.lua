@@ -69,9 +69,10 @@ function runner.run(buf)
   return tasks or {}
 end
 
-function runner.add_generator(generator)
-  table.insert(current_generators, generator)
-  generators_updated = true
+function runner.add_generators(generators)
+  for _, generator in ipairs(generators) do
+    table.insert(current_generators, generator)
+  end
 end
 
 ---Checks whether the generators should be run in the provided buffer.
