@@ -1,5 +1,5 @@
 local run_project =
-require "telescope._extensions.tasks.generators.default.run_project"
+  require "telescope._extensions.tasks.generators.default.run_project"
 
 return {
   ---Access the run_projet default generators api

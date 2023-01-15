@@ -12,7 +12,7 @@ The tasks may either be [auto-generated](#generators) based on the current proje
 
 https://user-images.githubusercontent.com/67372390/212492248-72411619-525f-4e65-b702-b602e42dc4ce.mp4
 
-> The demo uses the default `run_project` generator for `Go` and python projects.
+> The demo uses the default `run_project` generator for `Go` and `Python` projects.
 
 ## Installation
 
@@ -80,7 +80,13 @@ The last opened output may then be toggled with:
 
 You may either use the [Default Generators](./DEFAULT_GENERATORS.md), or add [Custom Generators](./CUSTOM_GENERATORS.md).
 
-> The default generators are currently highly experimental and unfinished.
->
-> Not many are added yet, and those added were not yet properly tested, hence
-> custom generators are preffered at the moment.
+## Mappings
+
+| Key     | Description                                                                                                                               |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `<CR>`  | Run the selected task, or kill it if it is already running.                                                                               |
+| `<CR>`  | _Not yet implemented!_: Run the selected task after asking for additional parameters, arguments,..., or kill it if it is already running. |
+| `<C-o>` | Display the output of the selected task in another window.                                                                                |
+| `<C-d>` | Delete the output of the selected task.                                                                                                   |
+| `<C-k>` | Scroll the previewer up.                                                                                                                  |
+| `<C-j>` | Scroll the previewer down.                                                                                                                |

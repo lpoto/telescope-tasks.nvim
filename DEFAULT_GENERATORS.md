@@ -29,3 +29,13 @@ Call any of the functions described bellow to enable just some of them.
 | `run_project.python()` | Currently in progress...                                                                                                                                                                                                                                                                                                                                                     |
 | `run_project.cargo()`  | Currently in progress...                                                                                                                                                                                                                                                                                                                                                     |
 | `run_project.all()`    | Enables all of the `run_project` generators above.                                                                                                                                                                                                                                                                                                                           |
+
+> This is a work in progress, many more will be added in the future.
+
+### `default.scripts`
+
+> This is not yet implemented
+
+| Function                   | Description                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `scripts.docker_compose()` | Creates a task for each of the `docker-compose` files found in the subdirectories of the current working directory. |
