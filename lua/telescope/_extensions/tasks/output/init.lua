@@ -86,8 +86,9 @@ function output.toggle_last()
     end
   end
 
-  if vim.api.nvim_buf_get_option(0, "filetype")
-      == enum.TELESCOPE_PROMPT_FILETYPE
+  if
+    vim.api.nvim_buf_get_option(0, "filetype")
+    == enum.TELESCOPE_PROMPT_FILETYPE
   then
     -- NOTE: close telescope popup if open
     vim.api.nvim_buf_delete(0, { force = true })

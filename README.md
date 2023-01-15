@@ -35,10 +35,16 @@ First setup and load the extension:
 ```lua
 require("telescope").setup {
   extensions = {
+    -- NOTE: this setup is optional
     tasks = {
       theme = "ivy",
-      output_window = "float", -- "vsplit" | "split" | "float"
-      -- other telescope picker config fields
+      output = {
+        style = "float", -- "vsplit" | "split" | "float"
+        layout = "center", -- "bottom" | "left" | "right" | "center"
+        scale = 0.4, -- output window to editor size ratio
+        -- NOTE: layout and scale are only relevant when style == "float"
+      },
+      -- other picker setup values
     },
   },
 }

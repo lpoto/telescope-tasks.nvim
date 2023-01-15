@@ -3,7 +3,13 @@ local env = require "telescope._extensions.tasks.generators.env"
 
 local setup = {}
 
-setup.opts = {}
+setup.opts = {
+  output = {
+    style = "float", -- "split" | "vsplit"
+    layout = "center", -- "bottom" | "left" | "right"
+    scale = 0.4,
+  },
+}
 
 ---Creates the default picker options from the provided
 ---options. If the `theme` field with a string value is added,
@@ -15,6 +21,13 @@ function setup.setup(opts)
       title = enum.TITLE,
     })
     return
+  end
+
+  local output_opts = setup.opts.output
+  if opts.output then
+    output_opts.layout = opts.output.layout or output_opts.layout
+    output_opts.style = opts.output.style or output_opts.style
+    output_opts.scale = opts.output.scale or output_opts.scale
   end
 
   local opts_env = opts.env
@@ -41,6 +54,7 @@ function setup.setup(opts)
       })
     end
   end
+  opts.output = output_opts
   setup.opts = vim.tbl_extend("force", setup.opts, opts)
 end
 
