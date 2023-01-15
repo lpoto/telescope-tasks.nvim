@@ -6,6 +6,7 @@ local window = require "telescope._extensions.tasks.output.window"
 local output = {}
 
 local prev_task_name = nil
+local term_buf = nil
 local open_last_task_output
 
 ---Open the output for the provided task.
@@ -34,7 +35,7 @@ function output.open(task, before_opening)
 
   prev_task_name = task.name
 
-  open_last_task_output()
+  open_last_task_output(buf)
 end
 
 ---Toggle the window of the last opened output.
@@ -42,26 +43,51 @@ end
 ---or the previous output buffer is no longer available.
 function output.toggle_last()
   -- Get the buffer from the provided function
-  if prev_task_name == nil then
-    return
+  local buf = nil
+  if prev_task_name ~= nil then
+    buf = executor.get_task_output_buf(prev_task_name)
   end
-  local buf = executor.get_task_output_buf(prev_task_name)
 
   -- NOTE: make sure a valid buffer was returned
   if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
-    vim.notify(
-      prev_task_name .. ": output no longer available",
-      vim.log.levels.WARN,
-      {
-        title = enum.TITLE,
-      }
-    )
-    return
+    if prev_task_name then
+      vim.notify(
+        prev_task_name .. ": output no longer available",
+        vim.log.levels.WARN,
+        {
+          title = enum.TITLE,
+        }
+      )
+      prev_task_name = nil
+    end
   end
 
-  if
-    vim.api.nvim_buf_get_option(0, "filetype")
-    == enum.TELESCOPE_PROMPT_FILETYPE
+  prev_task_name = executor.get_name_of_first_task_with_output()
+  if prev_task_name ~= nil then
+    buf = executor.get_task_output_buf(prev_task_name)
+  end
+
+  if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
+    prev_task_name = nil
+    local ok, _ = pcall(function()
+      if term_buf and vim.api.nvim_buf_is_valid(term_buf) then
+        buf = term_buf
+      else
+        buf = buffer.create()
+        vim.api.nvim_buf_call(buf, function()
+          vim.api.nvim_exec("term", false)
+        end)
+        term_buf = buf
+      end
+    end)
+    if not ok then
+      pcall(vim.api.nvim_buf_delete, buf, { force = true })
+      return
+    end
+  end
+
+  if vim.api.nvim_buf_get_option(0, "filetype")
+      == enum.TELESCOPE_PROMPT_FILETYPE
   then
     -- NOTE: close telescope popup if open
     vim.api.nvim_buf_delete(0, { force = true })
@@ -73,7 +99,7 @@ function output.toggle_last()
     return
   end
 
-  open_last_task_output()
+  open_last_task_output(buf)
 end
 
 ---Create an output buffer and set up the proper options. If a valid
@@ -84,13 +110,7 @@ function output.create_buffer(buf)
   return buffer.create(buf)
 end
 
-open_last_task_output = function()
-  -- Get the buffer from the provided function
-  if prev_task_name == nil then
-    return
-  end
-  local buf = executor.get_task_output_buf(prev_task_name)
-
+open_last_task_output = function(buf)
   -- NOTE: make sure a valid buffer was returned
   if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
     prev_task_name = nil
