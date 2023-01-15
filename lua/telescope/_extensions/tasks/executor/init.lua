@@ -47,6 +47,19 @@ function executor.get_running_tasks()
   return tasks
 end
 
+---Get the name of the first found task that currently
+---has an existing output buffer.
+---@return string|nil
+function executor.get_name_of_first_task_with_output()
+  for _, o in pairs(running_tasks or o) do
+    local buf = executor.get_task_output_buf(o.task.name)
+    if buf and vim.api.nvim_buf_is_valid(buf) then
+      return o.task.name
+    end
+  end
+  return nil
+end
+
 ---Returns the number of currently running tasks.
 ---
 ---@return number
@@ -181,7 +194,7 @@ run_task = function(task, on_exit)
   --NOTE: if an output buffer for the same task already exists,
   --open terminal in that one instead of creating a new one
   local term_buf =
-    output_buffer.create(executor.get_task_output_buf(task.name))
+  output_buffer.create(executor.get_task_output_buf(task.name))
   if not term_buf or not vim.api.nvim_buf_is_valid(term_buf) then
     return false
   end

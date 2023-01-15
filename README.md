@@ -10,7 +10,6 @@ The tasks may either be [auto-generated](#generators) based on the current proje
 
 ## Demo
 
-
 https://user-images.githubusercontent.com/67372390/212492248-72411619-525f-4e65-b702-b602e42dc4ce.mp4
 
 > The demo uses the default `run_project` generator for `Go` and python projects.
@@ -68,6 +67,8 @@ The last opened output may then be toggled with:
 ```lua
  require("telescope").extensions.tasks.actions.toggle_last_output()
 ```
+
+> When there is no output available, a terminal will be opened.
 
 ## Generators
 

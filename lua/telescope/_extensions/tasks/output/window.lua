@@ -16,6 +16,8 @@ local close_win
 function window.create(buf, title)
   clean_buffer(buf)
 
+  title = title or "Terminal"
+
   local ok, winid = pcall(determine_output_window_type(), buf, title)
   if ok == false then
     vim.notify(winid, vim.log.levels.ERROR, {
@@ -127,23 +129,21 @@ end
 ---@return function
 determine_output_window_type = function()
   local win_type = setup.opts.output_window
-    or setup.opts.output_win
-    or setup.opts.win
-    or setup.opts.window
-    or "float"
+      or setup.opts.output_win
+      or setup.opts.win
+      or setup.opts.window
+      or "float"
 
-  if
-    win_type == "vsplit"
-    or win_type == "vertical"
-    or win_type == "vertical split"
+  if win_type == "vsplit"
+      or win_type == "vertical"
+      or win_type == "vertical split"
   then
     return create_vsplit_window
   elseif win_type == "split" or win_type == "normal" then
     return create_split_window
-  elseif
-    win_type == "floating"
-    or win_type == "float"
-    or win_type == "popup"
+  elseif win_type == "floating"
+      or win_type == "float"
+      or win_type == "popup"
   then
     return create_floating_window
   else
