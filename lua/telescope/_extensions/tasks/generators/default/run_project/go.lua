@@ -58,7 +58,7 @@ function go.run_current_file_generator(buf, opts)
     return nil
   end
   local name = vim.api.nvim_buf_get_name(buf)
-  if go.file_is_main_package(name) then
+  if go.is_main_file(name) then
     opts.package = name
     opts.name = "Run current Go file"
     return go.build_task_from_opts(opts)
@@ -79,11 +79,7 @@ function go.run_current_project_generator(opts)
   for _, name in ipairs(scan.scan_dir(cwd:__tostring(), { hidden = false })) do
     local path = Path:new(name)
     checked_files[path:__tostring()] = true
-    if
-      name:match ".*.go$"
-      and path:is_file()
-      and go.file_is_main_package(name)
-    then
+    if name:match ".*.go$" and path:is_file() and go.is_main_file(name) then
       opts.cwd = path:parent():__tostring()
       path:make_relative(cwd:__tostring())
       opts.name = "Run Go project: " .. path:__tostring()
@@ -146,7 +142,7 @@ function go.get_opts_string(opts)
   return s
 end
 
-function go.file_is_main_package(file)
+function go.is_main_file(file)
   local ok, ok2 = pcall(function()
     local path = Path:new(file)
     if not path:is_file() then
@@ -160,7 +156,7 @@ function go.file_is_main_package(file)
 
     -- TODO: handle any comments before the package definition ...
     text = text:gsub("\n", " ")
-    local main_package_pattern = "^%s*package%s+main;?%s+"
+    local main_package_pattern = "^%s*package%s+main;?%s+.*func%s+main%s*%("
 
     local r = text:find(main_package_pattern)
     return r ~= nil
