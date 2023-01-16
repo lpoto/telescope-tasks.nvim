@@ -26,6 +26,22 @@ function actions.select_task(prompt_bufnr)
   refresh_picker(prompt_bufnr)
 end
 
+function actions.select_task_with_arguments(prompt_bufnr)
+  vim.notify("AA")
+  local selection = action_state.get_selected_entry()
+  local task = selection.value
+
+  if executor.is_running(task.name) then
+    executor.kill(task)
+    return
+  end
+
+  executor.run(task, function()
+    refresh_picker()
+  end, true)
+  refresh_picker(prompt_bufnr)
+end
+
 function actions.selected_task_output(prompt_bufnr)
   local selection = action_state.get_selected_entry()
   output.open(selection.value, function()
