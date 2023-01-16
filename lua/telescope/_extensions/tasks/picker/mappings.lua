@@ -5,7 +5,7 @@ local mappings = {}
 
 mappings.keys = {
   ["<CR>"] = actions.select_task,
-  ["<C-i>"] = actions.select_task_with_arguments,
+  ["<C-a>"] = actions.select_task_with_arguments,
   ["<C-o>"] = actions.selected_task_output,
   ["<C-d>"] = actions.delete_selected_task_output,
   ["<C-k>"] = telescope_actions.preview_scrolling_up,

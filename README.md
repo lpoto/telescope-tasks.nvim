@@ -10,7 +10,7 @@ The tasks may either be [auto-generated](#generators) based on the current proje
 
 ## Demo
 
-https://user-images.githubusercontent.com/67372390/212492248-72411619-525f-4e65-b702-b602e42dc4ce.mp4
+https://user-images.githubusercontent.com/67372390/212735801-5dcbecc1-5d2e-4ce5-894e-fba731b3d05a.mp4
 
 > The demo uses the default `run_project` generator for `Go` and `Python` projects.
 
@@ -85,7 +85,7 @@ You may either use the [Default Generators](./DEFAULT_GENERATORS.md), or add [Cu
 | Key     | Description                                                 |
 | ------- | ----------------------------------------------------------- |
 | `<CR>`  | Run the selected task, or kill it if it is already running. |
-| `<C-i>` | Run the selected task with arguments.                       |
+| `<C-a>` | Run the selected task with arguments.                       |
 | `<C-o>` | Display the output of the selected task in another window.  |
 | `<C-d>` | Delete the output of the selected task.                     |
 | `<C-k>` | Scroll the previewer up.                                    |
