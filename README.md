@@ -85,7 +85,7 @@ You may either use the [Default Generators](./DEFAULT_GENERATORS.md), or add [Cu
 | Key     | Description                                                 |
 | ------- | ----------------------------------------------------------- |
 | `<CR>`  | Run the selected task, or kill it if it is already running. |
-| `<C-i>` | Run the selected task with arguments.                       |
+| `<C-a>` | Run the selected task with arguments.                       |
 | `<C-o>` | Display the output of the selected task in another window.  |
 | `<C-d>` | Delete the output of the selected task.                     |
 | `<C-k>` | Scroll the previewer up.                                    |

@@ -27,7 +27,7 @@ function actions.select_task(prompt_bufnr)
 end
 
 function actions.select_task_with_arguments(prompt_bufnr)
-  vim.notify("AA")
+  vim.notify "AA"
   local selection = action_state.get_selected_entry()
   local task = selection.value
 
