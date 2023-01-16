@@ -4,10 +4,6 @@
 that allows running tasks directly from the telescope prompt and displaying their
 definitions and outputs in the telescope's previewer.
 
-The tasks may either be [auto-generated](#generators) based on the current project, or added with [custom generators](#custom-generators).
-
-> Note that auto-generating is still in progress and experimental.
-
 ## Demo
 
 https://user-images.githubusercontent.com/67372390/212735801-5dcbecc1-5d2e-4ce5-894e-fba731b3d05a.mp4
