@@ -3,6 +3,7 @@
 ---@field env table: A table of environment variables.
 ---@field cmd table|string: The command, may either be a string or a table. When a table, the first element should be executable.
 ---@field cwd string: The working directory of the task.
+---@field before_running function|nil
 ---@field __generator_opts table|nil
 
 ---@type Task
@@ -65,7 +66,59 @@ function Task:new(o, generator_opts)
   )
   a.env = o.env or {}
 
+  local before_running = o.before_running
+  assert(
+    before_running == nil or type(before_running) == "function",
+    "Task '" .. a.name .. "'s before_running should be a function!"
+  )
+  a.before_running = before_running
   return a
+end
+
+local copy_cmd
+local consume_before_running
+
+---@return function
+function Task:create_job(callback, default_prompt)
+  local cmd = copy_cmd(self.cmd)
+  cmd = consume_before_running(self, cmd, default_prompt)
+
+  local opts = {
+    env = next(self.env or {}) and self.env or nil,
+    cwd = self.cwd,
+    clear_env = false,
+    detach = false,
+    on_exit = callback,
+  }
+  return function(buf)
+    local job_id = nil
+    vim.api.nvim_buf_call(buf, function()
+      local ok, id = pcall(vim.fn.termopen, cmd, opts)
+      if not ok and type(id) == "string" then
+        vim.notify(id, vim.log.levels.ERROR, {
+          title = enum.TITLE,
+        })
+      else
+        job_id = id
+      end
+    end)
+    return job_id
+  end
+end
+
+function Task.default_arguments_prompt()
+  local r = vim.fn.input {
+    prompt = "Arguments: ",
+    default = nil,
+    cancelreturn = nil,
+  }
+  if not r or type(r) == "string" and r:len() == 0 then
+    return nil
+  end
+  if type(r) == "string" then
+    return r
+  end
+  return vim.inspect(r)
 end
 
 local quote_string
@@ -136,6 +189,44 @@ quote_string = function(v)
     end
   end
   return v
+end
+
+copy_cmd = function(cmd)
+  local _cmd = nil
+  if type(cmd) == "string" then
+    _cmd = cmd
+  elseif type(cmd) == "table" then
+    _cmd = {}
+    for _, v in ipairs(cmd) do
+      table.insert(_cmd, v)
+    end
+  end
+  return _cmd
+end
+
+consume_before_running = function(self, cmd, default_prompt)
+  local f = self.before_running
+  if type(f) ~= "function" then
+    if default_prompt then
+      f = Task.default_arguments_prompt
+    else
+      return cmd
+    end
+  end
+  local suffix = f()
+  if type(suffix) == "string" then
+    suffix = vim.split(suffix, " ")
+  end
+  if type(suffix) == "table" then
+    if type(cmd) == "string" then
+      cmd = cmd .. " " .. table.concat(suffix, " ")
+    elseif type(cmd) == "table" then
+      for _, v in ipairs(suffix) do
+        table.insert(cmd, v)
+      end
+    end
+  end
+  return cmd
 end
 
 return Task

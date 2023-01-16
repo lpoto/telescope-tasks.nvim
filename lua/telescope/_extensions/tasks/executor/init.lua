@@ -73,8 +73,10 @@ end
 
 ---@param task Task: The task to run
 ---@param on_exit function: A function called when a started task exits.
+---@param default_prompt boolean?: Whether to use a task's default prompt for
+---arguments when the task has no other before_running function.
 ---@return boolean: whether the tasks started successfully
-function executor.run(task, on_exit)
+function executor.run(task, on_exit, default_prompt)
   if executor.is_running(task.name) == true then
     vim.notify("Task '" .. name .. "' is already running!", vim.log.levels.WARN, {
       title = enum.TITLE,
@@ -82,7 +84,7 @@ function executor.run(task, on_exit)
     return false
   end
 
-  local ok, r = pcall(run_task, task, on_exit)
+  local ok, r = pcall(run_task, task, on_exit, default_prompt)
   if not ok and type(r) == "string" then
     vim.notify(r, vim.log.levels.ERROR, {
       title = enum.TITLE,
@@ -180,18 +182,9 @@ local function name_output_buf(buf, task)
   end
 end
 
-run_task = function(task, on_exit)
-  -- NOTE: Gather job options from the task
-  local cmd = task.cmd
-  local opts = {
-    env = next(task.env or {}) and task.env or nil,
-    cwd = task.cwd,
-    clear_env = false,
-    detach = false,
-    on_exit = on_task_exit(task, on_exit),
-  }
-
-  --NOTE: if an output buffer for the same task already exists,
+---@param task Task
+--@param on_exit function?
+run_task = function(task, on_exit, default_prompt)
   --open terminal in that one instead of creating a new one
   local term_buf =
     output_buffer.create(executor.get_task_output_buf(task.name))
@@ -199,19 +192,10 @@ run_task = function(task, on_exit)
     return false
   end
 
-  --NOTE: open a terminal in the created buffer and run
-  --the task in it
-  local job_id = nil
-  vim.api.nvim_buf_call(term_buf, function()
-    local ok, id = pcall(vim.fn.termopen, cmd, opts)
-    if not ok and type(id) == "string" then
-      vim.notify(id, vim.log.levels.ERROR, {
-        title = enum.TITLE,
-      })
-    else
-      job_id = id
-    end
-  end)
+  -- NOTE: Gather job options from the task
+  local job = task:create_job(on_task_exit(task, on_exit), default_prompt)
+
+  local job_id = job(term_buf)
 
   if not job_id then
     pcall(vim.api.nvim_buf_delete, term_buf, { force = true })

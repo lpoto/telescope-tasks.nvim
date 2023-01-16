@@ -59,9 +59,10 @@ custom.add {
 
 ## Task Spec
 
-| Property          | Type                | Description                                                                        |
-| ----------------- | ------------------- | ---------------------------------------------------------------------------------- |
-| **name** or `[1]` | `string`            | The name of the task.                                                              |
-| **cmd**           | `string` or `table` | A command to be executed. When a table, the first element should be an executable. |
-| **env**           | `table?`            | A table of environment variables used during the task's execution .                |
-| **cwd**           | `string?`           | A path to a directory that will be used as a working directory for the task.       |
+| Property           | Type                | Description                                                                                                                                                                                         |
+| ------------------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **name** or `[1]`  | `string`            | The name of the task.                                                                                                                                                                               |
+| **cmd**            | `string` or `table` | A command to be executed. When a table, the first element should be an executable.                                                                                                                  |
+| **env**            | `table?`            | A table of environment variables used during the task's execution .                                                                                                                                 |
+| **cwd**            | `string?`           | A path to a directory that will be used as a working directory for the task.                                                                                                                        |
+| **before_running** | `function?`         | A function that returns a string or a table of strings. It is called every time before running the task and the result is added to the end of command. This is useful for asking for arguments etc. |
