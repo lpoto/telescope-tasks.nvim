@@ -1,6 +1,7 @@
 local enum = require "telescope._extensions.tasks.enum"
 local output_buffer = require "telescope._extensions.tasks.output.buffer"
 
+local idx = 0
 local running_tasks = {}
 local buffers_to_delete = {}
 
@@ -207,8 +208,34 @@ run_task = function(task, on_exit, default_prompt)
     job = job_id,
     buf = term_buf,
     task = task,
+    idx = idx,
+    name = task.name,
   }
+  idx = idx + 1
   return true
+end
+
+function executor.get_last_task_output_buf()
+  local v = vim.tbl_values(running_tasks)
+  table.sort(v, function(a, b)
+    return a.idx > b.idx
+  end)
+  if next(v) == nil then
+    return nil
+  end
+  for _, t in ipairs(v) do
+    if t.buf and vim.api.nvim_buf_is_valid(t.buf) then
+      return t.buf, t.name
+    end
+  end
+  return nil
+end
+
+function executor.mark_task_as_latest(name)
+  if running_tasks[name] then
+    running_tasks[name].idx = idx
+    idx = idx + 1
+  end
 end
 
 return executor

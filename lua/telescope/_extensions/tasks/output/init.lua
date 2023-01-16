@@ -5,7 +5,6 @@ local window = require "telescope._extensions.tasks.output.window"
 
 local output = {}
 
-local prev_task_name = nil
 local term_buf = nil
 local open_last_task_output
 
@@ -33,9 +32,9 @@ function output.open(task, before_opening)
     before_opening()
   end
 
-  prev_task_name = task.name
+  output.close_output_windows()
 
-  open_last_task_output(buf)
+  open_last_task_output(task.name, buf)
 end
 
 ---Toggle the window of the last opened output.
@@ -43,47 +42,36 @@ end
 ---or the previous output buffer is no longer available.
 function output.toggle_last()
   -- Get the buffer from the provided function
-  local buf = nil
-  if prev_task_name ~= nil then
-    buf = executor.get_task_output_buf(prev_task_name)
+  if output.close_output_windows() then
+    return
   end
 
-  -- NOTE: make sure a valid buffer was returned
-  if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
-    if prev_task_name then
-      vim.notify(
-        prev_task_name .. ": output no longer available",
-        vim.log.levels.WARN,
-        {
-          title = enum.TITLE,
-        }
-      )
-      prev_task_name = nil
-    end
-  end
+  local buf, name = executor.get_last_task_output_buf()
 
-  prev_task_name = executor.get_name_of_first_task_with_output()
-  if prev_task_name ~= nil then
-    buf = executor.get_task_output_buf(prev_task_name)
-  end
-
-  if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
-    prev_task_name = nil
+  if not buf then
     local ok, _ = pcall(function()
-      if term_buf and vim.api.nvim_buf_is_valid(term_buf) then
-        buf = term_buf
-      else
-        buf = buffer.create()
-        vim.api.nvim_buf_call(buf, function()
+      if not term_buf or not vim.api.nvim_buf_is_valid(term_buf) then
+        term_buf = buffer.create()
+        vim.api.nvim_buf_call(term_buf, function()
           vim.api.nvim_exec("term", false)
         end)
-        term_buf = buf
+      end
+      local winid = vim.fn.bufwinid(term_buf)
+      if winid and winid ~= 1 and vim.api.nvim_win_is_valid(winid) then
+        vim.api.nvim_win_close(winid, false)
+      else
+        buf = term_buf
+        name = "Terminal"
       end
     end)
     if not ok then
-      pcall(vim.api.nvim_buf_delete, buf, { force = true })
+      pcall(vim.api.nvim_buf_delete, term_buf, { force = true })
+      term_buf = nil
       return
     end
+  end
+  if not buf then
+    return
   end
 
   if
@@ -94,13 +82,21 @@ function output.toggle_last()
     vim.api.nvim_buf_delete(0, { force = true })
   end
 
-  local existing_winid = vim.fn.bufwinid(buf)
-  if vim.api.nvim_win_is_valid(existing_winid) then
-    vim.api.nvim_win_close(existing_winid, false)
-    return
-  end
+  open_last_task_output(name, buf)
+end
 
-  open_last_task_output(buf)
+function output.close_output_windows()
+  local win_handles = vim.tbl_filter(function(win_handle)
+    local buf = vim.api.nvim_win_get_buf(win_handle)
+    return vim.api.nvim_buf_get_option(buf, "filetype")
+      == enum.OUTPUT_BUFFER_FILETYPE
+  end, vim.api.nvim_list_wins())
+  local ok = false
+  for _, winid in ipairs(win_handles) do
+    vim.api.nvim_win_close(winid, false)
+    ok = true
+  end
+  return ok
 end
 
 ---Create an output buffer and set up the proper options. If a valid
@@ -111,12 +107,13 @@ function output.create_buffer(buf)
   return buffer.create(buf)
 end
 
-open_last_task_output = function(buf)
+open_last_task_output = function(name, buf)
   -- NOTE: make sure a valid buffer was returned
   if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
-    prev_task_name = nil
     return
   end
+
+  executor.mark_task_as_latest(name)
 
   local existing_winid = vim.fn.bufwinid(buf)
   if vim.api.nvim_win_is_valid(existing_winid) then
@@ -127,7 +124,7 @@ open_last_task_output = function(buf)
     return
   end
 
-  local ow = window.create(buf, prev_task_name)
+  local ow = window.create(buf, name)
   if not vim.api.nvim_win_is_valid(ow) then
     return
   end
