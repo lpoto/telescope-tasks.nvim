@@ -62,6 +62,10 @@ local function display_running_buf(status, task)
   local running_buf = executor.get_task_output_buf(task.name)
   if running_buf and vim.api.nvim_buf_is_valid(running_buf) then
     vim.api.nvim_win_set_buf(status.preview_win, running_buf)
+    vim.api.nvim_win_set_cursor(
+      status.preview_win,
+      { vim.api.nvim_buf_line_count(running_buf), 0 }
+    )
     return true
   end
   return false
