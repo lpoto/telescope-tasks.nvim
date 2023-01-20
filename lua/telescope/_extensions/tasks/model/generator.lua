@@ -39,6 +39,9 @@ end
 ---@return boolean: Whether the generator is available in
 ---the current context
 function Generator:available()
+  if not self.opts then
+    return false
+  end
   return self.opts:check_in_current_context()
 end
 
