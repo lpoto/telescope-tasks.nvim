@@ -1,4 +1,5 @@
 local enum = require "telescope._extensions.tasks.enum"
+local setup = require "telescope._extensions.tasks.setup"
 local executor = require "telescope._extensions.tasks.executor"
 local buffer = require "telescope._extensions.tasks.output.buffer"
 local window = require "telescope._extensions.tasks.output.window"
@@ -49,6 +50,12 @@ function output.toggle_last()
   local buf, name = executor.get_last_task_output_buf()
 
   if not buf then
+    if not setup.opts.output.terminal then
+      vim.notify("There is no available output", vim.log.levels.WARN, {
+        title = enum.TITLE,
+      })
+      return
+    end
     local ok, _ = pcall(function()
       if not term_buf or not vim.api.nvim_buf_is_valid(term_buf) then
         term_buf = buffer.create()
