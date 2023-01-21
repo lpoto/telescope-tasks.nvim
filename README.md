@@ -39,6 +39,7 @@ require("telescope").setup {
         layout = "center", -- "bottom" | "left" | "right" | "center"
         scale = 0.4, -- output window to editor size ratio
         -- NOTE: layout and scale are only relevant when style == "float"
+        terminal = false, -- Open terminal when toggling output but there is no available output
       },
       -- other picker setup values
     },

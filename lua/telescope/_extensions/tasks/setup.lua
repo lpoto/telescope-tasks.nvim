@@ -8,6 +8,7 @@ setup.opts = {
     style = "float", -- "split" | "vsplit"
     layout = "center", -- "bottom" | "left" | "right"
     scale = 0.4,
+    terminal = false,
   },
 }
 
@@ -25,9 +26,7 @@ function setup.setup(opts)
 
   local output_opts = setup.opts.output
   if opts.output then
-    output_opts.layout = opts.output.layout or output_opts.layout
-    output_opts.style = opts.output.style or output_opts.style
-    output_opts.scale = opts.output.scale or output_opts.scale
+    output_opts = vim.tbl_extend("force", output_opts, opts.output)
   end
 
   local opts_env = opts.env
