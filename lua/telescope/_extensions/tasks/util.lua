@@ -1,4 +1,5 @@
 local Path = require "plenary.path"
+local scan = require "plenary.scandir"
 
 local path = {}
 
@@ -25,6 +26,16 @@ function path.find_current_file_root(files_and_directories)
   return root
 end
 
+---Find a parent directory of the provided file,
+---containing at least one file or directory
+---present in the provided `files_and_directories` table.
+---When no such parent is found, the file's parent directory is returned.
+---@return string
+function path.find_file_root(file, files_and_directories)
+  local _, root = find_root(files_and_directories, file)
+  return root
+end
+
 ---Returns true if any of the current file's
 ---parent directories include any of the provided files or directories.
 ---@return boolean
@@ -34,7 +45,8 @@ function path.parent_dir_includes(files_and_directories)
 end
 
 find_root = function(patterns, start)
-  local parents = Path:new(start):parents()
+  local start_path = Path:new(start)
+  local parents = start_path:parents()
   table.insert(parents, start)
 
   for _, parent in ipairs(parents) do
@@ -44,7 +56,10 @@ find_root = function(patterns, start)
       end
     end
   end
-  return false, start
+  if start_path:is_file() then
+    return false, start_path:parent():__tostring()
+  end
+  return false, start_path:__tostring()
 end
 
 return path

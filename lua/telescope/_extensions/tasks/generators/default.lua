@@ -1,12 +1,44 @@
-local run_project =
-  require "telescope._extensions.tasks.generators.default.run_project"
+local Generator = require "telescope._extensions.tasks.model.generator"
+local runner = require "telescope._extensions.tasks.generators.runner"
 
-return {
-  ---Access the run_projet default generators api
-  run_project = run_project,
+local default = {}
+local add_generator
 
-  ---Enable all default generators
-  all = function()
-    run_project.all()
-  end,
-}
+---Enable all default generators
+function default.all()
+  return default.go(), default.cargo(), default.python()
+end
+
+---Enable Go default run_project generator
+function default.go()
+  return add_generator(
+    require "telescope._extensions.tasks.generators.default.go"
+  )
+end
+
+---Enable Cargo default run_project generator
+function default.cargo()
+  return add_generator(
+    require "telescope._extensions.tasks.generators.default.cargo"
+  )
+end
+
+---Enable Python run_project generator
+function default.python()
+  return add_generator(
+    require "telescope._extensions.tasks.generators.default..python"
+  )
+end
+
+add_generator = function(generator_fn)
+  local gen = Generator:new {
+    opts = {
+      name = "Run project Generator",
+      experimental = true,
+    },
+    generator = generator_fn,
+  }
+  runner.add_generators { gen }
+end
+
+return default
