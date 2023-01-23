@@ -1,7 +1,6 @@
 local enum = require "telescope._extensions.tasks.enum"
 local executor = require "telescope._extensions.tasks.executor"
-local Runner_state =
-  require "telescope._extensions.tasks.generators.runner_state"
+local State = require "telescope._extensions.tasks.model.state"
 
 local should_run_generators
 
@@ -17,7 +16,7 @@ local last_tasks = {}
 function runner.run(buf)
   -- NOTE: create a new runner state every time we run,
   -- so the generators may share data and generate tasks faster.
-  state = Runner_state:new()
+  state = State:new()
 
   local ok, tasks = pcall(function()
     if not next(current_generators or {}) then
@@ -67,7 +66,7 @@ function runner.add_generators(generators)
   end
 end
 
----@return Runner_state|nil
+---@return State|nil
 function runner.get_state()
   return state
 end

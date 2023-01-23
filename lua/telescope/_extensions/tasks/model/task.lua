@@ -6,6 +6,7 @@ local enum = require "telescope._extensions.tasks.enum"
 ---@field cmd table|string: The command, may either be a string or a table. When a table, the first element should be executable.
 ---@field cwd string: The working directory of the task.
 ---@field before_running function|nil
+---@field errorformat string|nil
 ---@field __generator_opts table|nil
 
 ---@type Task
@@ -46,6 +47,13 @@ function Task:new(o, generator_opts)
   local name = o.name or o[1]
   assert(type(name) == "string", "Task's 'name' should be a string!")
   a.name = name
+
+  local errorformat = o.errorformat
+  assert(
+    errorformat == nil or type(errorformat) == "string",
+    "Task '" .. a.name .. "'s `errorformat` field should be a string!"
+  )
+  a.errorformat = errorformat
 
   local cmd = o.cmd
   assert(

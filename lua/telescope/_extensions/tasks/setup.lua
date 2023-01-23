@@ -29,7 +29,6 @@ function setup.setup(opts)
   if opts.output then
     output_opts = vim.tbl_extend("force", output_opts, opts.output)
   end
-  
 
   local opts_env = opts.env
 

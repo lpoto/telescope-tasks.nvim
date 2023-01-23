@@ -1,8 +1,8 @@
 local util = require "telescope._extensions.tasks.util"
 local Path = require "plenary.path"
 local env = require "telescope._extensions.tasks.generators.env"
-
-local get_opts_string
+local Default_generator =
+  require "telescope._extensions.tasks.model.default_generator"
 
 ---Check if there exists a Cargo.toml file, if not return nil.
 ---Check targets in Cargo.toml and build tasks from them.
@@ -13,7 +13,23 @@ local get_opts_string
 ---cargo run [options] [-- args]
 ---
 ---NOTE: this returns only tasks for running rust with cargo
-local gen = function()
+local cargo = Default_generator:new {
+  errorformat = [[%Eerror: %\%%(aborting %\|could not compile%\)%\@!%m,]]
+    .. [[%Eerror[E%n]: %m,]]
+    .. [[%Inote: %m,]]
+    .. [[%Wwarning: %\%%(%.%# warning%\)%\@!%m,]]
+    .. [[%C %#--> %f:%l:%c,]]
+    .. [[%E  left:%m,%C right:%m %f:%l:%c,%Z,]]
+    .. [[%.%#panicked at \'%m\'\, %f:%l:%c]],
+  opts = {
+    name = "Default Cargo Generator",
+    experimental = true,
+  },
+}
+
+local get_opts_string
+
+function cargo.generator()
   local executable = env.get({ "CARGO", "EXECUTABLE" }, "cargo")
   local cargo_toml = env.get({ "CARGO", "CARGO_TOML" }, "Cargo.toml")
   local options = env.get({ "CARGO", "RUN", "OPTIONS" }, {})
@@ -81,4 +97,4 @@ get_opts_string = function(opts)
   return s
 end
 
-return gen
+return cargo

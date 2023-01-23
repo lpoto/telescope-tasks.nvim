@@ -90,3 +90,4 @@ You may either use the [Default Generators](./DEFAULT_GENERATORS.md), or add [Cu
 | `<C-d>` | Delete the output of the selected task.                     |
 | `<C-k>` | Scroll the previewer up.                                    |
 | `<C-j>` | Scroll the previewer down.                                  |
+| `<C-q>` | Send a task's output to quickfix.                           |

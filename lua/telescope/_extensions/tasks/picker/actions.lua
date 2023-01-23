@@ -28,7 +28,6 @@ function actions.select_task(prompt_bufnr)
 end
 
 function actions.select_task_with_arguments(prompt_bufnr)
-  vim.notify "AA"
   local selection = action_state.get_selected_entry()
   local task = selection.value
 
@@ -61,6 +60,12 @@ function actions.delete_selected_task_output(picker_buf)
   if not running then
     refresh_picker(picker_buf, true)
   end
+end
+
+function actions.selection_to_qf()
+  local selection = action_state.get_selected_entry()
+  local task = selection.value
+  executor.to_qf(task)
 end
 
 function actions.toggle_last_output()
