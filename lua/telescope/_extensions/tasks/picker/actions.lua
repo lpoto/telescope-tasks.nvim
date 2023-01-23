@@ -22,8 +22,9 @@ function actions.select_task(prompt_bufnr)
 
   executor.run(task, function()
     refresh_picker()
+  end, function()
+    refresh_picker(prompt_bufnr)
   end)
-  refresh_picker(prompt_bufnr)
 end
 
 function actions.select_task_with_arguments(prompt_bufnr)
@@ -38,8 +39,9 @@ function actions.select_task_with_arguments(prompt_bufnr)
 
   executor.run(task, function()
     refresh_picker()
+  end, function()
+    refresh_picker(prompt_bufnr)
   end, true)
-  refresh_picker(prompt_bufnr)
 end
 
 function actions.selected_task_output(prompt_bufnr)

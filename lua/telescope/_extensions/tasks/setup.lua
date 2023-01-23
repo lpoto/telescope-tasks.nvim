@@ -10,6 +10,7 @@ setup.opts = {
     scale = 0.4,
     terminal = false,
   },
+  enable_build_commands = false,
 }
 
 ---Creates the default picker options from the provided
@@ -28,6 +29,7 @@ function setup.setup(opts)
   if opts.output then
     output_opts = vim.tbl_extend("force", output_opts, opts.output)
   end
+  
 
   local opts_env = opts.env
 

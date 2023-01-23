@@ -9,21 +9,21 @@ function default.all()
   return default.go(), default.cargo(), default.python()
 end
 
----Enable Go default run_project generator
+---Enable Go default generator
 function default.go()
   return add_generator(
     require "telescope._extensions.tasks.generators.default.go"
   )
 end
 
----Enable Cargo default run_project generator
+---Enable Cargo default generator
 function default.cargo()
   return add_generator(
     require "telescope._extensions.tasks.generators.default.cargo"
   )
 end
 
----Enable Python run_project generator
+---Enable Python generator
 function default.python()
   return add_generator(
     require "telescope._extensions.tasks.generators.default..python"

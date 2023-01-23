@@ -7,6 +7,10 @@ local ENV = {
       BUILD_FLAGS = {},
       ARGUMENTS = {},
     },
+    BUILD = {
+      -- go build [build flags]
+      BUILD_FLAGS = {},
+    },
     ENV = {
       -- GOOS = "linux"
       -- ...
