@@ -1,4 +1,5 @@
 local util = require "telescope._extensions.tasks.util"
+local setup = require "telescope._extensions.tasks.setup"
 local env = require "telescope._extensions.tasks.generators.env"
 local Path = require "plenary.path"
 local runner = require "telescope._extensions.tasks.generators.runner"
@@ -20,8 +21,8 @@ function go.gen(buf)
   return nil
 end
 
---- Get the options for building a go task
-function go.get_task_opts(name, cwd, package)
+--- Get the options for building a go run task
+function go.get_run_task_opts(name, cwd, package)
   return {
     executable = env.get({ "GO", "EXECUTABLE" }, "go"),
     build_flags = env.get({ "GO", "RUN", "BUILD_FLAGS" }, {}),
@@ -29,6 +30,17 @@ function go.get_task_opts(name, cwd, package)
     xprog = env.get({ "GO", "RUN", "XPROG" }, false),
     go_env = env.get({ "GO", "ENV" }, nil),
     package = package,
+    cwd = cwd,
+    name = name,
+  }
+end
+
+--- Get the options for building a go build task
+function go.get_build_task_opts(name, cwd)
+  return {
+    executable = env.get({ "GO", "EXECUTABLE" }, "go"),
+    build_flags = env.get({ "GO", "BUILD", "BUILD_FLAGS" }, {}),
+    go_env = env.get({ "GO", "ENV" }, nil),
     cwd = cwd,
     name = name,
   }
@@ -69,47 +81,88 @@ function go.build_tasks(buf)
         --project in the found file's directory.
         local cwd = path:parent():__tostring()
         path:make_relative(root:__tostring())
-        local name = "Run Go project: " .. path:__tostring()
-        local opts = go.get_task_opts(name, cwd, ".")
-        table.insert(tasks, go.build_task_from_opts(opts))
+        local name = "Go project: " .. path:__tostring()
+        table.insert(tasks, go.build_project_task(cwd, name))
       elseif entry == vim.api.nvim_buf_get_name(buf) then
         --NOTE: if the CURRENT file is a main go file
         --but there is no parent go.mod file, add a task
         --for only running the current file
         local cwd = vim.loop.cwd()
         path:make_relative(cwd)
-        local name = "Run Go file: " .. path:__tostring()
-        local opts = go.get_task_opts(name, cwd, entry)
-        table.insert(tasks, go.build_task_from_opts(opts))
+        local name = "Run current Go file"
+        table.insert(tasks, go.build_current_file_task(entry, cwd, name))
       end
     end
   end
   return tasks
 end
 
---- Build  a task based on the provided go options
-function go.build_task_from_opts(opts)
+function go.build_project_task(cwd, name)
+  local executable = env.get({ "GO", "EXECUTABLE" }, "go")
+  local build_flags = env.get({ "GO", "RUN", "BUILD_FLAGS" }, {})
+  local arguments = env.get({ "GO", "RUN", "ARGUMENTS" }, {})
+  local xprog = env.get({ "GO", "RUN", "XPROG" }, false)
+  local go_env = env.get({ "GO", "ENV" }, nil)
+
+  local run_cmd = { executable, "run" }
+  local build_cmd = { executable, "build" }
+
+  local flags_string = go.get_opts_string(build_flags or {})
+  if flags_string then
+    table.insert(run_cmd, flags_string)
+    table.insert(build_cmd, flags_string)
+  end
+  if xprog then
+    table.insert(run_cmd, "-exec xprog")
+  end
+  table.insert(run_cmd, ".")
+  local args_string = go.get_opts_string(arguments or {})
+  if args_string then
+    table.insert(run_cmd, args_string)
+  end
   local cmd = {
-    opts.executable,
-    "run",
+    run = run_cmd,
+    build = build_cmd,
   }
-  local flags_string = go.get_opts_string(opts.build_flags or {})
+  if not setup.opts.enable_build_commands then
+    cmd = run_cmd
+  end
+  return {
+    name,
+    cmd = cmd,
+    env = go_env,
+    cwd = cwd,
+  }
+end
+
+function go.build_current_file_task(package, cwd, name)
+  local executable = env.get({ "GO", "EXECUTABLE" }, "go")
+  local build_flags = env.get({ "GO", "RUN", "BUILD_FLAGS" }, {})
+  local arguments = env.get({ "GO", "RUN", "ARGUMENTS" }, {})
+  local xprog = env.get({ "GO", "RUN", "XPROG" }, false)
+  local go_env = env.get({ "GO", "ENV" }, nil)
+
+  local cmd = { executable, "run" }
+
+  local flags_string = go.get_opts_string(build_flags or {})
   if flags_string then
     table.insert(cmd, flags_string)
   end
-  if opts.xprog then
+  if xprog then
     table.insert(cmd, "-exec xprog")
   end
-  table.insert(cmd, opts.package)
-  local args_string = go.get_opts_string(opts.arguments or {})
+  if package then
+    table.insert(cmd, package)
+  end
+  local args_string = go.get_opts_string(arguments or {})
   if args_string then
     table.insert(cmd, args_string)
   end
   return {
-    opts.name,
+    name,
     cmd = cmd,
-    env = opts.env,
-    cwd = opts.cwd,
+    env = go_env,
+    cwd = cwd,
   }
 end
 

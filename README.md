@@ -41,6 +41,9 @@ require("telescope").setup {
         -- NOTE: layout and scale are only relevant when style == "float"
         terminal = false, -- Open terminal when toggling output but there is no available output
       },
+      --[[ Allow default generators to generate tasks for building projects aswell,
+        instead  of generating just tasks for running them. Example: `go build` ]]
+      enable_build_commands = false,
       -- other picker setup values
     },
   },

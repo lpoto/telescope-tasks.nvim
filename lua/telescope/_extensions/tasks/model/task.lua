@@ -1,3 +1,5 @@
+local enum = require "telescope._extensions.tasks.enum"
+
 ---@class Task
 ---@field name string: This is taken from the key in vim.g.telescope_tasks table
 ---@field env table: A table of environment variables.
@@ -50,6 +52,22 @@ function Task:new(o, generator_opts)
     type(cmd) == "table" or type(cmd) == "string",
     "Task '" .. a.name .. "' should have a string or a table `cmd` field!"
   )
+  if type(cmd) == "table" then
+    local t = nil
+    for k, v in pairs(cmd) do
+      if t ~= nil then
+        assert(
+          type(k) == t,
+          "cmd table should have either all number or all string keys."
+        )
+      end
+      assert(
+        (type(v) == "table" and type(k) == "string") or type(v) == "string",
+        "Commands should have string or table values!"
+      )
+      t = type(k)
+    end
+  end
   a.cmd = cmd
 
   local cwd = o.cwd
@@ -79,8 +97,17 @@ local copy_cmd
 local consume_before_running
 
 ---@return function
-function Task:create_job(callback, default_prompt)
-  local cmd = copy_cmd(self.cmd)
+function Task:create_job(callback, default_prompt, cmd_name)
+  local cmds, keys = self:get_cmd()
+  local cmd = cmds
+  if keys and next(keys) then
+    if cmd_name and cmds[cmd_name] then
+      cmd = cmds[cmd_name]
+    else
+      cmd = cmds[keys[1]]
+    end
+  end
+  cmd = copy_cmd(cmd)
   cmd = consume_before_running(self, cmd, default_prompt)
 
   local opts = {
@@ -106,6 +133,27 @@ function Task:create_job(callback, default_prompt)
   end
 end
 
+function Task:get_cmd()
+  local cmd = self.cmd
+  if type(cmd) == "string" then
+    return cmd, nil
+  end
+  local _cmd = {}
+  local keys = {}
+  local multiple = false
+  for k, v in pairs(cmd) do
+    if type(k) ~= "number" then
+      multiple = true
+    end
+    table.insert(keys, k)
+    _cmd[k] = v
+  end
+  if multiple then
+    return _cmd, keys
+  end
+  return _cmd, nil
+end
+
 function Task.default_arguments_prompt()
   local r = vim.fn.input {
     prompt = "Arguments: ",
@@ -122,6 +170,7 @@ function Task.default_arguments_prompt()
 end
 
 local quote_string
+local quote_table
 function Task:to_yaml_definition()
   local def = {}
   table.insert(def, "name: " .. quote_string(self.name))
@@ -129,13 +178,28 @@ function Task:to_yaml_definition()
   if type(cmd) == "string" then
     table.insert(def, "cmd: " .. quote_string(cmd))
   elseif type(cmd) == "table" then
-    table.insert(def, "cmd: ")
-    for _, v in ipairs(cmd) do
-      if type(v) == "string" then
-        table.insert(def, "  - " .. quote_string(v))
-      else
-        table.insert(def, "  - " .. quote_string(vim.inspect(v)))
+    local k, _ = next(cmd)
+    if type(k) == "string" then
+      table.insert(def, "cmd:")
+      for key, value in pairs(cmd) do
+        if type(value) == "string" then
+          table.insert(def, "  " .. key .. ": " .. quote_string(value))
+        elseif type(value) == "table" then
+          table.insert(
+            def,
+            "  "
+              .. key
+              .. ": ["
+              .. table.concat(quote_table(value), ", ")
+              .. "]"
+          )
+        end
       end
+    else
+      table.insert(
+        def,
+        "cmd: " .. "[" .. table.concat(quote_table(cmd), ", ") .. "]"
+      )
     end
   end
   if type(self.cwd) == "string" then
@@ -175,6 +239,18 @@ function Task:to_yaml_definition()
   return def
 end
 
+quote_table = function(v)
+  local t = {}
+  for k, s in pairs(v) do
+    if type(s) == "string" then
+      t[k] = quote_string(s)
+    else
+      t[k] = s
+    end
+  end
+  return t
+end
+
 quote_string = function(v)
   if
     type(v) == "string"
@@ -189,19 +265,6 @@ quote_string = function(v)
     end
   end
   return v
-end
-
-copy_cmd = function(cmd)
-  local _cmd = nil
-  if type(cmd) == "string" then
-    _cmd = cmd
-  elseif type(cmd) == "table" then
-    _cmd = {}
-    for _, v in ipairs(cmd) do
-      table.insert(_cmd, v)
-    end
-  end
-  return _cmd
 end
 
 consume_before_running = function(self, cmd, default_prompt)
@@ -227,6 +290,19 @@ consume_before_running = function(self, cmd, default_prompt)
     end
   end
   return cmd
+end
+
+copy_cmd = function(cmd)
+  local _cmd = nil
+  if type(cmd) == "string" then
+    _cmd = cmd
+  elseif type(cmd) == "table" then
+    _cmd = {}
+    for _, v in ipairs(cmd) do
+      table.insert(_cmd, v)
+    end
+  end
+  return _cmd
 end
 
 return Task

@@ -21,9 +21,9 @@ Call any of the functions described bellow to enable just some of them.
 
 ## Available default generators
 
-| Function           | Description               |
-| ------------------ | ------------------------- |
-| `default.go()`     | Currently in progress ... |
-| `default.cargo()`  | Currently in progress ... |
-| `default.python()` | Currently in progress ... |
-| `default.docker()` | Currently in progress ... |
+| Function           | Description                                                                                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `default.go()`     | Finds all Go projects in subdirectories and generates tasks for running or building them. If no `go.mod` file is found, generates a task for running the current Go file. |
+| `default.cargo()`  | Currently in progress ...                                                                                                                                                 |
+| `default.python()` | Currently in progress ...                                                                                                                                                 |
+| `default.docker()` | Currently in progress ...                                                                                                                                                 |
