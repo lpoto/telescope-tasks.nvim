@@ -12,7 +12,7 @@ if not has_telescope then
   vim.notify(
     "This extension requires telescope.nvim "
       .. "(https://github.com/nvim-telescope/telescope.nvim)",
-    log.levels.error,
+    vim.log.levels.error,
     {
       title = enum.TITLE,
     }

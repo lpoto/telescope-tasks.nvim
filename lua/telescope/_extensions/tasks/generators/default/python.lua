@@ -1,13 +1,23 @@
 local env = require "telescope._extensions.tasks.generators.env"
-
-local get_opts_string
+local Default = require "telescope._extensions.tasks.model.default_generator"
 
 ---Add a task for running the current python file.
 ---
 ---TODO: handle `venv`.
 ---
 ---python [options] [package] [arguments]
-local gen = function(buf)
+local python = Default:new {
+  errorformat = '%C\\ %.%#,%A\\ \\ File\\ "%f"\\,'
+    .. "\\ line\\ %l%.%#,%Z%[%^\\ ]%\\@=%m",
+  opts = {
+    name = "Default Python Generator",
+    experimental = true,
+  },
+}
+
+local get_opts_string
+
+function python.generator(buf)
   local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
   if filetype ~= "python" then
     return nil
@@ -62,4 +72,4 @@ get_opts_string = function(opts)
   return s
 end
 
-return gen
+return python

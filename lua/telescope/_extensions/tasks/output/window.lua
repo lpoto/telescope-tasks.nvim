@@ -2,21 +2,19 @@ local enum = require "telescope._extensions.tasks.enum"
 local setup = require "telescope._extensions.tasks.setup"
 local highlight = require "telescope._extensions.tasks.output.highlight"
 local float = require "telescope._extensions.tasks.output.float"
+local executor = require "telescope._extensions.tasks.executor"
 
 local window = {}
 
 local handle_window
 local determine_output_window_type
 local add_autocmd
-local clean_buffer
 local close_win
 
 ---@param buf number: A buffer number to create a window for
 ---@rarapm title string?: The title of the window, relevant only for floats
 ---@return number: A window id, -1 when invalid
 function window.create(buf, title)
-  clean_buffer(buf)
-
   title = title or "Terminal"
 
   local ok, winid = pcall(determine_output_window_type(), buf, title)
@@ -77,10 +75,6 @@ handle_window = function(winid)
   highlight.set_output_window_highlights(winid)
 end
 
-clean_buffer = function(buf)
-  pcall(vim.keymap.del, "n", "q", { buffer = buf })
-end
-
 ---@return function
 determine_output_window_type = function()
   local win_type = setup.opts.output and setup.opts.output.style or "float"
@@ -128,6 +122,15 @@ add_autocmd = function(buf)
 
   vim.keymap.set("n", "q", function()
     close_win(buf)
+  end, {
+    buffer = buf,
+  })
+  vim.keymap.set("n", "<C-q>", function()
+    local task = executor.get_task_from_buffer(buf)
+    if not task then
+      return
+    end
+    executor.to_qf(task)
   end, {
     buffer = buf,
   })

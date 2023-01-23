@@ -17,7 +17,7 @@ local get_task_display
 function finder.available_tasks_finder(buf, exit_on_no_results)
   local tasks = vim.tbl_values(runner.run(buf) or {})
   if exit_on_no_results and not next(tasks) then
-    vim.notify("There are no available tasks", vim.log.levels.WARN, {
+    vim.notify("There xare no available tasks", vim.log.levels.WARN, {
       title = enum.TITLE,
     })
     return nil

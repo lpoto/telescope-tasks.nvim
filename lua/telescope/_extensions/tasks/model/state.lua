@@ -1,21 +1,21 @@
 local scan = require "plenary.scandir"
 
----@class Runner_state
+---@class State
 ---@field iterated_subdirectories boolean
 ---@field found_files table
-local Runner_state = {
+local State = {
   iterated_subdirectories = false,
   found_files = {},
 }
-Runner_state.__index = Runner_state
+State.__index = State
 
----@return Runner_state
-function Runner_state:new()
-  return setmetatable({}, Runner_state)
+---@return State
+function State:new()
+  return setmetatable({}, State)
 end
 
 ---@return table
-function Runner_state:find_files()
+function State:find_files()
   if self.iterated_subdirectories then
     return self.found_files
   end
@@ -23,7 +23,7 @@ function Runner_state:find_files()
   return self.found_files
 end
 
-function Runner_state:__iterate_subdirectories()
+function State:__iterate_subdirectories()
   self.iterated_subdirectories = true
   self.found_files = {}
   scan.scan_dir(vim.loop.cwd(), {
@@ -44,4 +44,4 @@ function Runner_state:__iterate_subdirectories()
   })
 end
 
-return Runner_state
+return State

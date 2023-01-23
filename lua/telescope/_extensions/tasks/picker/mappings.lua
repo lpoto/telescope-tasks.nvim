@@ -8,6 +8,7 @@ mappings.keys = {
   ["<C-a>"] = actions.select_task_with_arguments,
   ["<C-o>"] = actions.selected_task_output,
   ["<C-d>"] = actions.delete_selected_task_output,
+  ["<C-q>"] = actions.selection_to_qf,
   ["<C-k>"] = telescope_actions.preview_scrolling_up,
   ["<C-j>"] = telescope_actions.preview_scrolling_down,
 }

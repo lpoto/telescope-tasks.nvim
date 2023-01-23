@@ -260,4 +260,48 @@ function executor.mark_task_as_latest(name)
   end
 end
 
+function executor.to_qf(task)
+  if not task.errorformat then
+    vim.notify(
+      "Task '" .. task.name .. "' has no errorformat!",
+      vim.log.levels.WARN,
+      {
+        title = enum.TITLE,
+      }
+    )
+    return
+  end
+  local buf = executor.get_task_output_buf(task.name)
+  if not buf or not vim.api.nvim_buf_is_valid(buf) then
+    vim.notify(
+      "Task '" .. task.name .. "' has no output buffer!",
+      vim.log.levels.WARN,
+      {
+        title = enum.TITLE,
+      }
+    )
+    return
+  end
+  local ok, e = pcall(function()
+    vim.api.nvim_buf_set_option(buf, "errorformat", task.errorformat)
+    vim.api.nvim_exec("noautocmd cgetbuffer " .. buf, false)
+  end)
+  if not ok and type(e) == "string" then
+    vim.notify(e, vim.log.levels.ERROR, {
+      title = enum.TITLE,
+    })
+    return
+  end
+  vim.notify(task.name .. ": " .. "Output send to quickfix")
+end
+
+function executor.get_task_from_buffer(buf)
+  for _, t in pairs(running_tasks) do
+    if t.buf == buf then
+      return t.task
+    end
+  end
+  return nil
+end
+
 return executor
