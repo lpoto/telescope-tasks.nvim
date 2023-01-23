@@ -1,18 +1,24 @@
 local enum = require "telescope._extensions.tasks.enum"
 local executor = require "telescope._extensions.tasks.executor"
+local Runner_state =
+  require "telescope._extensions.tasks.generators.runner_state"
 
 local should_run_generators
 
 local runner = {}
+local state = nil
 
 --local generators_updated = false
 local current_generators = {}
---local cache = {}
 local last_tasks = {}
 
 ---Runs all the available generators.
 ---@return table: The found tasks
 function runner.run(buf)
+  -- NOTE: create a new runner state every time we run,
+  -- so the generators may share data and generate tasks faster.
+  state = Runner_state:new()
+
   local ok, tasks = pcall(function()
     if not next(current_generators or {}) then
       return {}
@@ -21,9 +27,6 @@ function runner.run(buf)
     if type(buf) ~= "number" or not vim.api.nvim_buf_is_valid(buf) then
       buf = vim.api.nvim_get_current_buf()
     end
-    --local cwd = vim.loop.cwd()
-    --local name = vim.api.nvim_buf_get_name(buf)
-    --local ftime = vim.fn.getftime(name)
 
     local found_tasks = {}
 
@@ -31,27 +34,13 @@ function runner.run(buf)
     -- the provided buf's buftype is ""
     if not should_run_generators(buf) then
       found_tasks = last_tasks
-      --elseif not generators_updated
-      --    and cache[buf]
-      --    and cache[buf].cwd == cwd
-      --    and cache[buf].ftime == ftime
-      --    and cache[buf].name == name
-      --then
-      --  found_tasks = cache[buf].tasks or {}
     else
-      for _, generator in ipairs(generators or current_generators or {}) do
+      for _, generator in ipairs(current_generators or {}) do
         if generator:available() then
           found_tasks =
             vim.tbl_extend("force", found_tasks, generator:run() or {})
         end
       end
-      --cache[buf] = {
-      --  cwd = cwd,
-      --  tasks = found_tasks,
-      --  name = name,
-      --  ftime = ftime,
-      --}
-      --generators_updated = false
       last_tasks = found_tasks
     end
 
@@ -60,6 +49,9 @@ function runner.run(buf)
 
     return found_tasks
   end)
+
+  state = nil
+
   if not ok and type(tasks) == "string" then
     vim.notify(tasks, vim.log.levels.ERROR, {
       title = enum.TITLE,
@@ -73,6 +65,11 @@ function runner.add_generators(generators)
   for _, generator in ipairs(generators) do
     table.insert(current_generators, generator)
   end
+end
+
+---@return Runner_state|nil
+function runner.get_state()
+  return state
 end
 
 ---Checks whether the generators should be run in the provided buffer.
