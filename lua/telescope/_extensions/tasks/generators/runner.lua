@@ -1,4 +1,4 @@
-local enum = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.enum"
 local executor = require "telescope._extensions.tasks.executor"
 local State = require "telescope._extensions.tasks.model.state"
 
@@ -52,9 +52,7 @@ function runner.run(buf)
   state = nil
 
   if not ok and type(tasks) == "string" then
-    vim.notify(tasks, vim.log.levels.ERROR, {
-      title = enum.TITLE,
-    })
+    util.error(tasks)
     return {}
   end
   return tasks or {}

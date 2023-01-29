@@ -1,4 +1,5 @@
 local enum = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.util"
 local env = require "telescope._extensions.tasks.generators.env"
 
 local setup = {}
@@ -10,7 +11,7 @@ setup.opts = {
     scale = 0.4,
     terminal = false,
   },
-  enable_build_commands = false,
+  enable_multiple_commands = false,
 }
 
 ---Creates the default picker options from the provided
@@ -19,9 +20,7 @@ setup.opts = {
 ---@param opts table
 function setup.setup(opts)
   if type(opts) ~= "table" then
-    vim.notify("Tasks config should be a table!", vim.log.levels.WARN, {
-      title = enum.TITLE,
-    })
+    util.warn "Tasks config should be a table!"
     return
   end
 
@@ -35,13 +34,7 @@ function setup.setup(opts)
   if type(opts.theme) == "string" then
     local theme = require("telescope.themes")["get_" .. opts.theme]
     if theme == nil then
-      vim.notify(
-        "No such telescope theme: '" .. opts.theme .. "'",
-        vim.log.levels.WARN,
-        {
-          title = enum.TITLE,
-        }
-      )
+      util.warn("No such telescope theme: '" .. opts.theme .. "'")
     else
       opts = theme(opts)
     end
@@ -49,9 +42,7 @@ function setup.setup(opts)
   if opts_env then
     local ok, e = pcall(env.add, opts_env)
     if not ok and type(e) == "string" then
-      vim.notify(e, vim.log.levels.WARN, {
-        title = enum.TITLE,
-      })
+      util.warn(e, vim.log.levels.WARN)
     end
   end
   opts.output = output_opts

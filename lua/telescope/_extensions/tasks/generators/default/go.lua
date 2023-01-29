@@ -93,7 +93,7 @@ build_project_task = function(cwd, name)
     run = run_cmd,
     build = build_cmd,
   }
-  if not setup.opts.enable_build_commands then
+  if not setup.opts.enable_multiple_commands then
     cmd = run_cmd
   end
   return {

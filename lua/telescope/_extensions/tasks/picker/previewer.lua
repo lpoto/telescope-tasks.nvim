@@ -1,7 +1,7 @@
 local previewers = require "telescope.previewers"
 local executor = require "telescope._extensions.tasks.executor"
 local highlight = require "telescope._extensions.tasks.output.highlight"
-local enum = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.util"
 
 local previewer = {}
 
@@ -49,9 +49,7 @@ scroll_fn = function(self, direction)
     vim.api.nvim_win_set_cursor(winid, { cur_y, cur_x })
   end)
   if not ok and type(e) == "string" then
-    vim.notify(e, vim.log.levels.WARN, {
-      title = enum.TITLE,
-    })
+    util.warn(e)
   end
 end
 
@@ -122,10 +120,9 @@ teardown_fn = function(self)
     return
   end
   local winid = self.status.preview_win
-  if
-    type(winid) ~= "number"
-    or winid == -1
-    or not vim.api.nvim_win_is_valid(winid)
+  if type(winid) ~= "number"
+      or winid == -1
+      or not vim.api.nvim_win_is_valid(winid)
   then
     return
   end

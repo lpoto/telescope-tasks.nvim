@@ -39,11 +39,11 @@ require("telescope").setup {
         layout = "center", -- "bottom" | "left" | "right" | "center"
         scale = 0.4, -- output window to editor size ratio
         -- NOTE: layout and scale are only relevant when style == "float"
-        terminal = false, -- Open terminal when toggling output but there is no available output
       },
-      --[[ Allow default generators to generate tasks for building projects aswell,
-        instead  of generating just tasks for running them. Example: `go build` ]]
-      enable_build_commands = false,
+      --[[ Allow default generators to multiple commands for a single task, as an example
+        instead  of generating just a command for running a go project, generate a command for
+        building it aswell. ]]
+      enable_multiple_commands = false,
       -- other picker setup values
     },
   },
@@ -74,8 +74,6 @@ The last opened output may then be toggled with:
  require("telescope").extensions.tasks.actions.toggle_last_output()
 ```
 
-> When there is no output available, a terminal will be opened.
-
 ## Generators
 
 You may either use the [Default Generators](./DEFAULT_GENERATORS.md), or add [Custom Generators](./CUSTOM_GENERATORS.md).
@@ -85,7 +83,6 @@ You may either use the [Default Generators](./DEFAULT_GENERATORS.md), or add [Cu
 | Key     | Description                                                 |
 | ------- | ----------------------------------------------------------- |
 | `<CR>`  | Run the selected task, or kill it if it is already running. |
-| `<C-a>` | Run the selected task with arguments.                       |
 | `<C-o>` | Display the output of the selected task in another window.  |
 | `<C-d>` | Delete the output of the selected task.                     |
 | `<C-k>` | Scroll the previewer up.                                    |

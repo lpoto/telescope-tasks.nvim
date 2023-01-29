@@ -1,5 +1,5 @@
 local finders = require "telescope.finders"
-local enum = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.util"
 local entry_display = require "telescope.pickers.entry_display"
 local executor = require "telescope._extensions.tasks.executor"
 local runner = require "telescope._extensions.tasks.generators.runner"
@@ -17,9 +17,7 @@ local get_task_display
 function finder.available_tasks_finder(buf, exit_on_no_results)
   local tasks = vim.tbl_values(runner.run(buf) or {})
   if exit_on_no_results and not next(tasks) then
-    vim.notify("There are no available tasks", vim.log.levels.WARN, {
-      title = enum.TITLE,
-    })
+    util.warn "There are no available tasks"
     return nil
   end
 
