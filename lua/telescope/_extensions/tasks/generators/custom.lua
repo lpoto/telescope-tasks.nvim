@@ -1,5 +1,5 @@
 local runner = require "telescope._extensions.tasks.generators.runner"
-local enum = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.util"
 local Generator = require "telescope._extensions.tasks.model.generator"
 
 local custom = {}
@@ -19,9 +19,7 @@ function custom.add(...)
       table.insert(generators, generator)
     end)
     if not ok and type(e) == "string" then
-      vim.notify(e, vim.log.levels.WARN, {
-        title = enum.TITLE,
-      })
+      util.warn(e)
     end
   end
 

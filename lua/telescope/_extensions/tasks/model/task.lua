@@ -1,13 +1,14 @@
-local enum = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.util"
 
 ---@class Task
 ---@field name string: This is taken from the key in vim.g.telescope_tasks table
 ---@field env table: A table of environment variables.
 ---@field cmd table|string: The command, may either be a string or a table. When a table, the first element should be executable.
 ---@field cwd string: The working directory of the task.
----@field before_running function|nil
 ---@field errorformat string|nil
 ---@field __generator_opts table|nil
+---@field get_cmd function
+---@field create_job function
 
 ---@type Task
 local Task = {}
@@ -91,21 +92,13 @@ function Task:new(o, generator_opts)
     "Task '" .. a.name .. "'s env should be a table!"
   )
   a.env = o.env or {}
-
-  local before_running = o.before_running
-  assert(
-    before_running == nil or type(before_running) == "function",
-    "Task '" .. a.name .. "'s before_running should be a function!"
-  )
-  a.before_running = before_running
   return a
 end
 
 local copy_cmd
-local consume_before_running
 
----@return function
-function Task:create_job(callback, default_prompt, cmd_name)
+---@return function?
+function Task:create_job(callback, cmd_name)
   local cmds, keys = self:get_cmd()
   local cmd = cmds
   if keys and next(keys) then
@@ -116,7 +109,6 @@ function Task:create_job(callback, default_prompt, cmd_name)
     end
   end
   cmd = copy_cmd(cmd)
-  cmd = consume_before_running(self, cmd, default_prompt)
 
   local opts = {
     env = next(self.env or {}) and self.env or nil,
@@ -125,14 +117,27 @@ function Task:create_job(callback, default_prompt, cmd_name)
     detach = false,
     on_exit = callback,
   }
+
+  local cmd_string = cmd
+  if type(cmd_string) == "table" then
+    cmd_string = table.concat(cmd_string, " ")
+  end
+
+  cmd_string = vim.fn.input("$ ", cmd_string .. " ")
+  if not cmd_string or cmd_string:len() == 0 then
+    return nil
+  end
+  cmd = vim.split(cmd_string, " ")
+  if vim.fn.executable(cmd[1]) ~= 1 then
+    cmd = table.concat(cmd, " ")
+  end
+
   return function(buf)
     local job_id = nil
     vim.api.nvim_buf_call(buf, function()
       local ok, id = pcall(vim.fn.termopen, cmd, opts)
       if not ok and type(id) == "string" then
-        vim.notify(id, vim.log.levels.ERROR, {
-          title = enum.TITLE,
-        })
+        util.error(id)
       else
         job_id = id
       end
@@ -141,6 +146,8 @@ function Task:create_job(callback, default_prompt, cmd_name)
   end
 end
 
+---@return string|table: The command
+---@return table|nil: Names of commands when there are multiple
 function Task:get_cmd()
   local cmd = self.cmd
   if type(cmd) == "string" then
@@ -273,31 +280,6 @@ quote_string = function(v)
     end
   end
   return v
-end
-
-consume_before_running = function(self, cmd, default_prompt)
-  local f = self.before_running
-  if type(f) ~= "function" then
-    if default_prompt then
-      f = Task.default_arguments_prompt
-    else
-      return cmd
-    end
-  end
-  local suffix = f()
-  if type(suffix) == "string" then
-    suffix = vim.split(suffix, " ")
-  end
-  if type(suffix) == "table" then
-    if type(cmd) == "string" then
-      cmd = cmd .. " " .. table.concat(suffix, " ")
-    elseif type(cmd) == "table" then
-      for _, v in ipairs(suffix) do
-        table.insert(cmd, v)
-      end
-    end
-  end
-  return cmd
 end
 
 copy_cmd = function(cmd)

@@ -1,4 +1,4 @@
-local enum = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.util"
 local executor = require "telescope._extensions.tasks.executor"
 local finder = require "telescope._extensions.tasks.picker.finder"
 local output = require "telescope._extensions.tasks.output"
@@ -25,22 +25,6 @@ function actions.select_task(prompt_bufnr)
   end, function()
     refresh_picker(prompt_bufnr)
   end)
-end
-
-function actions.select_task_with_arguments(prompt_bufnr)
-  local selection = action_state.get_selected_entry()
-  local task = selection.value
-
-  if executor.is_running(task.name) then
-    executor.kill(task)
-    return
-  end
-
-  executor.run(task, function()
-    refresh_picker()
-  end, function()
-    refresh_picker(prompt_bufnr)
-  end, true)
 end
 
 function actions.selected_task_output(prompt_bufnr)
@@ -86,9 +70,7 @@ refresh_picker = function(picker_buf, close_on_no_results)
   end
   local ok, e = pcall(p.refresh, p, tasks_finder)
   if not ok and type(e) == "string" then
-    vim.notify(e, vim.log.levels.ERROR, {
-      title = enum.TITLE,
-    })
+    util.error(e)
   end
 end
 

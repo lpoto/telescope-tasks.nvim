@@ -9,13 +9,9 @@ local generators = require "telescope._extensions.tasks.generators"
 -- before registering the extension
 local has_telescope, telescope = pcall(require, "telescope")
 if not has_telescope then
-  vim.notify(
+  util.error(
     "This extension requires telescope.nvim "
-      .. "(https://github.com/nvim-telescope/telescope.nvim)",
-    vim.log.levels.error,
-    {
-      title = enum.TITLE,
-    }
+    .. "(https://github.com/nvim-telescope/telescope.nvim)"
   )
 end
 

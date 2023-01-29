@@ -1,4 +1,4 @@
-local enum = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.util"
 local popup = require "telescope._extensions.tasks.executor.popup"
 local output_buffer = require "telescope._extensions.tasks.output.buffer"
 
@@ -76,26 +76,16 @@ end
 ---@param task Task: The task to run
 ---@param on_exit function: A function called when a started task exits.
 ---@param on_start function: A function called when a task is started
----@param default_prompt boolean?: Whether to use a task's default prompt for
----arguments when the task has no other before_running function.
-function executor.run(task, on_exit, on_start, default_prompt)
+function executor.run(task, on_exit, on_start)
   if executor.is_running(task.name) == true then
-    vim.notify(
-      "Task '" .. task.name .. "' is already running!",
-      vim.log.levels.WARN,
-      {
-        title = enum.TITLE,
-      }
-    )
+    util.warn("Task '" .. task.name .. "' is already running!")
     return false
   end
 
   local safely_run = function(cmd_name)
-    local ok, r = pcall(run_task, task, on_exit, default_prompt, cmd_name)
+    local ok, r = pcall(run_task, task, on_exit, cmd_name)
     if not ok and type(r) == "string" then
-      vim.notify(r, vim.log.levels.ERROR, {
-        title = enum.TITLE,
-      })
+      util.error(r)
       return false
     end
     if r then
@@ -136,13 +126,7 @@ function executor.delete_task_buffer(task)
   local job = executor.get_job_id(task.name)
   local buf = executor.get_task_output_buf(task.name)
   if buf == nil then
-    vim.notify(
-      "Task '" .. task.name .. "' has no output buffer!",
-      vim.log.levels.WARN,
-      {
-        title = enum.TITLE,
-      }
-    )
+    util.warn("Task '" .. task.name .. "' has no output buffer!")
     return
   end
   local ok, err = pcall(function()
@@ -150,14 +134,10 @@ function executor.delete_task_buffer(task)
       pcall(vim.fn.jobstop, job)
     end
     vim.api.nvim_buf_delete(buf, { force = true })
-    vim.notify(task.name .. ": output buffer deleted", vim.log.levels.INFO, {
-      title = enum.TITLE,
-    })
+    util.info(task.name .. ": output buffer deleted")
   end)
   if not ok and type(err) == "string" then
-    vim.notify(err, vim.log.levels.ERROR, {
-      title = enum.TITLE,
-    })
+    vim.error(err)
     return
   end
 
@@ -182,9 +162,7 @@ local function on_task_exit(task, callback)
     if callback then
       callback(code)
     end
-    vim.notify(task.name .. ": exited with code: " .. code, vim.log.levels.INFO, {
-      title = enum.TITLE,
-    })
+    util.info(task.name .. ": exited with code:", code)
   end
 end
 
@@ -205,18 +183,20 @@ local function name_output_buf(buf, task)
 end
 
 ---@param task Task
---@param on_exit function?
-run_task = function(task, on_exit, default_prompt, cmd_name)
+---@param on_exit function?
+run_task = function(task, on_exit, cmd_name)
   --open terminal in that one instead of creating a new one
   local term_buf =
-    output_buffer.create(executor.get_task_output_buf(task.name))
+  output_buffer.create(executor.get_task_output_buf(task.name))
   if not term_buf or not vim.api.nvim_buf_is_valid(term_buf) then
     return false
   end
 
   -- NOTE: Gather job options from the task
-  local job =
-    task:create_job(on_task_exit(task, on_exit), default_prompt, cmd_name)
+  local job = task:create_job(on_task_exit(task, on_exit), cmd_name)
+  if not job then
+    return
+  end
 
   local job_id = job(term_buf)
 
@@ -262,24 +242,12 @@ end
 
 function executor.to_qf(task)
   if not task.errorformat then
-    vim.notify(
-      "Task '" .. task.name .. "' has no errorformat!",
-      vim.log.levels.WARN,
-      {
-        title = enum.TITLE,
-      }
-    )
+    util.warn("Task '" .. task.name .. "' has no errorformat!")
     return
   end
   local buf = executor.get_task_output_buf(task.name)
   if not buf or not vim.api.nvim_buf_is_valid(buf) then
-    vim.notify(
-      "Task '" .. task.name .. "' has no output buffer!",
-      vim.log.levels.WARN,
-      {
-        title = enum.TITLE,
-      }
-    )
+    util.warn("Task '" .. task.name .. "' has no output buffer!")
     return
   end
   local ok, e = pcall(function()
@@ -287,12 +255,10 @@ function executor.to_qf(task)
     vim.api.nvim_exec("noautocmd cgetbuffer " .. buf, false)
   end)
   if not ok and type(e) == "string" then
-    vim.notify(e, vim.log.levels.ERROR, {
-      title = enum.TITLE,
-    })
+    util.error(e)
     return
   end
-  vim.notify(task.name .. ": " .. "Output send to quickfix")
+  util.info(task.name .. ": " .. "Output send to quickfix")
 end
 
 function executor.get_task_from_buffer(buf)

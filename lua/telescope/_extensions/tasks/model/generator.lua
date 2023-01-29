@@ -1,7 +1,7 @@
-local enum = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.util"
 local Task = require "telescope._extensions.tasks.model.task"
 local Generator_opts =
-  require "telescope._extensions.tasks.model.generator_opts"
+require "telescope._extensions.tasks.model.generator_opts"
 
 ---@class Generator
 ---@field generator function
@@ -52,15 +52,11 @@ function Generator:run()
   local buf = vim.api.nvim_get_current_buf()
   local ok, tasks = pcall(self.generator, buf)
   if not ok and type(tasks) == "string" then
-    vim.notify(tasks, vim.log.levels.ERROR, {
-      title = enum.TITLE,
-    })
+    util.error(tasks)
     return nil
   elseif type(tasks) ~= "table" then
     if tasks ~= nil then
-      vim.notify("Genrator should return a table", vim.log.levels.ERROR, {
-        title = enum.TITLE,
-      })
+      util.error "Genrator should return a table"
     end
     return nil
   end
@@ -75,9 +71,7 @@ function Generator:run()
       found_tasks[task.name] = task
     end)
     if not ok and type(err) == "string" then
-      vim.notify(err, vim.log.levels.WARN, {
-        title = enum.TITLE,
-      })
+      util.warn(err)
     end
   end
   return found_tasks

@@ -1,3 +1,4 @@
+local util = require "telescope._extensions.tasks.util"
 local enum = require "telescope._extensions.tasks.enum"
 
 local buffer = {}
@@ -13,17 +14,13 @@ function buffer.create(buf)
     local ok
     ok, buf = pcall(vim.api.nvim_create_buf, false, true)
     if ok == false then
-      vim.notify(buf, vim.log.levels.WARN, {
-        title = enum.TITLE,
-      })
+      util.warn(buf)
       return -1
     end
   end
   local ok, err = pcall(handle_buffer, buf)
   if ok == false and type(err) == "string" then
-    vim.notify(err, vim.log.levels.WARN, {
-      title = enum.TITLE,
-    })
+    util.warn(err)
   end
   return buf
 end

@@ -1,4 +1,5 @@
 local enum = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.enum"
 local setup = require "telescope._extensions.tasks.setup"
 local highlight = require "telescope._extensions.tasks.output.highlight"
 local float = require "telescope._extensions.tasks.output.float"
@@ -19,23 +20,17 @@ function window.create(buf, title)
 
   local ok, winid = pcall(determine_output_window_type(), buf, title)
   if ok == false then
-    vim.notify(winid, vim.log.levels.ERROR, {
-      title = enum.TITLE,
-    })
+    util.error(winid)
     return -1
   end
   if not vim.api.nvim_win_is_valid(winid) then
-    vim.notify("Failed to create a window", vim.log.levels.ERROR, {
-      title = enum.TITLE,
-    })
+    util.error "Failed to create a window"
     return -1
   end
 
   local ok2, err = pcall(handle_window, winid)
   if ok2 == false and type(err) == "string" then
-    vim.notify(err, vim.log.levels.ERROR, {
-      title = enum.TITLE,
-    })
+    util.error(err)
   end
 
   add_autocmd(buf)
@@ -79,24 +74,20 @@ end
 determine_output_window_type = function()
   local win_type = setup.opts.output and setup.opts.output.style or "float"
 
-  if
-    win_type == "vsplit"
-    or win_type == "vertical"
-    or win_type == "vertical split"
+  if win_type == "vsplit"
+      or win_type == "vertical"
+      or win_type == "vertical split"
   then
     return create_vsplit_window
   elseif win_type == "split" or win_type == "normal" then
     return create_split_window
-  elseif
-    win_type == "floating"
-    or win_type == "float"
-    or win_type == "popup"
+  elseif win_type == "floating"
+      or win_type == "float"
+      or win_type == "popup"
   then
     return float.create
   else
-    vim.notify("Invalid window type: " .. win_type, vim.log.levels.ERROR, {
-      title = enum.TITLE,
-    })
+    util.error("Invalid window type:", win_type)
   end
   return create_vsplit_window
 end
