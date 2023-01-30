@@ -6,9 +6,9 @@ definitions and outputs in the telescope's previewer.
 
 ## Demo
 
-https://user-images.githubusercontent.com/67372390/212735801-5dcbecc1-5d2e-4ce5-894e-fba731b3d05a.mp4
+https://user-images.githubusercontent.com/67372390/215597313-babf9442-61ba-4b7b-8689-77cb84b492c5.mp4
 
-> The demo uses the default `run_project` generator for `Go` and `Python` projects.
+> The demo uses the default generators for `Go` and `Python` projects.
 
 ## Installation
 
@@ -40,10 +40,9 @@ require("telescope").setup {
         scale = 0.4, -- output window to editor size ratio
         -- NOTE: layout and scale are only relevant when style == "float"
       },
-      --[[ Allow default generators to multiple commands for a single task, as an example
-        instead  of generating just a command for running a go project, generate a command for
-        building it aswell. ]]
-      enable_multiple_commands = false,
+      -- Directory to store the modified commands data to.
+      -- Set it to false to disable saving modified commands.
+      data_dir = Path:new(vim.fn.stdpath "data", "telescope_tasks"))
       -- other picker setup values
     },
   },

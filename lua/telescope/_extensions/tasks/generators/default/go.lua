@@ -1,6 +1,4 @@
 local util = require "telescope._extensions.tasks.util"
-local setup = require "telescope._extensions.tasks.setup"
-local env = require "telescope._extensions.tasks.generators.env"
 local Path = require "plenary.path"
 local Default = require "telescope._extensions.tasks.model.default_generator"
 
@@ -9,7 +7,6 @@ local Default = require "telescope._extensions.tasks.model.default_generator"
 ---go.mod files.
 ---
 ---go run [build flags] [-exec xprog] package [arguments...]
----go build [build flags]
 ---
 local go = Default:new {
   errorformat = "%f:%l.%c-%[%^:]%#:\\ %m,%f:%l:%c:\\ %m",
@@ -20,9 +17,8 @@ local go = Default:new {
 }
 
 local is_main_file
-local build_current_file_task
-local build_project_task
-local get_opts_string
+local run_current_file_task
+local run_project_task
 
 --- Build tasks by finding main go files in the subdirectories.
 --- If there are go.mod files, return tasks for running projects
@@ -49,114 +45,55 @@ function go.generator(buf)
         --a parent go.mod file, add a task for running the
         --project in the found file's directory.
         local cwd = path:parent():__tostring()
+        local full_path = path:__tostring()
         path:make_relative(root:__tostring())
         local name = "Go project: " .. path:__tostring()
-        table.insert(tasks, build_project_task(cwd, name))
+        table.insert(tasks, run_project_task(cwd, name, full_path))
       elseif entry == vim.api.nvim_buf_get_name(buf) then
         --NOTE: if the CURRENT file is a main go file
         --but there is no parent go.mod file, add a task
         --for only running the current file
         local cwd = vim.loop.cwd()
-        path:make_relative(cwd)
         local name = "Run current Go file"
-        table.insert(tasks, build_current_file_task(entry, cwd, name))
+        table.insert(tasks, run_current_file_task(entry, cwd, name))
       end
     end
   end
   return tasks
 end
 
-build_project_task = function(cwd, name)
-  local executable = env.get({ "GO", "EXECUTABLE" }, "go")
-  local build_flags = env.get({ "GO", "RUN", "BUILD_FLAGS" }, {})
-  local arguments = env.get({ "GO", "RUN", "ARGUMENTS" }, {})
-  local xprog = env.get({ "GO", "RUN", "XPROG" }, false)
-  local go_env = env.get({ "GO", "ENV" }, nil)
+run_project_task = function(cwd, name, full_path)
+  local cmd = { "go", "run", "." }
 
-  local run_cmd = { executable, "run" }
-  local build_cmd = { executable, "build" }
-
-  local flags_string = get_opts_string(build_flags or {})
-  if flags_string then
-    table.insert(run_cmd, flags_string)
-    table.insert(build_cmd, flags_string)
-  end
-  if xprog then
-    table.insert(run_cmd, "-exec xprog")
-  end
-  table.insert(run_cmd, ".")
-  local args_string = get_opts_string(arguments or {})
-  if args_string then
-    table.insert(run_cmd, args_string)
-  end
-  local cmd = {
-    run = run_cmd,
-    build = build_cmd,
-  }
-  if not setup.opts.enable_multiple_commands then
-    cmd = run_cmd
-  end
-  return {
+  local t = {
     name,
     cmd = cmd,
-    env = go_env,
     cwd = cwd,
+    __meta = {
+      name = "go_run_project_" .. full_path:gsub("/", "_"):gsub("\\", "-"),
+    },
   }
+  if type(vim.g.GO_ENV) == "table" and next(vim.g.GO_ENV) then
+    t.env = vim.g.GO_ENV
+  end
+  return t
 end
 
-build_current_file_task = function(package, cwd, name)
-  local executable = env.get({ "GO", "EXECUTABLE" }, "go")
-  local build_flags = env.get({ "GO", "RUN", "BUILD_FLAGS" }, {})
-  local arguments = env.get({ "GO", "RUN", "ARGUMENTS" }, {})
-  local xprog = env.get({ "GO", "RUN", "XPROG" }, false)
-  local go_env = env.get({ "GO", "ENV" }, nil)
+run_current_file_task = function(package, cwd, name)
+  local cmd = { "go", "run", package }
 
-  local cmd = { executable, "run" }
-
-  local flags_string = get_opts_string(build_flags or {})
-  if flags_string then
-    table.insert(cmd, flags_string)
-  end
-  if xprog then
-    table.insert(cmd, "-exec xprog")
-  end
-  if package then
-    table.insert(cmd, package)
-  end
-  local args_string = get_opts_string(arguments or {})
-  if args_string then
-    table.insert(cmd, args_string)
-  end
-  return {
+  local t = {
     name,
     cmd = cmd,
-    env = go_env,
     cwd = cwd,
+    __meta = {
+      name = "go_run_file_" .. package:gsub("/", "_"):gsub("\\", "-"),
+    },
   }
-end
-
-get_opts_string = function(opts)
-  if not opts or next(opts) == nil then
-    return nil
+  if type(vim.g.GO_ENV) == "table" and next(vim.g.GO_ENV) then
+    t.env = vim.g.GO_ENV
   end
-  local s = ""
-  for k, v in pairs(opts) do
-    if s:len() > 0 then
-      s = s .. " "
-    end
-    if type(k) == "string" then
-      s = s .. k .. " "
-    end
-    if type(v) == "string" then
-      s = s .. v
-    else
-      s = s .. vim.inspect(v)
-    end
-  end
-  if s:len() == 0 then
-    return nil
-  end
-  return s
+  return t
 end
 
 --- Check whether the provided file contains both

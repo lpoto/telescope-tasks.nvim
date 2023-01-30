@@ -94,15 +94,6 @@ function executor.run(task, on_exit, on_start)
     return r
   end
 
-  local _, keys = task:get_cmd()
-  if keys then
-    if not next(keys) then
-      return false
-    end
-    popup.open(keys, safely_run)
-    return false
-  end
-
   return safely_run()
 end
 
@@ -187,7 +178,7 @@ end
 run_task = function(task, on_exit, cmd_name)
   --open terminal in that one instead of creating a new one
   local term_buf =
-  output_buffer.create(executor.get_task_output_buf(task.name))
+    output_buffer.create(executor.get_task_output_buf(task.name))
   if not term_buf or not vim.api.nvim_buf_is_valid(term_buf) then
     return false
   end

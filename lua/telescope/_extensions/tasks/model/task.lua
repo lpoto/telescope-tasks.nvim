@@ -1,4 +1,5 @@
 local util = require "telescope._extensions.tasks.util"
+local setup = require "telescope._extensions.tasks.setup"
 
 ---@class Task
 ---@field name string: This is taken from the key in vim.g.telescope_tasks table
@@ -7,12 +8,14 @@ local util = require "telescope._extensions.tasks.util"
 ---@field cwd string: The working directory of the task.
 ---@field errorformat string|nil
 ---@field __generator_opts table|nil
----@field get_cmd function
 ---@field create_job function
+---@field __meta table
 
 ---@type Task
 local Task = {}
 Task.__index = Task
+
+local format_cmd
 
 ---Create an task from a table
 ---
@@ -92,22 +95,35 @@ function Task:new(o, generator_opts)
     "Task '" .. a.name .. "'s env should be a table!"
   )
   a.env = o.env or {}
+
+  if type(o.__meta) == "table" then
+    a.__meta = o.__meta
+    if type(a.__meta.name) == "string" then
+      local data_dir = setup.opts.data_dir
+      if type(data_dir) == "string" then
+        local data = util.fetch_data(data_dir, a.__meta.name)
+        if type(data) == "string" then
+          a.cmd = data
+        end
+      end
+    end
+  else
+    assert(
+      o.__meta == nil or type(o.__meta) == "table",
+      "__meta field should be a table"
+    )
+  end
+
+  a.cmd = format_cmd(a.cmd)
+
   return a
 end
 
 local copy_cmd
 
 ---@return function?
-function Task:create_job(callback, cmd_name)
-  local cmds, keys = self:get_cmd()
-  local cmd = cmds
-  if keys and next(keys) then
-    if cmd_name and cmds[cmd_name] then
-      cmd = cmds[cmd_name]
-    else
-      cmd = cmds[keys[1]]
-    end
-  end
+function Task:create_job(callback)
+  local cmd = self.cmd
   cmd = copy_cmd(cmd)
 
   local opts = {
@@ -122,14 +138,27 @@ function Task:create_job(callback, cmd_name)
   if type(cmd_string) == "table" then
     cmd_string = table.concat(cmd_string, " ")
   end
+  cmd_string = util.trim_string(cmd_string)
 
-  cmd_string = vim.fn.input("$ ", cmd_string .. " ")
-  if not cmd_string or cmd_string:len() == 0 then
+  local cmd_string2 = vim.fn.input("$ ", cmd_string .. " ")
+  if not cmd_string2 or cmd_string2:len() == 0 then
     return nil
   end
-  cmd = vim.split(cmd_string, " ")
-  if vim.fn.executable(cmd[1]) ~= 1 then
-    cmd = table.concat(cmd, " ")
+  cmd_string2 = util.trim_string(cmd_string2)
+
+  local set_cmd = false
+  if type(self.__meta) == "table" and type(self.__meta.name) == "string" then
+    if cmd_string2 ~= cmd_string then
+      local data_dir = setup.opts.data_dir
+      if type(data_dir) == "string" then
+        util.save_data(data_dir, self.__meta.name, cmd_string2)
+        set_cmd = true
+      end
+    end
+  end
+  cmd = format_cmd(cmd_string2)
+  if set_cmd then
+    self.cmd = cmd
   end
 
   return function(buf)
@@ -144,29 +173,6 @@ function Task:create_job(callback, cmd_name)
     end)
     return job_id
   end
-end
-
----@return string|table: The command
----@return table|nil: Names of commands when there are multiple
-function Task:get_cmd()
-  local cmd = self.cmd
-  if type(cmd) == "string" then
-    return cmd, nil
-  end
-  local _cmd = {}
-  local keys = {}
-  local multiple = false
-  for k, v in pairs(cmd) do
-    if type(k) ~= "number" then
-      multiple = true
-    end
-    table.insert(keys, k)
-    _cmd[k] = v
-  end
-  if multiple then
-    return _cmd, keys
-  end
-  return _cmd, nil
 end
 
 function Task.default_arguments_prompt()
@@ -293,6 +299,26 @@ copy_cmd = function(cmd)
     end
   end
   return _cmd
+end
+
+format_cmd = function(cmd)
+  local cmd2 = {}
+  if type(cmd) == "string" then
+    cmd = vim.split(cmd, " ")
+  end
+  for _, v in ipairs(cmd) do
+    if type(v) == "string" and v:len() > 0 then
+      table.insert(cmd2, v)
+    end
+  end
+  if #cmd2 == 0 then
+    return ""
+  end
+  cmd = cmd2
+  if vim.fn.executable(cmd[1]) ~= 1 then
+    cmd = table.concat(cmd, " ")
+  end
+  return cmd
 end
 
 return Task
