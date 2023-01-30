@@ -58,6 +58,45 @@ function util.parent_dir_includes(files_and_directories)
   return ok
 end
 
+---@param dir string
+---@param name string
+---@param data string
+function util.save_data(dir, name, data)
+  assert(type(dir) == "string", "Data directory should be a string")
+  assert(type(name) == "string", "Data name should be a string")
+  assert(type(data) == "string", "Cannot save non string data")
+
+  local path = Path:new(dir)
+  if not path:is_dir() then
+    path:mkdir()
+  end
+  path = path:joinpath(name .. ".txt")
+  if not path:is_file() then
+    path:touch()
+  end
+  path:write(data, "w")
+end
+
+---@param dir string
+---@param name string
+---@return string|nil
+function util.fetch_data(dir, name)
+  assert(type(dir) == "string", "Data directory should be a string")
+  assert(type(name) == "string", "Data name should be a string")
+
+  local path = Path:new(dir):joinpath(name .. ".txt")
+  if not path:is_file() then
+    return nil
+  end
+  return path:_read()
+end
+
+---@param s string
+---@return string
+function util.trim_string(s)
+  return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
+
 find_root = function(patterns, start)
   local start_path = Path:new(start)
   local parents = start_path:parents()

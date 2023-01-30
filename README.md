@@ -40,10 +40,9 @@ require("telescope").setup {
         scale = 0.4, -- output window to editor size ratio
         -- NOTE: layout and scale are only relevant when style == "float"
       },
-      --[[ Allow default generators to multiple commands for a single task, as an example
-        instead  of generating just a command for running a go project, generate a command for
-        building it aswell. ]]
-      enable_multiple_commands = false,
+      -- Directory to store the modified commands data to.
+      -- Set it to false to disable saving modified commands.
+      data_dir = Path:new(vim.fn.stdpath "data", "telescope_tasks"))
       -- other picker setup values
     },
   },
