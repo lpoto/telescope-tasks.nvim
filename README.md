@@ -8,7 +8,7 @@ definitions and outputs in the telescope's previewer.
 
 https://user-images.githubusercontent.com/67372390/212735801-5dcbecc1-5d2e-4ce5-894e-fba731b3d05a.mp4
 
-> The demo uses the default `run_project` generator for `Go` and `Python` projects.
+> The demo uses the default generators for `Go` and `Python` projects.
 
 ## Installation
 
