@@ -6,10 +6,11 @@ local setup = require "telescope._extensions.tasks.setup"
 ---@field env table: A table of environment variables.
 ---@field cmd table|string: The command, may either be a string or a table. When a table, the first element should be executable.
 ---@field cwd string: The working directory of the task.
+---@field lock boolean|nil: When true, don't ask for input when creating a job.
 ---@field errorformat string|nil
 ---@field __generator_opts table|nil
----@field create_job function
 ---@field __meta table
+---@field create_job function
 
 ---@type Task
 local Task = {}
@@ -96,6 +97,13 @@ function Task:new(o, generator_opts)
   )
   a.env = o.env or {}
 
+  local lock = o.lock
+  assert(
+    lock == nil or type(lock) == "boolean",
+    "Task '" .. a.name .. "'s lock should be a boolean!"
+  )
+  a.lock = lock
+
   if type(o.__meta) == "table" then
     a.__meta = o.__meta
     if type(a.__meta.name) == "string" then
@@ -121,6 +129,10 @@ end
 
 local copy_cmd
 
+---Create a job from the task's fields.
+---Returns a function that startes the job in the provided buffer
+---and returns the started job's id.
+---
 ---@return function?
 function Task:create_job(callback)
   local cmd = self.cmd
@@ -134,31 +146,33 @@ function Task:create_job(callback)
     on_exit = callback,
   }
 
-  local cmd_string = cmd
-  if type(cmd_string) == "table" then
-    cmd_string = table.concat(cmd_string, " ")
-  end
-  cmd_string = util.trim_string(cmd_string)
+  if not self.lock then
+    local cmd_string = cmd
+    if type(cmd_string) == "table" then
+      cmd_string = table.concat(cmd_string, " ")
+    end
+    cmd_string = util.trim_string(cmd_string)
 
-  local cmd_string2 = vim.fn.input("$ ", cmd_string .. " ")
-  if not cmd_string2 or cmd_string2:len() == 0 then
-    return nil
-  end
-  cmd_string2 = util.trim_string(cmd_string2)
+    local cmd_string2 = vim.fn.input("$ ", cmd_string .. " ")
+    if not cmd_string2 or cmd_string2:len() == 0 then
+      return nil
+    end
+    cmd_string2 = util.trim_string(cmd_string2)
 
-  local set_cmd = false
-  if type(self.__meta) == "table" and type(self.__meta.name) == "string" then
-    if cmd_string2 ~= cmd_string then
-      local data_dir = setup.opts.data_dir
-      if type(data_dir) == "string" then
-        util.save_data(data_dir, self.__meta.name, cmd_string2)
-        set_cmd = true
+    local set_cmd = false
+    if type(self.__meta) == "table" and type(self.__meta.name) == "string" then
+      if cmd_string2 ~= cmd_string then
+        local data_dir = setup.opts.data_dir
+        if type(data_dir) == "string" then
+          util.save_data(data_dir, self.__meta.name, cmd_string2)
+          set_cmd = true
+        end
       end
     end
-  end
-  cmd = format_cmd(cmd_string2)
-  if set_cmd then
-    self.cmd = cmd
+    cmd = format_cmd(cmd_string2)
+    if set_cmd then
+      self.cmd = cmd
+    end
   end
 
   return function(buf)
@@ -173,21 +187,6 @@ function Task:create_job(callback)
     end)
     return job_id
   end
-end
-
-function Task.default_arguments_prompt()
-  local r = vim.fn.input {
-    prompt = "Arguments: ",
-    default = nil,
-    cancelreturn = nil,
-  }
-  if not r or type(r) == "string" and r:len() == 0 then
-    return nil
-  end
-  if type(r) == "string" then
-    return r
-  end
-  return vim.inspect(r)
 end
 
 local quote_string
