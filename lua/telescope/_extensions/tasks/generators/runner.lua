@@ -29,9 +29,12 @@ function runner.run(buf)
 
     local found_tasks = {}
 
+    local generators_supported = true
+
     -- NOTE: should run only when current buftype is "" and
     -- the provided buf's buftype is ""
     if not should_run_generators(buf) then
+      generators_supported = false
       found_tasks = last_tasks
     else
       for _, generator in ipairs(current_generators or {}) do
@@ -45,6 +48,10 @@ function runner.run(buf)
 
     found_tasks =
       vim.tbl_extend("force", found_tasks, executor.get_running_tasks() or {})
+
+    if not generators_supported and not next(found_tasks or {}) then
+      util.warn "Generating tasks is not supported in current buffer"
+    end
 
     return found_tasks
   end)
