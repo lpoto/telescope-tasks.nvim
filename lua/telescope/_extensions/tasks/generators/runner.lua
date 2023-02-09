@@ -1,4 +1,4 @@
-local util = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.util"
 local executor = require "telescope._extensions.tasks.executor"
 local State = require "telescope._extensions.tasks.model.state"
 
@@ -58,7 +58,7 @@ function runner.run(buf)
 
   state = nil
 
-  if not ok and type(tasks) == "string" then
+  if not ok then
     util.error(tasks)
     return {}
   end
