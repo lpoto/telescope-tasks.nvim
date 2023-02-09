@@ -76,7 +76,7 @@ should_run_generators = function(buf)
   local cur_buf = vim.api.nvim_get_current_buf()
   local buftype = vim.api.nvim_buf_get_option(buf, "buftype")
   local cur_buftype = vim.api.nvim_buf_get_option(cur_buf, "buftype")
-  return buftype:len() == 0 and cur_buftype:len() == 0
+  return (buftype:len() == 0 or buftype == "nofile") and cur_buftype:len() == 0
 end
 
 return runner
