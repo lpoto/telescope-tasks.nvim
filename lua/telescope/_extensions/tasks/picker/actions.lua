@@ -24,7 +24,23 @@ function actions.select_task(prompt_bufnr)
     refresh_picker()
   end, function()
     refresh_picker(prompt_bufnr)
-  end)
+  end, true)
+end
+
+function actions.run_task_with_modyfiable_command(prompt_bufnr)
+  local selection = action_state.get_selected_entry()
+  local task = selection.value
+
+  if executor.is_running(task.name) then
+    util.error "Task is already running"
+    return
+  end
+
+  executor.run(task, function()
+    refresh_picker()
+  end, function()
+    refresh_picker(prompt_bufnr)
+  end, false)
 end
 
 function actions.selected_task_output(prompt_bufnr)
