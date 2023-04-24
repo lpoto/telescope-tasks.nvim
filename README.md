@@ -79,11 +79,15 @@ You may either use the [Default Generators](./DEFAULT_GENERATORS.md), or add [Cu
 
 ## Mappings
 
-| Key     | Description                                                 |
-| ------- | ----------------------------------------------------------- |
-| `<CR>`  | Run the selected task, or kill it if it is already running. |
-| `<C-o>` | Display the output of the selected task in another window.  |
-| `<C-d>` | Delete the output of the selected task.                     |
-| `<C-k>` | Scroll the previewer up.                                    |
-| `<C-j>` | Scroll the previewer down.                                  |
-| `<C-q>` | Send a task's output to quickfix.                           |
+| Key     | Description                                                               |
+| ------- | --------------------------------------------------------------------------|
+| `<CR>`  | Run the selected task, or kill it if it is already running.               |
+| `<C-a>` | Run the selected task, but allow modifying the command before running it. |
+| `<C-o>` | Display the output of the selected task in another window.                |
+| `<C-d>` | Delete the output of the selected task.                                   |
+| `<C-k>` | Scroll the previewer up.                                                  |
+| `<C-j>` | Scroll the previewer down.                                                |
+| `<C-q>` | Send a task's output to quickfix.                                         |
+
+**NOTE** modified command will be saved, so the next time you run the same task,
+the modified command will be used.

@@ -6,7 +6,6 @@ local setup = require "telescope._extensions.tasks.setup"
 ---@field env table: A table of environment variables.
 ---@field cmd table|string: The command, may either be a string or a table. When a table, the first element should be executable.
 ---@field cwd string: The working directory of the task.
----@field lock boolean|nil: When true, don't ask for input when creating a job.
 ---@field errorformat string|nil
 ---@field __generator_opts table|nil
 ---@field __meta table
@@ -97,13 +96,6 @@ function Task:new(o, generator_opts)
   )
   a.env = o.env or {}
 
-  local lock = o.lock
-  assert(
-    lock == nil or type(lock) == "boolean",
-    "Task '" .. a.name .. "'s lock should be a boolean!"
-  )
-  a.lock = lock
-
   if type(o.__meta) == "table" then
     a.__meta = o.__meta
     if type(a.__meta.name) == "string" then
@@ -134,7 +126,7 @@ local copy_cmd
 ---and returns the started job's id.
 ---
 ---@return function?
-function Task:create_job(callback)
+function Task:create_job(callback, lock)
   local cmd = self.cmd
   cmd = copy_cmd(cmd)
 
@@ -146,7 +138,7 @@ function Task:create_job(callback)
     on_exit = callback,
   }
 
-  if not self.lock then
+  if not lock then
     local cmd_string = cmd
     if type(cmd_string) == "table" then
       cmd_string = table.concat(cmd_string, " ")
