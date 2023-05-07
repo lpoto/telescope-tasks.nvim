@@ -91,7 +91,7 @@ local function display_definition_buf(status, task)
     previewer.old_preview_buf
   )
   if ok == false then
-    log.error(e)
+    util.error(e)
   end
 end
 
