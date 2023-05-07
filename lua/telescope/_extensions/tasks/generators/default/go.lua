@@ -46,7 +46,7 @@ function go.generator(buf)
         --project in the found file's directory.
         local cwd = path:parent():__tostring()
         local full_path = path:__tostring()
-        path:make_relative(root:__tostring())
+        path:make_relative(vim.fn.getcwd())
         local name = "Go project: " .. path:__tostring()
         table.insert(tasks, run_project_task(cwd, name, full_path))
       elseif entry == vim.api.nvim_buf_get_name(buf) then
