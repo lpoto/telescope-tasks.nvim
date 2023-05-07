@@ -82,7 +82,25 @@ local function display_definition_buf(status, task)
   pcall(
     vim.api.nvim_buf_set_option,
     previewer.old_preview_buf,
+    "buftype",
+    "nofile"
+  )
+  pcall(
+    vim.api.nvim_buf_set_option,
+    previewer.old_preview_buf,
+    "bufhidden",
+    "wipe"
+  )
+  pcall(
+    vim.api.nvim_buf_set_option,
+    previewer.old_preview_buf,
     "syntax",
+    "yaml"
+  )
+  pcall(
+    vim.api.nvim_buf_set_option,
+    previewer.old_preview_buf,
+    "filetype",
     "yaml"
   )
   local ok, e = pcall(
