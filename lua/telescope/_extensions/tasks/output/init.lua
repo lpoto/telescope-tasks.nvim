@@ -3,6 +3,7 @@ local util = require "telescope._extensions.tasks.util"
 local executor = require "telescope._extensions.tasks.executor"
 local buffer = require "telescope._extensions.tasks.output.buffer"
 local window = require "telescope._extensions.tasks.output.window"
+local telescope_actions = require "telescope.actions"
 
 local output = {}
 
@@ -51,11 +52,13 @@ function output.toggle_last()
     return
   end
 
-  if vim.api.nvim_buf_get_option(0, "filetype")
+  if
+      vim.api.nvim_buf_get_option(0, "filetype")
       == enum.TELESCOPE_PROMPT_FILETYPE
   then
     -- NOTE: close telescope popup if open
-    vim.api.nvim_buf_delete(0, { force = true })
+    local prompt_bufnr = vim.api.nvim_get_current_buf()
+    pcall(telescope_actions.close, prompt_bufnr)
   end
 
   open_last_task_output(name, buf)
