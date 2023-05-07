@@ -200,10 +200,10 @@ function Task:to_yaml_definition()
           table.insert(
             def,
             "  "
-              .. key
-              .. ": ["
-              .. table.concat(quote_table(value), ", ")
-              .. "]"
+            .. key
+            .. ": ["
+            .. table.concat(quote_table(value), ", ")
+            .. "]"
           )
         end
       end
@@ -264,19 +264,13 @@ quote_table = function(v)
 end
 
 quote_string = function(v)
-  if
-    type(v) == "string"
-    and (string.find(v, "'") or string.find(v, "`") or string.find(v, '"'))
-  then
-    if string.find(v, "'") == nil then
-      v = "'" .. v .. "'"
-    elseif string.find(v, '"') == nil then
-      v = '"' .. v .. '"'
-    elseif string.find(v, "`") == nil then
-      v = "`" .. v .. "`"
-    end
+  if type(v) ~= "string" then
+    return v
   end
-  return v
+  local a = string.find(v, "'")
+  local b = string.find(v, '"')
+  local c = string.find(v, "`")
+  return vim.inspect(v)
 end
 
 copy_cmd = function(cmd)
