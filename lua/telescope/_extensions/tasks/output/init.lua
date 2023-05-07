@@ -40,11 +40,6 @@ end
 ---Warns when there wasn't any previous outputs opened,
 ---or the previous output buffer is no longer available.
 function output.toggle_last()
-  -- Get the buffer from the provided function
-  if output.close_output_windows() then
-    return
-  end
-
   local buf, name = executor.get_last_task_output_buf()
 
   if not buf then
@@ -59,6 +54,11 @@ function output.toggle_last()
     -- NOTE: close telescope popup if open
     local prompt_bufnr = vim.api.nvim_get_current_buf()
     pcall(telescope_actions.close, prompt_bufnr)
+  end
+
+  -- Get the buffer from the provided function
+  if output.close_output_windows() then
+    return
   end
 
   open_last_task_output(name, buf)
