@@ -1,10 +1,10 @@
 local util = require "telescope._extensions.tasks.util"
-local popup = require "telescope._extensions.tasks.executor.popup"
 local output_buffer = require "telescope._extensions.tasks.output.buffer"
 
 local idx = 0
 local running_tasks = {}
 local buffers_to_delete = {}
+local timestamps = {}
 
 local run_task
 
@@ -19,11 +19,24 @@ function executor.get_task_output_buf(name)
   if running_tasks[name] == nil then
     return nil
   end
-  return running_tasks[name].buf
+  local buf = running_tasks[name].buf
+  if not buf or not vim.api.nvim_buf_is_valid(buf) then
+    return nil
+  end
+  return buf
 end
 
 function executor.is_running(name)
   return executor.get_job_id(name) ~= nil
+end
+
+---Returns the timestamp of the last run of the task
+---identified by the provided name.
+---
+---@param name string: name of an task
+---@return number?: the timestamp
+function executor.get_task_latest_timestamp(name)
+  return timestamps[name]
 end
 
 ---Returns the buffer number for the task identified
@@ -83,13 +96,21 @@ function executor.run(task, on_exit, on_start, lock)
     return false
   end
 
+  local on_exit2 = function(...)
+    timestamps[task.name] = os.time()
+    if type(on_exit) == "function" then
+      on_exit(...)
+    end
+  end
+
   local safely_run = function()
-    local ok, r = pcall(run_task, task, on_exit, lock)
+    local ok, r = pcall(run_task, task, on_exit2, lock)
     if not ok and type(r) == "string" then
       util.error(r)
       return false
     end
     if r then
+      timestamps[task.name] = os.time()
       on_start()
     end
     return r
@@ -179,7 +200,7 @@ end
 run_task = function(task, on_exit, lock)
   --open terminal in that one instead of creating a new one
   local term_buf =
-    output_buffer.create(executor.get_task_output_buf(task.name))
+      output_buffer.create(executor.get_task_output_buf(task.name))
   if not term_buf or not vim.api.nvim_buf_is_valid(term_buf) then
     return false
   end

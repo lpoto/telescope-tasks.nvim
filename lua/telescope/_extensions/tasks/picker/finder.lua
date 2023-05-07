@@ -7,19 +7,22 @@ local runner = require "telescope._extensions.tasks.generators.runner"
 local finder = {}
 
 local get_task_display
+local order_tasks
 
 ---Create a telescope finder for the currently available tasks.
 ---
 ---@param buf number?: Buffer from where the picker was opened
 ---(current buffer by default)
 ---@param exit_on_no_results boolean?: Return nil and warn if no results found.
+---@param sort boolean?: Sort the results by timestamp
 ---@return table?: a telescope finder
-function finder.available_tasks_finder(buf, exit_on_no_results)
-  local tasks = vim.tbl_values(runner.run(buf) or {})
+function finder.available_tasks_finder(buf, exit_on_no_results, sort)
+  local tasks = runner.run(buf) or {}
   if exit_on_no_results and not next(tasks) then
     util.warn "There are no available tasks"
     return nil
   end
+  tasks = order_tasks(tasks, sort)
 
   return finders.new_table {
     results = tasks,
@@ -60,6 +63,61 @@ get_task_display = function(task)
     { "" },
     task.name,
   }
+end
+
+local task_names = {}
+local function get_tasks_ordering(tasks, new)
+  if not new and next(task_names) then
+    return task_names
+  end
+  task_names = {}
+  for _, task in pairs(tasks) do
+    table.insert(task_names, task.name)
+  end
+  table.sort(task_names, function(a, b)
+    local a_running = executor.is_running(a)
+    local b_running = executor.is_running(b)
+    if a_running and not b_running then
+      return true
+    elseif not a_running and b_running then
+      return false
+    end
+    local output_buf_a = executor.get_task_output_buf(a)
+    local output_buf_b = executor.get_task_output_buf(b)
+    if output_buf_a ~= nil and output_buf_b == nil then
+      return true
+    elseif output_buf_a == nil and output_buf_b ~= nil then
+      return false
+    end
+    local a_timestamp = executor.get_task_latest_timestamp(a)
+    local b_timestamp = executor.get_task_latest_timestamp(b)
+    if a_timestamp ~= nil and b_timestamp == nil then
+      return true
+    elseif a_timestamp == nil and b_timestamp ~= nil then
+      return false
+    end
+    return a_timestamp == nil and b_timestamp == nil
+        or a_timestamp > b_timestamp
+  end)
+  return task_names
+end
+
+function order_tasks(tasks, regen_ordering)
+  local new_tasks = {}
+  local inserted = {}
+  local ordering = get_tasks_ordering(tasks, regen_ordering) or {}
+  for _, name in ipairs(ordering) do
+    inserted[name] = true
+    if tasks[name] then
+      table.insert(new_tasks, tasks[name])
+    end
+  end
+  for name, task in pairs(tasks) do
+    if not inserted[name] then
+      table.insert(new_tasks, task)
+    end
+  end
+  return new_tasks
 end
 
 return finder

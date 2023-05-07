@@ -7,7 +7,7 @@ local conf = require("telescope.config").values
 
 local available_tasks_telescope_picker = function(options)
   local buf = vim.api.nvim_get_current_buf()
-  local tasks_finder = finder.available_tasks_finder(buf, true)
+  local tasks_finder = finder.available_tasks_finder(buf, true, true)
   if not tasks_finder then
     return
   end
