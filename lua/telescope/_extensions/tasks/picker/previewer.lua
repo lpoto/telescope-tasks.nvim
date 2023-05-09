@@ -71,13 +71,24 @@ end
 
 local function display_definition_buf(status, task)
   previewer.old_preview_buf = vim.api.nvim_create_buf(false, true)
+  local def = task:get_definition()
+  local lines = {}
+  for _, item in ipairs(def) do
+    if type(item) == "table" then
+      if not next(item) then
+        table.insert(lines, "")
+      else
+        table.insert(lines, item.key .. ": " .. item.value)
+      end
+    end
+  end
   pcall(
     vim.api.nvim_buf_set_lines,
     previewer.old_preview_buf,
     0,
     -1,
     false,
-    task:to_yaml_definition()
+    lines
   )
   pcall(
     vim.api.nvim_buf_set_option,
@@ -91,18 +102,33 @@ local function display_definition_buf(status, task)
     "bufhidden",
     "wipe"
   )
-  pcall(
-    vim.api.nvim_buf_set_option,
-    previewer.old_preview_buf,
-    "syntax",
-    "yaml"
-  )
-  pcall(
-    vim.api.nvim_buf_set_option,
-    previewer.old_preview_buf,
-    "filetype",
-    "yaml"
-  )
+  for i, item in ipairs(def) do
+    if type(item) == "table" and next(item) then
+      local key_hl = "Conditional"
+      local value_hl = "Normal"
+      if item.key:match "^#" then
+        key_hl = "Comment"
+        value_hl = "Comment"
+      end
+      local n = vim.fn.strchars(item.key)
+      vim.api.nvim_buf_add_highlight(
+        previewer.old_preview_buf,
+        -1,
+        key_hl,
+        i - 1,
+        0,
+        n
+      )
+      vim.api.nvim_buf_add_highlight(
+        previewer.old_preview_buf,
+        -1,
+        value_hl,
+        i - 1,
+        n + 2,
+        -1
+      )
+    end
+  end
   local ok, e = pcall(
     vim.api.nvim_win_set_buf,
     status.preview_win,
@@ -138,9 +164,10 @@ teardown_fn = function(self)
     return
   end
   local winid = self.status.preview_win
-  if type(winid) ~= "number"
-      or winid == -1
-      or not vim.api.nvim_win_is_valid(winid)
+  if
+    type(winid) ~= "number"
+    or winid == -1
+    or not vim.api.nvim_win_is_valid(winid)
   then
     return
   end
