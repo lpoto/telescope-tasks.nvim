@@ -181,96 +181,52 @@ function Task:create_job(callback, lock)
   end
 end
 
-local quote_string
-local quote_table
-function Task:to_yaml_definition()
+function Task:get_definition()
   local def = {}
-  table.insert(def, "name: " .. quote_string(self.name))
+  table.insert(def, { key = "name", value = self.name })
   local cmd = self.cmd
   if type(cmd) == "string" then
-    table.insert(def, "cmd: " .. quote_string(cmd))
+    table.insert(def, { key = "cmd", value = cmd })
   elseif type(cmd) == "table" then
-    local k, _ = next(cmd)
-    if type(k) == "string" then
-      table.insert(def, "cmd:")
-      for key, value in pairs(cmd) do
-        if type(value) == "string" then
-          table.insert(def, "  " .. key .. ": " .. quote_string(value))
-        elseif type(value) == "table" then
-          table.insert(
-            def,
-            "  "
-            .. key
-            .. ": ["
-            .. table.concat(quote_table(value), ", ")
-            .. "]"
-          )
-        end
-      end
-    else
-      table.insert(
-        def,
-        "cmd: " .. "[" .. table.concat(quote_table(cmd), ", ") .. "]"
-      )
-    end
+    table.insert(
+      def,
+      { key = "cmd", value = "[" .. table.concat(cmd, ", ") .. "]" }
+    )
+  else
+    table.insert(def, { key = "cmd", value = table.concat(cmd) })
   end
   if type(self.cwd) == "string" then
-    table.insert(def, "cwd: " .. quote_string(self.cwd))
+    table.insert(def, { key = "cwd", value = self.cwd })
   else
-    table.insert(def, "cwd: " .. quote_string(vim.inspect(self.cwd)))
+    table.insert(def, { key = "cwd", vim.inspect(self.cwd) })
   end
-  table.insert(def, "env: ")
-  for k, v in pairs(self.env) do
-    table.insert(def, "  " .. k .. ": " .. quote_string(v))
+  if type(self.env) == "table" then
+    table.insert(
+      def,
+      { key = "env", value = "[" .. table.concat(self.env, ", ") .. "]" }
+    )
   end
 
   if self.__generator_opts then
-    table.insert(def, "")
-    table.insert(def, "# generator:")
-    if next(self.__generator_opts or {}) then
-      if self.__generator_opts.name then
-        table.insert(
-          def,
-          "#   name: " .. quote_string(self.__generator_opts.name)
-        )
-      end
+    table.insert(def, {})
+    if next(self.__generator_opts or {}) and self.__generator_opts.name then
+      table.insert(
+        def,
+        { key = "#  generator", value = self.__generator_opts.name }
+      )
       for k, v in pairs(self.__generator_opts) do
         if k ~= "name" and type(v) == "table" then
-          local s = {}
-          for _, v2 in ipairs(v) do
-            table.insert(s, quote_string(v2))
-          end
-          local str = table.concat(s, ", ")
-          table.insert(def, "#   " .. k .. ": " .. "[" .. str .. "]")
+          table.insert(
+            def,
+            { key = "#   " .. k, value = "[" .. table.concat(v, ", ") .. "]" }
+          )
         elseif k == "experimental" and v then
-          table.insert(def, "#   " .. k .. ": " .. "true")
+          table.insert(def, { key = "#   " .. k, value = "true" })
         end
       end
     end
   end
   return def
-end
-
-quote_table = function(v)
-  local t = {}
-  for k, s in pairs(v) do
-    if type(s) == "string" then
-      t[k] = quote_string(s)
-    else
-      t[k] = s
-    end
-  end
-  return t
-end
-
-quote_string = function(v)
-  if type(v) ~= "string" then
-    return v
-  end
-  local a = string.find(v, "'")
-  local b = string.find(v, '"')
-  local c = string.find(v, "`")
-  return vim.inspect(v)
 end
 
 copy_cmd = function(cmd)
