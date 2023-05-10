@@ -95,9 +95,10 @@ local function get_tasks_ordering(tasks, new)
       return true
     elseif a_timestamp == nil and b_timestamp ~= nil then
       return false
+    elseif a_timestamp == nil and b_timestamp == nil then
+      return a < b
     end
-    return a_timestamp == nil and b_timestamp == nil
-        or a_timestamp > b_timestamp
+    return a_timestamp > b_timestamp
   end)
   return task_names
 end
