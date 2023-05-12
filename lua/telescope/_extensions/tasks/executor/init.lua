@@ -90,7 +90,8 @@ end
 ---@param on_exit function: A function called when a started task exits.
 ---@param on_start function: A function called when a task is started
 ---@param lock boolean: Whether to allow modyfing the executed command or not
-function executor.run(task, on_exit, on_start, lock)
+---@param save_modified_command boolean: Whether to save the modified command or not
+function executor.run(task, on_exit, on_start, lock, save_modified_command)
   if executor.is_running(task.name) == true then
     util.warn("Task '" .. task.name .. "' is already running!")
     return false
@@ -104,7 +105,7 @@ function executor.run(task, on_exit, on_start, lock)
   end
 
   local safely_run = function()
-    local ok, r = pcall(run_task, task, on_exit2, lock)
+    local ok, r = pcall(run_task, task, on_exit2, lock, save_modified_command)
     if not ok and type(r) == "string" then
       util.error(r)
       return false
@@ -197,7 +198,9 @@ end
 
 ---@param task Task
 ---@param on_exit function?
-run_task = function(task, on_exit, lock)
+---@param lock boolean?
+---@param save_modified_command boolean?
+run_task = function(task, on_exit, lock, save_modified_command)
   --open terminal in that one instead of creating a new one
   local term_buf =
       output_buffer.create(executor.get_task_output_buf(task.name))
@@ -206,7 +209,8 @@ run_task = function(task, on_exit, lock)
   end
 
   -- NOTE: Gather job options from the task
-  local job = task:create_job(on_task_exit(task, on_exit), lock)
+  local job =
+      task:create_job(on_task_exit(task, on_exit), lock, save_modified_command)
   if not job then
     return
   end

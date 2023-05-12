@@ -24,7 +24,7 @@ function actions.select_task(prompt_bufnr)
     refresh_picker()
   end, function()
     refresh_picker(prompt_bufnr)
-  end, true)
+  end, true, false)
 end
 
 function actions.run_task_with_modyfiable_command(prompt_bufnr)
@@ -40,7 +40,23 @@ function actions.run_task_with_modyfiable_command(prompt_bufnr)
     refresh_picker()
   end, function()
     refresh_picker(prompt_bufnr)
-  end, false)
+  end, false, false)
+end
+
+function actions.run_task_and_save_modified_command(prompt_bufnr)
+  local selection = action_state.get_selected_entry()
+  local task = selection.value
+
+  if executor.is_running(task.name) then
+    util.error "Task is already running"
+    return
+  end
+
+  executor.run(task, function()
+    refresh_picker()
+  end, function()
+    refresh_picker(prompt_bufnr)
+  end, false, true)
 end
 
 function actions.selected_task_output(prompt_bufnr)
@@ -79,7 +95,7 @@ refresh_picker = function(picker_buf, close_on_no_results)
     return
   end
   local tasks_finder =
-    finder.available_tasks_finder(p.starting_buffer, close_on_no_results)
+      finder.available_tasks_finder(p.starting_buffer, close_on_no_results)
   if not tasks_finder then
     pcall(telescope_actions.close, picker_buf)
     return
