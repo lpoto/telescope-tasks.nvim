@@ -152,8 +152,11 @@ function Task:create_job(callback, lock, save_modified_command)
     cmd_string2 = util.trim_string(cmd_string2)
 
     local set_cmd = false
-    if save_modified_command and
-      type(self.__meta) == "table" and type(self.__meta.name) == "string" then
+    if
+      save_modified_command
+      and type(self.__meta) == "table"
+      and type(self.__meta.name) == "string"
+    then
       if cmd_string2 ~= cmd_string then
         local data_dir = setup.opts.data_dir
         if type(data_dir) == "string" then
@@ -166,6 +169,12 @@ function Task:create_job(callback, lock, save_modified_command)
     if set_cmd then
       self.cmd = cmd
     end
+  end
+
+  -- NOTE: concat cmd, so that it is not processed
+  -- too hard when starting the job.
+  if type(cmd) ~= "string" then
+    cmd = table.concat(cmd, " ")
   end
 
   return function(buf)
