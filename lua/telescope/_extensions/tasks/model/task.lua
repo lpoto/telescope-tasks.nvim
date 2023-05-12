@@ -126,7 +126,7 @@ local copy_cmd
 ---and returns the started job's id.
 ---
 ---@return function?
-function Task:create_job(callback, lock)
+function Task:create_job(callback, lock, save_modified_command)
   local cmd = self.cmd
   cmd = copy_cmd(cmd)
 
@@ -152,7 +152,8 @@ function Task:create_job(callback, lock)
     cmd_string2 = util.trim_string(cmd_string2)
 
     local set_cmd = false
-    if type(self.__meta) == "table" and type(self.__meta.name) == "string" then
+    if save_modified_command and
+      type(self.__meta) == "table" and type(self.__meta.name) == "string" then
       if cmd_string2 ~= cmd_string then
         local data_dir = setup.opts.data_dir
         if type(data_dir) == "string" then

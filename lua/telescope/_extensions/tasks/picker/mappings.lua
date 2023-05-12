@@ -5,12 +5,13 @@ local mappings = {}
 
 mappings.keys = {
   ["<CR>"] = actions.select_task,
-  ["<C-a>"] = actions.run_task_with_modyfiable_command,
+  ["<C-a>"] = actions.run_task_and_save_modified_command,
+  ["<C-e>"] = actions.run_task_with_modyfiable_command,
   ["<C-o>"] = actions.selected_task_output,
-  ["<C-d>"] = actions.delete_selected_task_output,
+  ["<C-r>"] = actions.delete_selected_task_output,
   ["<C-q>"] = actions.selection_to_qf,
-  ["<C-k>"] = telescope_actions.preview_scrolling_up,
-  ["<C-j>"] = telescope_actions.preview_scrolling_down,
+  ["<C-u>"] = telescope_actions.preview_scrolling_up,
+  ["<C-d>"] = telescope_actions.preview_scrolling_down,
 }
 
 ---@param prompt_bufnr number

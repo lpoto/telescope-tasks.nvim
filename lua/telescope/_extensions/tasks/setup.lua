@@ -5,7 +5,7 @@ local setup = {}
 
 setup.opts = {
   output = {
-    style = "float", -- "split" | "vsplit"
+    style = "float",   -- "split" | "vsplit"
     layout = "center", -- "bottom" | "left" | "right"
     scale = 0.4,
   },
@@ -27,7 +27,7 @@ function setup.setup(opts)
     output_opts = vim.tbl_extend("force", output_opts, opts.output)
   end
   if opts.data_dir then
-    if type(opts.data_dir) ~= "string" and opts.data_dir ~= false then
+    if type(opts.data_dir) ~= "string" then
       util.warn "'data_dir' should be a string"
       opts.data_dir = nil
     end
