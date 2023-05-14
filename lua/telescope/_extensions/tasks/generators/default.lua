@@ -2,7 +2,11 @@ local default = {}
 
 ---Enable all default generators
 function default.all()
-  return default.go(), default.cargo(), default.python(), default.lua()
+  return default.go(),
+    default.cargo(),
+    default.python(),
+    default.lua(),
+    default.makefile()
 end
 
 ---Enable Go default generator
@@ -23,6 +27,11 @@ end
 ---Enable Lua default generator
 function default.lua()
   require("telescope._extensions.tasks.generators.default.lua"):load()
+end
+
+---Enable Makefile default generator
+function default.makefile()
+  require("telescope._extensions.tasks.generators.default.makefile"):load()
 end
 
 return default

@@ -14,10 +14,6 @@ function Default_generator:new(o)
     type(o) == "table",
     "Default_generator should be created from a table"
   )
-  assert(
-    type(o.errorformat) == "string",
-    "Default_generator should have a string errorformat field"
-  )
   return setmetatable(o or {}, Default_generator)
 end
 
