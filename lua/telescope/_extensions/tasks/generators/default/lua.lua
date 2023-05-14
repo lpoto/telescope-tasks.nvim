@@ -29,6 +29,7 @@ function lua.generator(buf)
   local t = {
     "Run current Lua file",
     cmd = cmd,
+    filename = name,
     __meta = {
       name = "lua_run_file_" .. name:gsub("/", "_"):gsub("\\", "-"),
     },

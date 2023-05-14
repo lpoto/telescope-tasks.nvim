@@ -28,6 +28,7 @@ function python.generator(buf)
   local t = {
     "Run current Python file",
     cmd = cmd,
+    filename = name,
     __meta = {
       name = "python_run_file_" .. name:gsub("/", "_"):gsub("\\", "-"),
     },

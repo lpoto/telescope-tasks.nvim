@@ -37,6 +37,7 @@ function get_task(path, target)
 
   local t = {
     relative_path .. ": " .. target,
+    filename = path:__tostring(),
     cmd = { "make", target },
     cwd = cwd,
   }
