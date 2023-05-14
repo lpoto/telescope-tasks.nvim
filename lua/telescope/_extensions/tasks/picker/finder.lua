@@ -30,6 +30,7 @@ function finder.available_tasks_finder(buf, exit_on_no_results, sort)
       return {
         value = entry,
         ordinal = entry.name,
+        filename = entry.filename,
         display = function(entry2)
           return get_task_display(entry2.value)
         end,

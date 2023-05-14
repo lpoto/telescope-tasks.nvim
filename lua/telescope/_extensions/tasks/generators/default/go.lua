@@ -69,6 +69,7 @@ run_project_task = function(cwd, name, full_path)
     name,
     cmd = cmd,
     cwd = cwd,
+    filename = full_path,
     __meta = {
       name = "go_run_project_" .. full_path:gsub("/", "_"):gsub("\\", "-"),
     },

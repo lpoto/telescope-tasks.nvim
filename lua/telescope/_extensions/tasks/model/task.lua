@@ -5,6 +5,7 @@ local setup = require "telescope._extensions.tasks.setup"
 ---@field name string: This is taken from the key in vim.g.telescope_tasks table
 ---@field env table: A table of environment variables.
 ---@field cmd table|string: The command, may either be a string or a table. When a table, the first element should be executable.
+---@field filename string?: The task's reference file, which may be opened from the picker.
 ---@field cwd string: The working directory of the task.
 ---@field errorformat string|nil
 ---@field __generator_opts table|nil
@@ -58,6 +59,13 @@ function Task:new(o, generator_opts)
     "Task '" .. a.name .. "'s `errorformat` field should be a string!"
   )
   a.errorformat = errorformat
+
+  local filename = o.filename
+  assert(
+    filename == nil or type(filename) == "string",
+    "Task '" .. a.name .. "'s `filename` field should be a string!"
+  )
+  a.filename = filename
 
   local cmd = o.cmd
   assert(

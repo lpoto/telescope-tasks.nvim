@@ -16,7 +16,8 @@ end
 
 ---@return table
 function State:find_files()
-  if self.iterated_subdirectories then
+  local cwd = vim.loop.cwd()
+  if self.iterated_subdirectories == cwd then
     return self.found_files
   end
   self:__iterate_subdirectories()
@@ -24,15 +25,19 @@ function State:find_files()
 end
 
 function State:__iterate_subdirectories()
-  self.iterated_subdirectories = true
+  local cwd = vim.loop.cwd()
+  self.iterated_subdirectories = cwd
   self.found_files = {}
-  scan.scan_dir(vim.loop.cwd(), {
+  scan.scan_dir(cwd, {
     hidden = false,
     add_dirs = false,
     on_insert = function(entry)
-      local extension = entry:match "^.+(%..+)$"
-      if not extension then
-        extension = "no_extension"
+      if vim.fn.filereadable(entry) ~= 1 then
+        return
+      end
+      local extension = vim.fn.fnamemodify(entry, ":e")
+      if not extension or extension:len() == 0 then
+        extension = vim.fn.fnamemodify(entry, ":t")
       else
         extension = extension:gsub("^.", "")
       end
