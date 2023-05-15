@@ -28,24 +28,26 @@ function State:__iterate_subdirectories()
   local cwd = vim.loop.cwd()
   self.iterated_subdirectories = cwd
   self.found_files = {}
+  local on_insert = function(entry)
+    if vim.fn.filereadable(entry) ~= 1 then
+      return
+    end
+    local extension = vim.fn.fnamemodify(entry, ":e")
+    if not extension or extension:len() == 0 then
+      extension = vim.fn.fnamemodify(entry, ":t")
+    end
+    if not self.found_files[extension] then
+      self.found_files[extension] = {}
+    end
+    table.insert(self.found_files[extension], entry)
+  end
+
+  on_insert(vim.api.nvim_buf_get_name(0))
+
   scan.scan_dir(cwd, {
     hidden = false,
     add_dirs = false,
-    on_insert = function(entry)
-      if vim.fn.filereadable(entry) ~= 1 then
-        return
-      end
-      local extension = vim.fn.fnamemodify(entry, ":e")
-      if not extension or extension:len() == 0 then
-        extension = vim.fn.fnamemodify(entry, ":t")
-      else
-        extension = extension:gsub("^.", "")
-      end
-      if not self.found_files[extension] then
-        self.found_files[extension] = {}
-      end
-      table.insert(self.found_files[extension], entry)
-    end,
+    on_insert = on_insert,
   })
 end
 
