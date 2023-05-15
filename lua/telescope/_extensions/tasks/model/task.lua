@@ -17,6 +17,7 @@ local Task = {}
 Task.__index = Task
 
 local format_cmd
+local copy_cmd
 
 ---Create an task from a table
 ---
@@ -103,6 +104,7 @@ function Task:new(o, generator_opts)
     "Task '" .. a.name .. "'s env should be a table!"
   )
   a.env = o.env or {}
+  local original_cmd = copy_cmd(format_cmd(a.cmd))
 
   if type(o.__meta) == "table" then
     a.__meta = o.__meta
@@ -121,13 +123,14 @@ function Task:new(o, generator_opts)
       "__meta field should be a table"
     )
   end
-
+  if a.__meta == nil then
+    a.__meta = {}
+  end
   a.cmd = format_cmd(a.cmd)
+  a.__meta.cmd = original_cmd
 
   return a
 end
-
-local copy_cmd
 
 ---Create a job from the task's fields.
 ---Returns a function that startes the job in the provided buffer
@@ -153,6 +156,12 @@ function Task:create_job(callback, lock, save_modified_command)
     end
     cmd_string = util.trim_string(cmd_string)
 
+    local orig_cmd_string = self.__meta.cmd
+    if type(orig_cmd_string) == "table" then
+      orig_cmd_string = table.concat(orig_cmd_string, " ")
+    end
+    orig_cmd_string = util.trim_string(orig_cmd_string)
+
     local cmd_string2 = vim.fn.input("$ ", cmd_string .. " ")
     if not cmd_string2 or cmd_string2:len() == 0 then
       return nil
@@ -165,12 +174,27 @@ function Task:create_job(callback, lock, save_modified_command)
       and type(self.__meta) == "table"
       and type(self.__meta.name) == "string"
     then
-      if cmd_string2 ~= cmd_string then
+      vim.notify(cmd_string)
+      vim.notify(cmd_string2)
+      vim.notify(orig_cmd_string)
+      vim.notify(vim.inspect(cmd_string == cmd_string2))
+      if cmd_string2 == orig_cmd_string then
+        -- NOTE: delete the saved command if it is the same as the original one.
+        -- So there are no redundant data files.
+        local data_dir = setup.opts.data_dir
+        if type(data_dir) == "string" then
+          util.delete_data(data_dir, self.__meta.name)
+        end
+        set_cmd = true
+      elseif cmd_string2 ~= cmd_string then
+        -- NOTE: if the command has been modified, create a data
+        -- file for that task, so the modified task will be used
+        -- next time.
         local data_dir = setup.opts.data_dir
         if type(data_dir) == "string" then
           util.save_data(data_dir, self.__meta.name, cmd_string2)
-          set_cmd = true
         end
+        set_cmd = true
       end
     end
     cmd = format_cmd(cmd_string2)
@@ -247,19 +271,6 @@ function Task:get_definition()
   return def
 end
 
-copy_cmd = function(cmd)
-  local _cmd = nil
-  if type(cmd) == "string" then
-    _cmd = cmd
-  elseif type(cmd) == "table" then
-    _cmd = {}
-    for _, v in ipairs(cmd) do
-      table.insert(_cmd, v)
-    end
-  end
-  return _cmd
-end
-
 format_cmd = function(cmd)
   local cmd2 = {}
   if type(cmd) == "string" then
@@ -278,6 +289,19 @@ format_cmd = function(cmd)
     cmd = table.concat(cmd, " ")
   end
   return cmd
+end
+
+copy_cmd = function(cmd)
+  local _cmd = nil
+  if type(cmd) == "string" then
+    _cmd = cmd
+  elseif type(cmd) == "table" then
+    _cmd = {}
+    for _, v in ipairs(cmd) do
+      table.insert(_cmd, v)
+    end
+  end
+  return _cmd
 end
 
 return Task

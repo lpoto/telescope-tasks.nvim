@@ -77,6 +77,16 @@ function util.save_data(dir, name, data)
   path:write(data, "w")
 end
 
+function util.delete_data(dir, name)
+  assert(type(dir) == "string", "Data directory should be a string")
+  assert(type(name) == "string", "Data name should be a string")
+
+  local path = Path:new(dir):joinpath(name .. ".txt")
+  if path:is_file() then
+    path:rm()
+  end
+end
+
 ---@param dir string
 ---@param name string
 ---@return string|nil
