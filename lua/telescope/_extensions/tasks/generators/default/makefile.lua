@@ -34,14 +34,15 @@ end
 function get_task(path, target)
   local relative_path = path:make_relative(vim.fn.getcwd())
   local cwd = path:parent():__tostring()
+  local filename = path:__tostring()
 
   local t = {
     relative_path .. ": " .. target,
-    filename = path:__tostring(),
+    filename = filename,
     cmd = { "make", target },
     cwd = cwd,
     __meta = {
-      name = "makefile_task_" .. target .. "_" .. path
+      name = "makefile_task_" .. target .. "_" .. filename
         :gsub("/", "_")
         :gsub("\\", "-"),
     },
