@@ -174,10 +174,6 @@ function Task:create_job(callback, lock, save_modified_command)
       and type(self.__meta) == "table"
       and type(self.__meta.name) == "string"
     then
-      vim.notify(cmd_string)
-      vim.notify(cmd_string2)
-      vim.notify(orig_cmd_string)
-      vim.notify(vim.inspect(cmd_string == cmd_string2))
       if cmd_string2 == orig_cmd_string then
         -- NOTE: delete the saved command if it is the same as the original one.
         -- So there are no redundant data files.
