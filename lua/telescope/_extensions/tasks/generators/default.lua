@@ -6,7 +6,8 @@ function default.all()
     default.cargo(),
     default.python(),
     default.lua(),
-    default.makefile()
+    default.makefile(),
+    default.package_json()
 end
 
 ---Enable Go default generator
@@ -32,6 +33,11 @@ end
 ---Enable Makefile default generator
 function default.makefile()
   require("telescope._extensions.tasks.generators.default.makefile"):load()
+end
+
+---Enable package json default generator
+function default.package_json()
+  require("telescope._extensions.tasks.generators.default.package_json"):load()
 end
 
 return default
