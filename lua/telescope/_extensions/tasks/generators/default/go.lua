@@ -29,8 +29,8 @@ function go.generator(buf)
   if not go:state() then
     return
   end
-  local files = go:state():find_files()
-  if not next(files.go or {}) then
+  local files = (go:state():find_files() or {}).by_extension
+  if type(files) ~= "table" or not next(files.go or {}) then
     -- NOTE: only go files are relevant
     return tasks
   end

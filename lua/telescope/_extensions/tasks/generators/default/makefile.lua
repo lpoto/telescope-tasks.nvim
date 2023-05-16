@@ -11,7 +11,10 @@ local makefile = Default:new {
 local get_task
 
 function makefile.generator()
-  local files = makefile:state():find_files()
+  local files = (makefile:state():find_files() or {}).by_name
+  if not next(files or {}) then
+    return {}
+  end
   local tasks = {}
 
   for _, n in ipairs { "makefile", "Makefile" } do
