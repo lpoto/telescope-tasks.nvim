@@ -21,10 +21,11 @@ Call any of the functions described bellow to enable just some of them.
 
 ## Available default generators
 
-| Function             | Description                                                                                                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `default.go()`       | Finds all Go projects in subdirectories and generates tasks for running or building them. If no `go.mod` file is found, generates a task for running the current Go file. |
-| `default.makefile()` | Finds all makefiles in subdirectories and generates tasks for all targets.                                                                                                |
-| `default.lua()`      | Generates a task for running a current lua file.                                                                                                                          |
-| `default.cargo()`    | Currently in progress ...                                                                                                                                                 |
-| `default.python()`   | Currently in progress ...                                                                                                                                                 |
+| Function                 | Description                                                                                                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `default.go()`           | Finds all Go projects in subdirectories and generates tasks for running or building them. If no `go.mod` file is found, generates a task for running the current Go file. |
+| `default.makefile()`     | Finds all makefiles in subdirectories and generates tasks for all targets.                                                                                                |
+| `default.package_json()` | Finds all package.json files in subdirectories and generates tasks for all scripts.                                                                                       |
+| `default.lua()`          | Generates a task for running a current lua file.                                                                                                                          |
+| `default.cargo()`        | Currently in progress ...                                                                                                                                                 |
+| `default.python()`       | Currently in progress ...                                                                                                                                                 |
