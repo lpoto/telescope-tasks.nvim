@@ -56,6 +56,12 @@ local function create_split_window(buf)
   return vim.fn.win_getid(vim.fn.winnr())
 end
 
+local function create_tab_window(buf)
+  vim.fn.execute("noautocmd keepjumps tab sb " .. buf, false)
+
+  return vim.fn.win_getid(vim.fn.winnr())
+end
+
 local function set_options(winid)
   vim.api.nvim_win_set_option(winid, "wrap", true)
   vim.api.nvim_win_set_option(winid, "number", false)
@@ -74,18 +80,22 @@ end
 determine_output_window_type = function()
   local win_type = setup.opts.output and setup.opts.output.style or "float"
 
-  if win_type == "vsplit"
-      or win_type == "vertical"
-      or win_type == "vertical split"
+  if
+    win_type == "vsplit"
+    or win_type == "vertical"
+    or win_type == "vertical split"
   then
     return create_vsplit_window
   elseif win_type == "split" or win_type == "normal" then
     return create_split_window
-  elseif win_type == "floating"
-      or win_type == "float"
-      or win_type == "popup"
+  elseif
+    win_type == "floating"
+    or win_type == "float"
+    or win_type == "popup"
   then
     return float.create
+  elseif win_type == "tab" or win_type == "tabpage" then
+    return create_tab_window
   else
     util.error("Invalid window type:", win_type)
   end

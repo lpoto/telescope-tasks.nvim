@@ -35,7 +35,7 @@ require("telescope").setup {
     tasks = {
       theme = "ivy",
       output = {
-        style = "float", -- "vsplit" | "split" | "float"
+        style = "float", -- "vsplit" | "split" | "float" | "tab"
         layout = "center", -- "bottom" | "left" | "right" | "center"
         scale = 0.4, -- output window to editor size ratio
         -- NOTE: layout and scale are only relevant when style == "float"

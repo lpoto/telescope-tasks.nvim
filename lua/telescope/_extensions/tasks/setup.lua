@@ -5,7 +5,7 @@ local setup = {}
 
 setup.opts = {
   output = {
-    style = "float",   -- "split" | "vsplit"
+    style = "float", -- "split" | "vsplit" | "tab" | "float"
     layout = "center", -- "bottom" | "left" | "right"
     scale = 0.4,
   },
