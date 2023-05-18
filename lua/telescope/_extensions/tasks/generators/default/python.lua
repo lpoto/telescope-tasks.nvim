@@ -3,8 +3,6 @@ local Default = require "telescope._extensions.tasks.model.default_generator"
 ---Add a task for running the current python file.
 ---
 ---TODO: handle `venv`.
----
----python [options] [package] [arguments]
 local python = Default:new {
   errorformat = '%C\\ %.%#,%A\\ \\ File\\ "%f"\\,'
     .. "\\ line\\ %l%.%#,%Z%[%^\\ ]%\\@=%m",
