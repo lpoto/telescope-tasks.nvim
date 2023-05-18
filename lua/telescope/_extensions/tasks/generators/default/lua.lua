@@ -8,11 +8,14 @@ local lua = Default:new {
     name = "Default Lua Generator",
     experimental = true,
   },
-    errorformat = vim.fn.exepath("lua") ..': [string %.%\\+]:%\\d%\\+: %m,' ..
-				vim.fn.exepath("lua")..': %f:%l: %m,' ..
-				vim.fn.exepath("lua")..': %m,' ..
-				'%\\s%\\+[string %.%\\+]:%\\d%\\+: %m,' ..
-				'%f:%l: %m'
+  errorformat = vim.fn.exepath "lua"
+    .. ": [string %.%\\+]:%\\d%\\+: %m,"
+    .. vim.fn.exepath "lua"
+    .. ": %f:%l: %m,"
+    .. vim.fn.exepath "lua"
+    .. ": %m,"
+    .. "%\\s%\\+[string %.%\\+]:%\\d%\\+: %m,"
+    .. "%f:%l: %m",
 }
 
 function lua.generator(buf)

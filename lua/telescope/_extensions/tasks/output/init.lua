@@ -36,6 +36,8 @@ function output.open(task, before_opening)
   open_last_task_output(task.name, buf)
 end
 
+local last_winid = nil
+
 ---Toggle the window of the last opened output.
 ---Warns when there wasn't any previous outputs opened,
 ---or the previous output buffer is no longer available.
@@ -48,8 +50,8 @@ function output.toggle_last()
   end
 
   if
-      vim.api.nvim_buf_get_option(0, "filetype")
-      == enum.TELESCOPE_PROMPT_FILETYPE
+    vim.api.nvim_buf_get_option(0, "filetype")
+    == enum.TELESCOPE_PROMPT_FILETYPE
   then
     -- NOTE: close telescope popup if open
     local prompt_bufnr = vim.api.nvim_get_current_buf()
@@ -58,6 +60,9 @@ function output.toggle_last()
 
   -- Get the buffer from the provided function
   if output.close_output_windows() then
+    if last_winid ~= nil and vim.api.nvim_win_is_valid(last_winid) then
+      vim.fn.win_gotoid(last_winid)
+    end
     return
   end
 
@@ -68,7 +73,7 @@ function output.close_output_windows()
   local win_handles = vim.tbl_filter(function(win_handle)
     local buf = vim.api.nvim_win_get_buf(win_handle)
     return vim.api.nvim_buf_get_option(buf, "filetype")
-        == enum.OUTPUT_BUFFER_FILETYPE
+      == enum.OUTPUT_BUFFER_FILETYPE
   end, vim.api.nvim_list_wins())
   local ok = false
   for _, winid in ipairs(win_handles) do
@@ -91,6 +96,8 @@ open_last_task_output = function(name, buf)
   if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
     return
   end
+
+  last_winid = vim.fn.win_getid()
 
   executor.mark_task_as_latest(name)
 

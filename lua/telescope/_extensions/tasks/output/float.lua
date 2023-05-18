@@ -1,9 +1,11 @@
 local setup = require "telescope._extensions.tasks.setup"
+local enum = require "telescope._extensions.tasks.enum"
 
 local float = {}
 
 local get_centered_opts
 local get_bottom_opts
+local get_top_opts
 local get_right_opts
 local get_left_opts
 
@@ -22,17 +24,19 @@ function float.create(buf, title)
   end
 
   local scale = setup.opts.output and setup.opts.output.scale
-  if type(scale) ~= "number" or scale < 0.1 or scale > 1.5 then
+  if type(scale) ~= "number" or scale < 0.1 or scale > 1 then
     scale = 0.4
   end
 
   local layout = setup.opts.output and setup.opts.output.layout
   local f
-  if layout == "bottom" or layout == "down" or layout == "bottom_pane" then
+  if layout == enum.OUTPUT.LAYOUT.BOTTOM then
     f = get_bottom_opts
-  elseif layout == "left" or layout == "left_pane" then
+  elseif layout == enum.OUTPUT.LAYOUT.TOP then
+    f = get_top_opts
+  elseif layout == enum.OUTPUT.LAYOUT.LEFT then
     f = get_left_opts
-  elseif layout == "right" or layout == "right_pane" then
+  elseif layout == enum.OUTPUT.LAYOUT.RIGHT then
     f = get_right_opts
   else
     f = get_centered_opts
@@ -69,7 +73,8 @@ get_centered_opts = function(lines, columns, scale)
 end
 
 get_bottom_opts = function(lines, columns, scale)
-  local h = math.min(math.max(20, math.floor(lines * scale)), lines / 2)
+  local pref_h = math.floor(lines * scale)
+  local h = math.max(20, math.floor(pref_h))
 
   return {
     width = columns,
@@ -77,6 +82,20 @@ get_bottom_opts = function(lines, columns, scale)
     row = lines,
     col = 0,
     border = { "", "─", "", "", "", "", "", "" },
+    anchor = "SW",
+  }
+end
+
+get_top_opts = function(lines, columns, scale)
+  local pref_h = math.floor(lines * scale)
+  local h = math.max(20, math.floor(pref_h))
+
+  return {
+    width = columns,
+    height = h,
+    row = 0,
+    col = 0,
+    border = { "", "", "", "", "", "─", "", "" },
     anchor = "SW",
   }
 end

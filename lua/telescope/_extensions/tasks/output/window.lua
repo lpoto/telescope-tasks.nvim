@@ -1,5 +1,5 @@
 local enum = require "telescope._extensions.tasks.enum"
-local util = require "telescope._extensions.tasks.enum"
+local util = require "telescope._extensions.tasks.util"
 local setup = require "telescope._extensions.tasks.setup"
 local highlight = require "telescope._extensions.tasks.output.highlight"
 local float = require "telescope._extensions.tasks.output.float"
@@ -18,7 +18,9 @@ local close_win
 function window.create(buf, title)
   title = title or "Terminal"
 
-  local ok, winid = pcall(determine_output_window_type(), buf, title)
+  local layout = setup.opts.output and setup.opts.output.layout
+
+  local ok, winid = pcall(determine_output_window_type(), buf, title, layout)
   if ok == false then
     util.error(winid)
     return -1
@@ -38,20 +40,45 @@ function window.create(buf, title)
   return winid
 end
 
-local function create_vsplit_window(buf)
-  local winid = vim.fn.win_getid(vim.fn.winnr())
+local function create_split_window(buf, _, layout)
+  if
+    layout == enum.OUTPUT.LAYOUT.BOTTOM or layout == enum.OUTPUT.LAYOUT.TOP
+  then
+    local splitbelow = vim.api.nvim_get_option "splitbelow"
 
-  vim.fn.execute("noautocmd keepjumps vertical sb " .. buf, false)
+    if layout == enum.OUTPUT.LAYOUT.BOTTOM then
+      vim.api.nvim_set_option("splitbelow", true)
+    else
+      vim.api.nvim_set_option("splitbelow", false)
+    end
 
-  if vim.fn.winwidth(winid) < 50 and vim.o.columns >= 70 then
-    -- NOTE: make sure the output window is at least 50 columns wide
-    vim.api.nvim_exec("vertical resize " .. 50, false)
+    vim.fn.execute("noautocmd keepjumps sb " .. buf, false)
+
+    vim.api.nvim_set_option("splitbelow", splitbelow)
+  else
+    local winid = vim.fn.win_getid(vim.fn.winnr())
+    local splitright = vim.api.nvim_get_option "splitright"
+
+    if layout == enum.OUTPUT.LAYOUT.RIGHT then
+      vim.api.nvim_set_option("splitright", true)
+    else
+      vim.api.nvim_set_option("splitright", false)
+    end
+    vim.fn.execute("noautocmd keepjumps vertical sb " .. buf, false)
+
+    vim.api.nvim_set_option("splitright", splitright)
+
+    if vim.fn.winwidth(winid) < 50 and vim.o.columns >= 70 then
+      -- NOTE: make sure the output window is at least 50 columns wide
+      vim.api.nvim_exec("vertical resize " .. 50, false)
+    end
   end
+
   return vim.fn.win_getid(vim.fn.winnr())
 end
 
-local function create_split_window(buf)
-  vim.fn.execute("noautocmd keepjumps sb " .. buf, false)
+local function create_tab_window(buf)
+  vim.fn.execute("noautocmd keepjumps tab sb " .. buf, false)
 
   return vim.fn.win_getid(vim.fn.winnr())
 end
@@ -74,22 +101,12 @@ end
 determine_output_window_type = function()
   local win_type = setup.opts.output and setup.opts.output.style or "float"
 
-  if win_type == "vsplit"
-      or win_type == "vertical"
-      or win_type == "vertical split"
-  then
-    return create_vsplit_window
-  elseif win_type == "split" or win_type == "normal" then
+  if win_type == enum.OUTPUT.STYLE.SPLIT then
     return create_split_window
-  elseif win_type == "floating"
-      or win_type == "float"
-      or win_type == "popup"
-  then
-    return float.create
-  else
-    util.error("Invalid window type:", win_type)
+  elseif win_type == enum.OUTPUT.STYLE.TAB then
+    return create_tab_window
   end
-  return create_vsplit_window
+  return float.create
 end
 
 add_autocmd = function(buf)

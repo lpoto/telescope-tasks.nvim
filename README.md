@@ -35,10 +35,10 @@ require("telescope").setup {
     tasks = {
       theme = "ivy",
       output = {
-        style = "float", -- "vsplit" | "split" | "float"
-        layout = "center", -- "bottom" | "left" | "right" | "center"
+        style = "float", -- "split" | "float" | "tab"
+        layout = "center", -- "left" | "right" | "center" | "below" | "above"
         scale = 0.4, -- output window to editor size ratio
-        -- NOTE: layout and scale are only relevant when style == "float"
+        -- NOTE: scale and "center" layout are only relevant when style == "float"
       },
       -- Directory to store the modified commands data to.
       -- Set it to false to disable saving modified commands.
