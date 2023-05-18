@@ -36,6 +36,8 @@ function output.open(task, before_opening)
   open_last_task_output(task.name, buf)
 end
 
+local last_winid = nil
+
 ---Toggle the window of the last opened output.
 ---Warns when there wasn't any previous outputs opened,
 ---or the previous output buffer is no longer available.
@@ -58,6 +60,9 @@ function output.toggle_last()
 
   -- Get the buffer from the provided function
   if output.close_output_windows() then
+    if last_winid ~= nil and vim.api.nvim_win_is_valid(last_winid) then
+      vim.fn.win_gotoid(last_winid)
+    end
     return
   end
 
@@ -91,6 +96,8 @@ open_last_task_output = function(name, buf)
   if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
     return
   end
+
+  last_winid = vim.fn.win_getid()
 
   executor.mark_task_as_latest(name)
 
