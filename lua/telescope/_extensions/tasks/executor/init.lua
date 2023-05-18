@@ -203,14 +203,14 @@ end
 run_task = function(task, on_exit, lock, save_modified_command)
   --open terminal in that one instead of creating a new one
   local term_buf =
-      output_buffer.create(executor.get_task_output_buf(task.name))
+    output_buffer.create(executor.get_task_output_buf(task.name))
   if not term_buf or not vim.api.nvim_buf_is_valid(term_buf) then
     return false
   end
 
   -- NOTE: Gather job options from the task
   local job =
-      task:create_job(on_task_exit(task, on_exit), lock, save_modified_command)
+    task:create_job(on_task_exit(task, on_exit), lock, save_modified_command)
   if not job then
     return
   end

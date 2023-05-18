@@ -48,8 +48,8 @@ function output.toggle_last()
   end
 
   if
-      vim.api.nvim_buf_get_option(0, "filetype")
-      == enum.TELESCOPE_PROMPT_FILETYPE
+    vim.api.nvim_buf_get_option(0, "filetype")
+    == enum.TELESCOPE_PROMPT_FILETYPE
   then
     -- NOTE: close telescope popup if open
     local prompt_bufnr = vim.api.nvim_get_current_buf()
@@ -68,7 +68,7 @@ function output.close_output_windows()
   local win_handles = vim.tbl_filter(function(win_handle)
     local buf = vim.api.nvim_win_get_buf(win_handle)
     return vim.api.nvim_buf_get_option(buf, "filetype")
-        == enum.OUTPUT_BUFFER_FILETYPE
+      == enum.OUTPUT_BUFFER_FILETYPE
   end, vim.api.nvim_list_wins())
   local ok = false
   for _, winid in ipairs(win_handles) do
