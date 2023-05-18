@@ -1,13 +1,17 @@
+local util = require "telescope._extensions.tasks.util"
+
 local default = {}
 
 ---Enable all default generators
 function default.all()
-  return default.go(),
-    default.cargo(),
-    default.python(),
-    default.lua(),
-    default.makefile(),
-    default.package_json()
+  for k, v in pairs(default) do
+    if type(v) == "function" and k ~= "all" then
+      local ok, e = pcall(v)
+      if not ok then
+        util.warn("Error loading default generator - ", k, ":", e)
+      end
+    end
+  end
 end
 
 ---Enable Go default generator
@@ -38,6 +42,11 @@ end
 ---Enable package json default generator
 function default.package_json()
   require("telescope._extensions.tasks.generators.default.package_json"):load()
+end
+
+---Enable maven default generator
+function default.maven()
+  require("telescope._extensions.tasks.generators.default.maven"):load()
 end
 
 return default

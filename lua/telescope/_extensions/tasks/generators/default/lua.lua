@@ -1,8 +1,6 @@
 local Default = require "telescope._extensions.tasks.model.default_generator"
 
 ---Add a task for running the current lua file.
----
----lua [options] [package] [arguments]
 local lua = Default:new {
   opts = {
     name = "Default Lua Generator",

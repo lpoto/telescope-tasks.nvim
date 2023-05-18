@@ -110,7 +110,7 @@ function State:__iterate_subdirectories()
         end
         for _, pattern in ipairs(State.ignore_directories) do
           local tail = vim.fn.fnamemodify(entry, ":t")
-          if tail:match(pattern) then
+          if tail == pattern then
             return
           end
         end
@@ -143,6 +143,7 @@ State.ignore_directories = {
   "snap",
   "usr",
   "tmp",
+  ".settings",
 }
 
 return State
