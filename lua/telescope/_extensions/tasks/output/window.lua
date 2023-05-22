@@ -115,7 +115,7 @@ add_autocmd = function(buf)
     buffer = buf,
     group = enum.TASKS_AUGROUP,
   }
-  vim.api.nvim_create_autocmd("BufLeave", {
+  vim.api.nvim_create_autocmd({ "BufLeave", "WinLeave" }, {
     group = enum.TASKS_AUGROUP,
     buffer = buf,
     once = true,
