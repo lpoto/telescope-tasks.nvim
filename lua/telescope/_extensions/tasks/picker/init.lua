@@ -1,6 +1,7 @@
 local finder = require "telescope._extensions.tasks.picker.finder"
 local previewer = require "telescope._extensions.tasks.picker.previewer"
 local mappings = require "telescope._extensions.tasks.picker.mappings"
+local enum = require "telescope._extensions.tasks.enum"
 
 local pickers = require "telescope.pickers"
 local conf = require("telescope.config").values
@@ -26,6 +27,14 @@ local available_tasks_telescope_picker = function(options)
       attach_mappings = mappings.attach_mappings,
     })
     picker.starting_buffer = buf
+
+    -- NOTE: this is so we may swap between
+    -- output buffers and the tasks picker without
+    -- errors
+    vim.api.nvim_exec_autocmds("BufLeave", {
+      group = enum.TASKS_AUGROUP,
+    })
+
     picker:find()
   end
 
