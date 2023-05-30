@@ -162,11 +162,19 @@ function Task:create_job(callback, lock, save_modified_command)
     end
     orig_cmd_string = util.trim_string(orig_cmd_string)
 
-    local cmd_string2 = vim.fn.input("$ ", cmd_string .. " ")
-    if not cmd_string2 or cmd_string2:len() == 0 then
+    local cmd_string2 = vim.fn.input {
+      prompt = "$ ",
+      default = cmd_string .. " ",
+      cancelreturn = false,
+    }
+    if type(cmd_string2) ~= "string" then
       return nil
     end
-    cmd_string2 = util.trim_string(cmd_string2)
+    if cmd_string2 == "" then
+      cmd_string2 = orig_cmd_string
+    else
+      cmd_string2 = util.trim_string(cmd_string2)
+    end
 
     local set_cmd = false
     if
