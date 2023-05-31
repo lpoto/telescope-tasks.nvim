@@ -39,14 +39,16 @@ scroll_fn = function(self, direction)
 
     local winid = self.state.winid
     local n = vim.api.nvim_win_get_height(winid)
-    n = direction < 0 and -n or n
-    local lines = vim.api.nvim_buf_line_count(vim.api.nvim_win_get_buf(winid))
+    n = math.min(math.max(math.ceil(n / 2), 5), 15)
+    if direction < 0 then
+      n = -n
+    end
     local pos = vim.api.nvim_win_get_cursor(winid)
     local cur_y, cur_x = pos[1], pos[2]
 
-    local new_y = cur_y + direction
-    cur_y = (new_y <= 0) and lines or (new_y > lines) and 1 or new_y
-    vim.api.nvim_win_set_cursor(winid, { cur_y, cur_x })
+    local new_y = cur_y + n
+    -- ignore error that may occur if new_y out of range
+    pcall(vim.api.nvim_win_set_cursor, winid, { new_y, cur_x })
   end)
   if not ok and type(e) == "string" then
     util.warn(e)
