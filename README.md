@@ -76,16 +76,18 @@ You may either use the [Default Generators](./DEFAULT_GENERATORS.md), or add [Cu
 
 ## Mappings
 
-| Key        | Description                                                                              |
-| ---------- | ---------------------------------------------------------------------------------------- |
-| `<CR>`     | Run the selected task, or kill it if it is already running.                              |
-| `<C-a>`    | Run the selected task, but allow modifying the command before running it.                |
-| `<C-e>`    | Run the selected task, allow modifying the command, but don't save the modified command. |
-| `<C-o>`    | Display the output of the selected task in another window.                               |
-| `<C-r>`    | Remove the output of the selected task.                                                  |
-| `<C-u>`    | Scroll the previewer up.                                                                 |
-| `<C-d>`    | Scroll the previewer down.                                                               |
-| `<C-q>`    | Send a task's output to quickfix.                                                        |
-| `e`        | Edit the selected task's associated file (only in normal mode).                          |
-| `o`        | same as `<C-o>` but only in normal mode.                                                 |
-| `r` or `d` | same as `<C-r>` but only in normal mode.                                                 |
+| Key        | Description                                                     |
+| ---------- | --------------------------------------------------------------- |
+| `<CR>`     | Run the selected task, or kill it if it is already running.     |
+| `<C-o>`    | Display the output of the selected task in another window.      |
+| `e`        | Edit the selected task's associated file (only in normal mode). |
+| `<C-r>`    | Remove the output of the selected task.                         |
+| `<C-a>`    | Modify the selected task's command.                             |
+| `<C-e>`    | Modify the selected task's environment variables.               |
+| `<C-c>`    | Modify the selected task's working directory.                   |
+| `<C-x>`    | Delete the task's modifications.                                |
+| `<C-u>`    | Scroll the previewer up.                                        |
+| `<C-d>`    | Scroll the previewer down.                                      |
+| `<C-q>`    | Send a task's output to quickfix.                               |
+| `o`        | same as `<C-o>` but only in normal mode.                        |
+| `r` or `d` | same as `<C-r>` but only in normal mode.                        |

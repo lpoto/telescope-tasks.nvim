@@ -4,7 +4,6 @@ local runner = require "telescope._extensions.tasks.generators.runner"
 ---@class Default_generator
 ---@field errorformat string
 ---@field generator function: A generator function
----@field opts Generator_opts: The generator opts
 local Default_generator = {}
 Default_generator.__index = Default_generator
 
@@ -34,13 +33,14 @@ function Default_generator:load()
         for _, task in ipairs(tasks) do
           if task ~= nil then
             task.errorformat = self.errorformat
+            task.__default_generator = true
+            task.__experimental = true
             table.insert(_tasks, task)
           end
         end
       end
       return _tasks
     end,
-    opts = self.opts,
   }
   runner.add_generators { generator }
 end

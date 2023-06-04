@@ -38,10 +38,8 @@ function runner.run(buf)
       found_tasks = last_tasks
     else
       for _, generator in ipairs(current_generators or {}) do
-        if generator:available() then
-          found_tasks =
-            vim.tbl_extend("force", found_tasks, generator:run() or {})
-        end
+        found_tasks =
+          vim.tbl_extend("force", found_tasks, generator:run() or {})
       end
       last_tasks = found_tasks
     end

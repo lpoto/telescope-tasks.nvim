@@ -1,4 +1,5 @@
 local Default = require "telescope._extensions.tasks.model.default_generator"
+local util = require "telescope._extensions.tasks.util"
 
 ---Add a task for running the current python file.
 ---
@@ -27,13 +28,14 @@ function python.generator(buf)
     "Run current Python file",
     cmd = cmd,
     filename = name,
-    __meta = {
+    keywords = {
       "python",
       name,
     },
   }
-  if type(vim.g.PYTHON_ENV) == "table" and next(vim.g.PYTHON_ENV) then
-    t.env = vim.g.PYTHON_ENV
+  local env = util.get_env "python"
+  if type(env) == "table" and next(env) then
+    t.env = env
   end
   return t
 end

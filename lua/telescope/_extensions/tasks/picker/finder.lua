@@ -8,6 +8,7 @@ local finder = {}
 
 local get_task_display
 local order_tasks
+local tasks = {}
 
 ---Create a telescope finder for the currently available tasks.
 ---
@@ -15,14 +16,25 @@ local order_tasks
 ---(current buffer by default)
 ---@param exit_on_no_results boolean?: Return nil and warn if no results found.
 ---@param sort boolean?: Sort the results by timestamp
+---@param find_tasks boolean?: Default = true
 ---@return table?: a telescope finder
-function finder.available_tasks_finder(buf, exit_on_no_results, sort)
-  local tasks = runner.run(buf) or {}
-  if exit_on_no_results and not next(tasks) then
-    util.warn "There are no available tasks"
-    return nil
+function finder.available_tasks_finder(
+  buf,
+  exit_on_no_results,
+  sort,
+  find_tasks
+)
+  if find_tasks == nil then
+    find_tasks = true
   end
-  tasks = order_tasks(tasks, sort)
+  if find_tasks then
+    tasks = runner.run(buf) or {}
+    if exit_on_no_results and not next(tasks) then
+      util.warn "There are no available tasks"
+      return nil
+    end
+    tasks = order_tasks(tasks, sort)
+  end
 
   return finders.new_table {
     results = tasks,
