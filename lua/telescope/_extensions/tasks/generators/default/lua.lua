@@ -32,7 +32,8 @@ function lua.generator(buf)
     cmd = cmd,
     filename = name,
     __meta = {
-      name = "lua_run_file_" .. name:gsub("/", "_"):gsub("\\", "-"),
+      "lua",
+      name,
     },
   }
   if type(vim.g.LUA_ENV) == "table" and next(vim.g.LUA_ENV) then

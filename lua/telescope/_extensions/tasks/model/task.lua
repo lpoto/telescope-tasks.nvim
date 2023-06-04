@@ -1,5 +1,5 @@
 local util = require "telescope._extensions.tasks.util"
-local setup = require "telescope._extensions.tasks.setup"
+local storage = require "telescope._extensions.tasks.storage"
 
 ---@class Task
 ---@field name string: This is taken from the key in vim.g.telescope_tasks table
@@ -9,15 +9,18 @@ local setup = require "telescope._extensions.tasks.setup"
 ---@field cwd string: The working directory of the task.
 ---@field errorformat string|nil
 ---@field __generator_opts table|nil
----@field __meta table
+---@field __meta string[]
 ---@field create_job function
+---@field __update_from_storage function
+---@field __modify_command_from_input function
 
 ---@type Task
-local Task = {}
+local Task = {
+  __orig_cmd = nil,
+}
 Task.__index = Task
 
 local format_cmd
-local copy_cmd
 
 ---Create an task from a table
 ---
@@ -104,18 +107,13 @@ function Task:new(o, generator_opts)
     "Task '" .. a.name .. "'s env should be a table!"
   )
   a.env = o.env or {}
-  local original_cmd = copy_cmd(format_cmd(a.cmd))
 
   if type(o.__meta) == "table" then
-    a.__meta = o.__meta
-    if type(a.__meta.name) == "string" then
-      local data_dir = setup.opts.data_dir
-      if type(data_dir) == "string" then
-        local data = util.fetch_data(data_dir, a.__meta.name)
-        if type(data) == "string" then
-          a.cmd = data
-        end
-      end
+    for k, v in pairs(o.__meta) do
+      assert(
+        type(v) == "string" and type(k) == "number",
+        "__meta should be a table of strings!"
+      )
     end
   else
     assert(
@@ -123,13 +121,11 @@ function Task:new(o, generator_opts)
       "__meta field should be a table"
     )
   end
-  if a.__meta == nil then
-    a.__meta = {}
-  end
+  a.__meta = o.__meta
   a.cmd = format_cmd(a.cmd)
-  a.__meta.cmd = original_cmd
+  a.__orig_cmd = format_cmd(a.cmd)
 
-  return a
+  return a:__update_from_storage()
 end
 
 ---Create a job from the task's fields.
@@ -138,8 +134,7 @@ end
 ---
 ---@return function?
 function Task:create_job(callback, lock, save_modified_command)
-  local cmd = self.cmd
-  cmd = copy_cmd(cmd)
+  self:__update_from_storage()
 
   local opts = {
     env = next(self.env or {}) and self.env or nil,
@@ -149,68 +144,11 @@ function Task:create_job(callback, lock, save_modified_command)
     on_exit = callback,
   }
 
+  local cmd
   if not lock then
-    local cmd_string = cmd
-    if type(cmd_string) == "table" then
-      cmd_string = table.concat(cmd_string, " ")
-    end
-    cmd_string = util.trim_string(cmd_string)
-
-    local orig_cmd_string = self.__meta.cmd
-    if type(orig_cmd_string) == "table" then
-      orig_cmd_string = table.concat(orig_cmd_string, " ")
-    end
-    orig_cmd_string = util.trim_string(orig_cmd_string)
-
-    local cmd_string2 = vim.fn.input {
-      prompt = "$ ",
-      default = cmd_string .. " ",
-      cancelreturn = false,
-    }
-    if type(cmd_string2) ~= "string" then
-      return nil
-    end
-    if cmd_string2 == "" then
-      cmd_string2 = orig_cmd_string
-    else
-      cmd_string2 = util.trim_string(cmd_string2)
-    end
-
-    local set_cmd = false
-    if
-      save_modified_command
-      and type(self.__meta) == "table"
-      and type(self.__meta.name) == "string"
-    then
-      if cmd_string2 == orig_cmd_string then
-        -- NOTE: delete the saved command if it is the same as the original one.
-        -- So there are no redundant data files.
-        local data_dir = setup.opts.data_dir
-        if type(data_dir) == "string" then
-          util.delete_data(data_dir, self.__meta.name)
-        end
-        set_cmd = true
-      elseif cmd_string2 ~= cmd_string then
-        -- NOTE: if the command has been modified, create a data
-        -- file for that task, so the modified task will be used
-        -- next time.
-        local data_dir = setup.opts.data_dir
-        if type(data_dir) == "string" then
-          util.save_data(data_dir, self.__meta.name, cmd_string2)
-        end
-        set_cmd = true
-      end
-    end
-    cmd = format_cmd(cmd_string2)
-    if set_cmd then
-      self.cmd = cmd
-    end
-  end
-
-  -- NOTE: concat cmd, so that it is not processed
-  -- too hard when starting the job.
-  if type(cmd) ~= "string" then
-    cmd = table.concat(cmd, " ")
+    cmd = self:__modify_command_from_input(save_modified_command)
+  else
+    cmd = format_cmd(self.cmd)
   end
 
   return function(buf)
@@ -275,6 +213,57 @@ function Task:get_definition()
   return def
 end
 
+function Task:__update_from_storage()
+  local task_stored_data = storage.get(self.__meta)
+  if
+    type(task_stored_data) == "table"
+    and (
+      type(task_stored_data.cmd) == "string"
+      or type(task_stored_data.cmd) == "table"
+    )
+  then
+    self.cmd = format_cmd(task_stored_data.cmd)
+  end
+  return self
+end
+
+function Task:__modify_command_from_input(save_modified_command)
+  local orig_cmd = format_cmd(self.__orig_cmd)
+  local cmd = format_cmd(self.cmd)
+
+  local cmd2 = vim.fn.input {
+    prompt = "$ ",
+    default = cmd .. " ",
+    cancelreturn = false,
+  }
+  if type(cmd2) ~= "string" then
+    return nil
+  end
+  if cmd2 == "" then
+    cmd2 = orig_cmd
+  else
+    cmd2 = format_cmd(cmd2)
+  end
+
+  local set_cmd = false
+  if save_modified_command then
+    if cmd2 == orig_cmd then
+      storage.delete(self.__meta)
+      set_cmd = true
+    elseif cmd2 ~= cmd then
+      storage.save(self.__meta, { cmd = cmd2 })
+      set_cmd = true
+    end
+  end
+  cmd = format_cmd(cmd2)
+  if set_cmd then
+    self.cmd = cmd
+  end
+  return cmd
+end
+
+---@param cmd string|table
+---@return string
 format_cmd = function(cmd)
   local cmd2 = {}
   if type(cmd) == "string" then
@@ -288,24 +277,8 @@ format_cmd = function(cmd)
   if #cmd2 == 0 then
     return ""
   end
-  cmd = cmd2
-  if vim.fn.executable(cmd[1]) ~= 1 then
-    cmd = table.concat(cmd, " ")
-  end
-  return cmd
-end
-
-copy_cmd = function(cmd)
-  local _cmd = nil
-  if type(cmd) == "string" then
-    _cmd = cmd
-  elseif type(cmd) == "table" then
-    _cmd = {}
-    for _, v in ipairs(cmd) do
-      table.insert(_cmd, v)
-    end
-  end
-  return _cmd
+  local s = table.concat(cmd2, " ")
+  return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
 return Task

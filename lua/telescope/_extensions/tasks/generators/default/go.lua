@@ -71,7 +71,9 @@ run_project_task = function(cwd, name, full_path)
     cwd = cwd,
     filename = full_path,
     __meta = {
-      name = "go_run_project_" .. full_path:gsub("/", "_"):gsub("\\", "-"),
+      "go",
+      "project",
+      full_path,
     },
   }
   if type(vim.g.GO_ENV) == "table" and next(vim.g.GO_ENV) then
@@ -88,7 +90,9 @@ run_current_file_task = function(package, cwd, name)
     cmd = cmd,
     cwd = cwd,
     __meta = {
-      name = "go_run_file_" .. package:gsub("/", "_"):gsub("\\", "-"),
+      "go",
+      "file",
+      package,
     },
   }
   if type(vim.g.GO_ENV) == "table" and next(vim.g.GO_ENV) then

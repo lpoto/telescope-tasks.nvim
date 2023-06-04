@@ -28,7 +28,8 @@ function python.generator(buf)
     cmd = cmd,
     filename = name,
     __meta = {
-      name = "python_run_file_" .. name:gsub("/", "_"):gsub("\\", "-"),
+      "python",
+      name,
     },
   }
   if type(vim.g.PYTHON_ENV) == "table" and next(vim.g.PYTHON_ENV) then

@@ -40,9 +40,6 @@ require("telescope").setup {
         scale = 0.4, -- output window to editor size ratio
         -- NOTE: scale and "center" layout are only relevant when style == "float"
       },
-      -- Directory to store the modified commands data to.
-      -- Set it to false to disable saving modified commands.
-      data_dir = Path:new(vim.fn.stdpath "data", "telescope_tasks"))
       -- other picker setup values
     },
   },

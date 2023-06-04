@@ -1,6 +1,5 @@
 local util = require "telescope._extensions.tasks.util"
 local enum = require "telescope._extensions.tasks.enum"
-local Path = require "plenary.path"
 
 local setup = {}
 
@@ -10,7 +9,6 @@ setup.opts = {
     layout = "center", -- "bottom" | "left" | "right"
     scale = 0.4,
   },
-  data_dir = Path:new(vim.fn.stdpath "data", "telescope_tasks"):__tostring(),
 }
 
 local parse_output_opts
@@ -29,12 +27,6 @@ function setup.setup(opts)
   if opts.output then
     output_opts =
       vim.tbl_extend("force", output_opts, parse_output_opts(opts.output))
-  end
-  if opts.data_dir then
-    if type(opts.data_dir) ~= "string" then
-      util.warn "'data_dir' should be a string"
-      opts.data_dir = nil
-    end
   end
 
   if type(opts.theme) == "string" then

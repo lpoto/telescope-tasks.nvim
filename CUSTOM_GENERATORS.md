@@ -59,10 +59,12 @@ custom.add {
 
 ## Task Spec
 
-| Property           | Type                | Description                                                                                                                                                                                         |
-| ------------------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **name** or `[1]`  | `string`            | The name of the task.                                                                                                                                                                               |
-| **cmd**            | `string` or `table` | A command to be executed. When a table, the first element should be an executable.                                                                                                                  |
-| **env**            | `table?`            | A table of environment variables used during the task's execution .                                                                                                                                 |
-| **cwd**            | `string?`           | A path to a directory that will be used as a working directory for the task.                                                                                                                        |
-| **errorformat**    | `string?`           | The errorformat used when sending the output to quickfix.                                                                                                                                           |
+| Property          | Type                | Description                                                                                                   |
+| ----------------- | ------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **name** or `[1]` | `string`            | The name of the task.                                                                                         |
+| **cmd**           | `string` or `table` | A command to be executed. When a table, the first element should be an executable.                            |
+| **env**           | `table?`            | A table of environment variables used during the task's execution .                                           |
+| **cwd**           | `string?`           | A path to a directory that will be used as a working directory for the task.                                  |
+| **errorformat**   | `string?`           | The errorformat used when sending the output to quickfix.                                                     |
+| **filename**      | `string?`           | A filename associated with the task (using `e` mapping will open this file).                                  |
+| **\_\_meta**      | `string[]?`         | A table of strings that uniquely describe the task (this will be used to store the task's modified commands). |

@@ -55,9 +55,9 @@ function get_tasks(path, pkg)
         cmd = v,
         cwd = cwd,
         __meta = {
-          name = "package_json_" .. k .. "_" .. filename
-            :gsub("/", "_")
-            :gsub("\\", "-"),
+          "package.json",
+          filename,
+          k,
         },
       }
       if type(vim.g.MAKEFILE_ENV) == "table" and next(vim.g.MAKEFILE_ENV) then
