@@ -57,7 +57,8 @@ run_project_task = function(cwd, name, full_path)
     cwd = cwd,
     filename = full_path,
     __meta = {
-      name = "maven_project_" .. full_path:gsub("/", "_"):gsub("\\", "-"),
+      "maven",
+      full_path,
     },
   }
   if type(vim.g.JAVA_ENV) == "table" and next(vim.g.JAVA_ENV) then

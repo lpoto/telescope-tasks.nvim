@@ -48,7 +48,9 @@ function cargo.generator()
       cmd = cmd,
       cwd = cwd,
       __meta = {
-        name = "python_run_file_" .. file:gsub("/", "_"):gsub("\\", "-"),
+        "cargo",
+        "binary",
+        file,
       },
     }
     if type(vim.g.CARGO_ENV) == "table" and next(vim.g.CARGO_ENV) then

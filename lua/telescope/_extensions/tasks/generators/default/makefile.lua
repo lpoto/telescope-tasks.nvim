@@ -45,9 +45,9 @@ function get_task(path, target)
     cmd = { "make", target },
     cwd = cwd,
     __meta = {
-      name = "makefile_task_" .. target .. "_" .. filename
-        :gsub("/", "_")
-        :gsub("\\", "-"),
+      "makefile",
+      filename,
+      target,
     },
   }
   if type(vim.g.MAKEFILE_ENV) == "table" and next(vim.g.MAKEFILE_ENV) then
