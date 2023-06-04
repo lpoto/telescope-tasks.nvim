@@ -1,5 +1,6 @@
 local Default = require "telescope._extensions.tasks.model.default_generator"
 local Path = require "plenary.path"
+local util = require "telescope._extensions.tasks.util"
 
 local makefile = Default:new {
   opts = {
@@ -44,14 +45,15 @@ function get_task(path, target)
     filename = filename,
     cmd = { "make", target },
     cwd = cwd,
-    __meta = {
+    keywords = {
       "makefile",
       filename,
       target,
     },
   }
-  if type(vim.g.MAKEFILE_ENV) == "table" and next(vim.g.MAKEFILE_ENV) then
-    t.env = vim.g.MAKEFILE_ENV
+  local env = util.get_env "makefile"
+  if type(env) == "table" and next(env) then
+    t.env = env
   end
   return t
 end

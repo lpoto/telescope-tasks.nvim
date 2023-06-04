@@ -18,44 +18,28 @@ An example:
 ```lua
 local util = require("telescope").extensions.tasks.util
 
-custom.add {
-  generator = function(buf)
+custom.add(
+  function(buf)
+    local root = util.find_current_file_root { "Makefile" }
     return {
         "Example Task",
-        cwd = util.find_current_file_root {".bashrc"},
-        cmd = {"cat", ".bashrc"}
+        cwd = root,
+        filename = root .. "/Makefile",
+        cmd = { "make", "example" },
         -- env = {...}
+        keywords = {
+            "makefile",
+            root,
+            "example",
+        }
       }
     -- NOTE: multiple tasks may be returned at once
     -- NOTE: You may return nil aswell in case you want to add custom
     -- conditions to the generator function itself
-  end,
-  opts = {
-    name = "Example Custom Generator",
-    filetypes = {"python", "sh"},
-    patterns = { os.getenv("HOME") .. "/.*"},
-  }
-}
---- You may pass multiple generators at once ( `custom.add({...}, {...}, {...})` )
+  end
+)
+--- You may pass multiple generators at once ( `custom.add(g1, g2, ...)` )
 ```
-
-## Generator Spec
-
-| Property      | Type       | Description                                                                                                            |
-| ------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **generator** | `function` | The generator function that recieves buffer number as input and returns nil or one or more [Task](#task-spec) objects. |
-| **opts**      | `table?`   | [Generator Opts](#generator-opts-spec).                                                                                |
-
-## Generator Opts Spec
-
-| Property                    | Type      | Description                                                                                                                                                              |
-| --------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **name**                    | `string?` | The name of the generator.                                                                                                                                               |
-| **filetypes**               | `table?`  | A table of filetypes in which the generator will be run.                                                                                                                 |
-| **patterns**                | `table?`  | A table lua patterns. The generator will only be run when the current filename matches **_at least one_** pattern.                                                       |
-| **ignore_patterns**         | `table?`  | A table lua patterns. The generator will only be run when the current filename **_does not_** match any patterns.                                                        |
-| **parent_dir_includes**     | `table?`  | A table of filenames and directory names. The generator will only run when one of the current file's parent directories includes one of the listed files or directories. |
-| **parent_dir_not_includes** | `table?`  | A table of filenames and directory names. The generator will only run when none of the current file's parent directories include any of the listed files or directories. |
 
 ## Task Spec
 
@@ -67,4 +51,4 @@ custom.add {
 | **cwd**           | `string?`           | A path to a directory that will be used as a working directory for the task.                                  |
 | **errorformat**   | `string?`           | The errorformat used when sending the output to quickfix.                                                     |
 | **filename**      | `string?`           | A filename associated with the task (using `e` mapping will open this file).                                  |
-| **\_\_meta**      | `string[]?`         | A table of strings that uniquely describe the task (this will be used to store the task's modified commands). |
+| **keywords**      | `string[]?`         | A table of strings that uniquely describe the task (this will be used to store the task's modified commands). |

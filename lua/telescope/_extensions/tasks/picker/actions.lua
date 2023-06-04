@@ -37,36 +37,52 @@ function actions.edit_task_file(prompt_bufnr)
   telescope_actions.file_edit(prompt_bufnr)
 end
 
-function actions.run_task_with_modyfiable_command(prompt_bufnr)
+function actions.modify_task_command(prompt_bufnr)
   local selection = action_state.get_selected_entry()
   local task = selection.value
 
   if executor.is_running(task.name) then
-    util.error "Task is already running"
+    util.error "Task is running"
     return
   end
-
-  executor.run(task, function()
-    refresh_picker()
-  end, function()
-    refresh_picker(prompt_bufnr)
-  end, false, false)
+  task:modify_command_from_input(prompt_bufnr)
+  refresh_picker(prompt_bufnr)
 end
 
-function actions.run_task_and_save_modified_command(prompt_bufnr)
+function actions.modify_task_env(prompt_bufnr)
   local selection = action_state.get_selected_entry()
   local task = selection.value
 
   if executor.is_running(task.name) then
-    util.error "Task is already running"
+    util.error "Task is running"
     return
   end
+  task:modify_env_from_input(prompt_bufnr)
+  refresh_picker(prompt_bufnr)
+end
 
-  executor.run(task, function()
-    refresh_picker()
-  end, function()
-    refresh_picker(prompt_bufnr)
-  end, false, true)
+function actions.modify_task_cwd(prompt_bufnr)
+  local selection = action_state.get_selected_entry()
+  local task = selection.value
+
+  if executor.is_running(task.name) then
+    util.error "Task is running"
+    return
+  end
+  task:modify_cwd_from_input(prompt_bufnr)
+  refresh_picker(prompt_bufnr)
+end
+
+function actions.delete_task_modifications(prompt_bufnr)
+  local selection = action_state.get_selected_entry()
+  local task = selection.value
+
+  if executor.is_running(task.name) then
+    util.error "Task is running"
+    return
+  end
+  task:delete_modifications(prompt_bufnr)
+  refresh_picker(prompt_bufnr)
 end
 
 function actions.selected_task_output(prompt_bufnr)
@@ -84,7 +100,7 @@ function actions.delete_selected_task_output(picker_buf)
   refresh_previewer(picker_buf)
   executor.delete_task_buffer(task)
   if not running then
-    refresh_picker(picker_buf, true)
+    refresh_picker(picker_buf, true, false)
   end
 end
 
@@ -104,8 +120,12 @@ refresh_picker = function(picker_buf, close_on_no_results)
   if p == nil then
     return
   end
-  local tasks_finder =
-    finder.available_tasks_finder(p.starting_buffer, close_on_no_results)
+  local tasks_finder = finder.available_tasks_finder(
+    p.starting_buffer,
+    close_on_no_results,
+    nil,
+    false
+  )
   if not tasks_finder then
     pcall(telescope_actions.close, picker_buf)
     return

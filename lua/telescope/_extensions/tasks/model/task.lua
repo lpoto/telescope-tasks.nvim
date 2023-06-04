@@ -1,4 +1,5 @@
 local util = require "telescope._extensions.tasks.util"
+local enum = require "telescope._extensions.tasks.enum"
 local storage = require "telescope._extensions.tasks.storage"
 
 ---@class Task
@@ -6,17 +7,23 @@ local storage = require "telescope._extensions.tasks.storage"
 ---@field env table: A table of environment variables.
 ---@field cmd table|string: The command, may either be a string or a table. When a table, the first element should be executable.
 ---@field filename string?: The task's reference file, which may be opened from the picker.
----@field cwd string: The working directory of the task.
+---@field cwd string?: The working directory of the task.
 ---@field errorformat string|nil
----@field __generator_opts table|nil
----@field __meta string[]
+---@field keywords string[]
+---@field __default_generator boolean
+---@field __experimental boolean
 ---@field create_job function
+---@field modify_command_from_input function
+---@field modify_cwd_from_input function
+---@field modify_env_from_input function
+---@field delete_modifications function
 ---@field __update_from_storage function
----@field __modify_command_from_input function
 
 ---@type Task
 local Task = {
   __orig_cmd = nil,
+  __orig_env = nil,
+  __orig_cwd = nil,
 }
 Task.__index = Task
 
@@ -25,14 +32,10 @@ local format_cmd
 ---Create an task from a table
 ---
 ---@param o table|string: Task's fields or just a command.
----@param generator_opts table|nil: The options of the generator that created this task.
 ---@return Task
-function Task:new(o, generator_opts)
+function Task:new(o)
   ---@type Task
-  local a = {
-    __generator_opts = generator_opts,
-  }
-  setmetatable(a, Task)
+  local a = setmetatable({}, Task)
 
   --NOTE: verify task's fields,
   --if any errors occur, stop with the creation and return
@@ -94,12 +97,20 @@ function Task:new(o, generator_opts)
   end
   a.cmd = cmd
 
+  if type(o.__experimental) == "boolean" then
+    a.__experimental = o.__experimental
+  end
+  if type(o.__default_generator) == "boolean" then
+    a.__default_generator = o.__default_generator
+  end
+
   local cwd = o.cwd
   assert(
     cwd == nil or type(cwd) == "string",
     "Task '" .. a.name .. "'s `cwd` field should be a string!"
   )
   a.cwd = cwd or vim.fn.getcwd()
+  a.__orig_cwd = a.cwd
 
   local env = o.env
   assert(
@@ -107,21 +118,22 @@ function Task:new(o, generator_opts)
     "Task '" .. a.name .. "'s env should be a table!"
   )
   a.env = o.env or {}
+  a.__orig_env = vim.deepcopy(a.env)
 
-  if type(o.__meta) == "table" then
-    for k, v in pairs(o.__meta) do
+  if type(o.keywords) == "table" then
+    for k, v in pairs(o.keywords) do
       assert(
         type(v) == "string" and type(k) == "number",
-        "__meta should be a table of strings!"
+        "keywords should be a table of strings!"
       )
     end
   else
     assert(
-      o.__meta == nil or type(o.__meta) == "table",
-      "__meta field should be a table"
+      o.keywords == nil or type(o.keywords) == "table",
+      "keywords field should be a table"
     )
   end
-  a.__meta = o.__meta
+  a.keywords = o.keywords
   a.cmd = format_cmd(a.cmd)
   a.__orig_cmd = format_cmd(a.cmd)
 
@@ -133,23 +145,19 @@ end
 ---and returns the started job's id.
 ---
 ---@return function?
-function Task:create_job(callback, lock, save_modified_command)
+function Task:create_job(callback)
   self:__update_from_storage()
 
   local opts = {
     env = next(self.env or {}) and self.env or nil,
-    cwd = self.cwd,
     clear_env = false,
     detach = false,
     on_exit = callback,
   }
-
-  local cmd
-  if not lock then
-    cmd = self:__modify_command_from_input(save_modified_command)
-  else
-    cmd = format_cmd(self.cmd)
+  if type(self.cwd) == "string" and self.cwd:len() > 0 then
+    opts.cwd = self.cwd
   end
+  local cmd = format_cmd(self.cmd)
 
   return function(buf)
     local job_id = nil
@@ -182,52 +190,61 @@ function Task:get_definition()
   if type(self.cwd) == "string" then
     table.insert(def, { key = "cwd", value = self.cwd })
   else
-    table.insert(def, { key = "cwd", vim.inspect(self.cwd) })
+    table.insert(def, { key = "cwd", value = "" })
   end
   if type(self.env) == "table" then
-    table.insert(
-      def,
-      { key = "env", value = "[" .. table.concat(self.env, ", ") .. "]" }
-    )
-  end
-
-  if self.__generator_opts then
-    table.insert(def, {})
-    if next(self.__generator_opts or {}) and self.__generator_opts.name then
-      table.insert(
-        def,
-        { key = "#  generator", value = self.__generator_opts.name }
-      )
-      for k, v in pairs(self.__generator_opts) do
-        if k ~= "name" and type(v) == "table" then
-          table.insert(
-            def,
-            { key = "#   " .. k, value = "[" .. table.concat(v, ", ") .. "]" }
-          )
-        elseif k == "experimental" and v then
-          table.insert(def, { key = "#   " .. k, value = "true" })
-        end
+    table.insert(def, { key = "env", value = "" })
+    if next(self.env) then
+      for k, v in pairs(self.env) do
+        table.insert(def, { key = "  " .. k, value = v })
       end
     end
+  end
+
+  table.insert(def, { key = "" })
+  table.insert(def, { key = "" })
+  if self.__default_generator then
+    table.insert(def, { key = "#  Default generator" })
+  else
+    table.insert(def, { key = "#  Custom generator" })
+  end
+  if self.__experimental then
+    table.insert(def, { key = "#  Experimental" })
+  end
+  if self:modified() then
+    table.insert(def, { key = "#  Modified" })
   end
   return def
 end
 
 function Task:__update_from_storage()
-  local task_stored_data = storage.get(self.__meta)
+  local task_stored_data = storage.get(self.keywords)
+  if type(task_stored_data) ~= "table" then
+    return self
+  end
   if
-    type(task_stored_data) == "table"
-    and (
-      type(task_stored_data.cmd) == "string"
-      or type(task_stored_data.cmd) == "table"
-    )
+    type(task_stored_data.cmd) == "string"
+    or type(task_stored_data.cmd) == "table"
   then
     self.cmd = format_cmd(task_stored_data.cmd)
+  end
+  if type(task_stored_data.env) == "table" then
+    for k, v in pairs(task_stored_data.env) do
+      if v == "" then
+        self.env[k] = nil
+      else
+        self.env[k] = v
+      end
+    end
+  end
+  if type(task_stored_data.cwd) == "string" then
+    self.cwd = task_stored_data.cwd
   end
   return self
 end
 
-function Task:__modify_command_from_input(save_modified_command)
+---@return boolean
+function Task:modify_command_from_input()
   local orig_cmd = format_cmd(self.__orig_cmd)
   local cmd = format_cmd(self.cmd)
 
@@ -237,7 +254,7 @@ function Task:__modify_command_from_input(save_modified_command)
     cancelreturn = false,
   }
   if type(cmd2) ~= "string" then
-    return nil
+    return false
   end
   if cmd2 == "" then
     cmd2 = orig_cmd
@@ -246,25 +263,136 @@ function Task:__modify_command_from_input(save_modified_command)
   end
 
   local set_cmd = false
-  if save_modified_command then
-    if cmd2 == orig_cmd then
-      storage.delete(self.__meta)
-      set_cmd = true
-    elseif cmd2 ~= cmd then
-      storage.save(self.__meta, { cmd = cmd2 })
-      set_cmd = true
+  if cmd2 == orig_cmd then
+    storage.save(self.keywords, { cmd = enum.NIL })
+    set_cmd = true
+  elseif cmd2 ~= cmd then
+    storage.save(self.keywords, { cmd = cmd2 })
+    set_cmd = true
+  end
+  if set_cmd then
+    self.cmd = format_cmd(cmd2)
+    return true
+  end
+  return false
+end
+
+---@return boolean
+function Task:modify_env_from_input()
+  local key = vim.fn.input {
+    prompt = "Environment variable name: ",
+    default = "",
+    cancelreturn = false,
+  }
+  if type(key) ~= "string" or key:len() == 0 then
+    return false
+  end
+  local value = vim.fn.input {
+    prompt = "Environment variable value: ",
+    default = "",
+    cancelreturn = false,
+  }
+  if type(value) ~= "string" then
+    return false
+  end
+  if value == "" then
+    if self.__orig_env[key] then
+      local r = vim.fn.confirm(
+        "Do you want to use default value for " .. key .. "?",
+        "&Yes\n&No",
+        2
+      )
+      if r == 1 then
+        value = self.__orig_env[key]
+        self.env[key] = value
+      else
+        self.env[key] = nil
+      end
+    else
+      value = enum.NIL
+      self.env[key] = nil
+    end
+  else
+    self.env[key] = value
+  end
+  storage.save(self.keywords, { env = { [key] = value } })
+  return true
+end
+
+function Task:modify_cwd_from_input()
+  local cwd = vim.fn.input {
+    prompt = "Working directory: ",
+    default = self.cwd,
+    cancelreturn = false,
+  }
+  if type(cwd) ~= "string" then
+    return false
+  end
+  local new_cwd = cwd
+  if cwd == "" then
+    if type(self.__orig_cwd) ~= "string" or self.__orig_cwd:len() == 0 then
+      new_cwd = nil
+    else
+      new_cwd = self.__orig_cwd
+    end
+  else
+    local ok, v = pcall(vim.fn.expand, cwd)
+    if not ok then
+      util.error("Not a directory: " .. cwd)
+      return false
+    end
+    cwd = v
+    if vim.fn.isdirectory(cwd) ~= 1 then
+      util.error("Not a directory: " .. cwd)
+      return false
     end
   end
-  cmd = format_cmd(cmd2)
-  if set_cmd then
-    self.cmd = cmd
+  if new_cwd == self.__orig_cwd then
+    cwd = enum.NIL
   end
-  return cmd
+  storage.save(self.keywords, { cwd = cwd })
+  self.cwd = new_cwd
+  return true
+end
+
+function Task:delete_modifications()
+  self.cmd = self.__orig_cmd
+  self.env = vim.deepcopy(self.__orig_env or {})
+  self.cwd = self.__orig_cwd
+  storage.delete(self.keywords)
+  return true
+end
+
+function Task:modified()
+  if
+    type(self.cmd) ~= type(self.__orig_cmd)
+    or type(self.env) ~= type(self.__orig_env)
+    or type(self.cwd) ~= type(self.__orig_cwd)
+  then
+    return true
+  end
+  if format_cmd(self.cmd) ~= format_cmd(self.__orig_cmd) then
+    return true
+  end
+  if self.cwd ~= self.__orig_cwd then
+    return true
+  end
+  if type(self.env) == "table" then
+    for k, v in pairs(self.env) do
+      if self.__orig_env[k] ~= v then
+        return true
+      end
+    end
+  end
+  return false
 end
 
 ---@param cmd string|table
 ---@return string
 format_cmd = function(cmd)
+  if cmd == nil then
+    return ""
+  end
   local cmd2 = {}
   if type(cmd) == "string" then
     cmd = vim.split(cmd, " ")

@@ -1,4 +1,5 @@
 local Path = require "plenary.path"
+local enum = require "telescope._extensions.tasks.enum"
 
 local storage = {
   file = Path:new(vim.fn.stdpath "data", "telescope_tasks.json"),
@@ -9,51 +10,74 @@ local load_data
 local loaded = false
 
 local get_data
-local check_metadata
+local check_keywords
 local clean_data
 local persist_data
 
 ---@class TaskStoredData
 ---@field cmd string
+---@field env table
+---@field cwd string?
 
 ---@return TaskStoredData?
-function storage.get(task_metadata)
-  if not check_metadata(task_metadata) then
+function storage.get(task_keywords)
+  if not check_keywords(task_keywords) then
     return nil
   end
   load_data()
-  return get_data(task_metadata)
+  return get_data(task_keywords)
 end
 
----@param task_metadata string[]
----@return boolean
-function storage.delete(task_metadata)
-  if not get_data(task_metadata) then
-    return false
-  end
-  return storage.save(task_metadata, nil)
-end
-
----@param task_metadata string[]
+---@param task_keywords string[]
 ---@param task_data TaskStoredData?
 ---@return boolean
-function storage.save(task_metadata, task_data)
-  if not check_metadata(task_metadata) then
+function storage.save(task_keywords, task_data)
+  if not check_keywords(task_keywords) then
     return false
   end
   if type(data) ~= "table" then
     data = {}
   end
   local d = data
-  for i, v in ipairs(task_metadata) do
+  for i, v in ipairs(task_keywords) do
     if type(v) ~= "string" then
       return false
     end
     if d[v] == nil then
       d[v] = {}
     end
-    if i == #task_metadata then
-      d[v] = task_data
+    if i == #task_keywords then
+      if type(d[v]) ~= "table" then
+        d[v] = {}
+      end
+      d[v] = vim.tbl_deep_extend("force", d[v], task_data or {})
+    else
+      d = d[v]
+    end
+  end
+  clean_data()
+  return persist_data()
+end
+
+---@param task_keywords string[]
+---@return boolean
+function storage.delete(task_keywords)
+  if not get_data(task_keywords) then
+    return false
+  end
+  if type(data) ~= "table" then
+    return false
+  end
+  local d = data
+  for i, v in ipairs(task_keywords) do
+    if type(v) ~= "string" then
+      return false
+    end
+    if d[v] == nil then
+      d[v] = {}
+    end
+    if i == #task_keywords then
+      d[v] = nil
     else
       d = d[v]
     end
@@ -84,6 +108,9 @@ function clean_data(d)
   if d == nil then
     d = data
   end
+  if d == enum.NIL then
+    return false
+  end
   if type(d) ~= "table" and d ~= nil then
     return true
   end
@@ -101,20 +128,20 @@ function clean_data(d)
   return ok
 end
 
----@param task_metadata string[]?
+---@param task_keywords string[]?
 ---@return boolean
-function check_metadata(task_metadata)
-  return type(task_metadata) == "table" and next(task_metadata) ~= nil
+function check_keywords(task_keywords)
+  return type(task_keywords) == "table" and next(task_keywords) ~= nil
 end
 
----@param task_metadata string[]?
+---@param task_keywords string[]?
 ---@return table?
-function get_data(task_metadata)
-  if not check_metadata(task_metadata) or type(data) ~= "table" then
+function get_data(task_keywords)
+  if not check_keywords(task_keywords) or type(data) ~= "table" then
     return nil
   end
   local d = data
-  for _, v in pairs(task_metadata or {}) do
+  for _, v in pairs(task_keywords or {}) do
     if type(d) ~= "table" or type(v) ~= "string" then
       return nil
     end

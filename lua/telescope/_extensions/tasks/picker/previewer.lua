@@ -80,7 +80,11 @@ local function display_definition_buf(status, task)
       if not next(item) then
         table.insert(lines, "")
       else
-        table.insert(lines, item.key .. ": " .. item.value)
+        if item.value == nil then
+          table.insert(lines, item.key)
+        else
+          table.insert(lines, item.key .. ": " .. item.value)
+        end
       end
     end
   end

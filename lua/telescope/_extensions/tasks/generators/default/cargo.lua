@@ -47,14 +47,15 @@ function cargo.generator()
       name = "Run current Cargo binary",
       cmd = cmd,
       cwd = cwd,
-      __meta = {
+      keywords = {
         "cargo",
         "binary",
         file,
       },
     }
-    if type(vim.g.CARGO_ENV) == "table" and next(vim.g.CARGO_ENV) then
-      binary_task.env = vim.g.CARGO_ENV
+    local env = util.get_env "cargo"
+    if type(env) == "table" and next(env) then
+      binary_task.env = env
     end
     table.insert(tasks, binary_task)
   end

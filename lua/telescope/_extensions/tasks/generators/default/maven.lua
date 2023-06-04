@@ -1,5 +1,6 @@
 local Path = require "plenary.path"
 local Default = require "telescope._extensions.tasks.model.default_generator"
+local util = require "telescope._extensions.tasks.util"
 
 ---Generate tasks for running maven projects in subdirectories,
 ---
@@ -56,16 +57,18 @@ run_project_task = function(cwd, name, full_path)
     cmd = cmd,
     cwd = cwd,
     filename = full_path,
-    __meta = {
+    keywords = {
       "maven",
       full_path,
     },
   }
-  if type(vim.g.JAVA_ENV) == "table" and next(vim.g.JAVA_ENV) then
-    t.env = vim.g.JAVA_ENV
+  local env = util.get_env "java"
+  if type(env) == "table" and next(env) then
+    t.env = env
   end
-  if type(vim.g.MAVEN_ENV) == "table" and next(vim.g.MAVEN_ENV) then
-    t.env = vim.tbl_extend("force", t.env or {}, vim.g.MAVEN_ENV)
+  env = util.get_env "makefile"
+  if type(env) == "table" and next(env) then
+    t.env = vim.tbl_extend("force", t.env or {}, env)
   end
   return t
 end

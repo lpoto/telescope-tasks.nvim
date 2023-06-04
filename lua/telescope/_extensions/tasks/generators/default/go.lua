@@ -70,14 +70,15 @@ run_project_task = function(cwd, name, full_path)
     cmd = cmd,
     cwd = cwd,
     filename = full_path,
-    __meta = {
+    keywords = {
       "go",
       "project",
       full_path,
     },
   }
-  if type(vim.g.GO_ENV) == "table" and next(vim.g.GO_ENV) then
-    t.env = vim.g.GO_ENV
+  local env = util.get_env "go"
+  if type(env) == "table" and next(env) then
+    t.env = env
   end
   return t
 end
@@ -89,14 +90,15 @@ run_current_file_task = function(package, cwd, name)
     name,
     cmd = cmd,
     cwd = cwd,
-    __meta = {
+    keywords = {
       "go",
       "file",
       package,
     },
   }
-  if type(vim.g.GO_ENV) == "table" and next(vim.g.GO_ENV) then
-    t.env = vim.g.GO_ENV
+  local env = util.get_env "go"
+  if type(env) == "table" and next(env) then
+    t.env = env
   end
   return t
 end

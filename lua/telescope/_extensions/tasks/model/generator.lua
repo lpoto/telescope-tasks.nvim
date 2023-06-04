@@ -1,11 +1,8 @@
 local util = require "telescope._extensions.tasks.util"
 local Task = require "telescope._extensions.tasks.model.task"
-local Generator_opts =
-  require "telescope._extensions.tasks.model.generator_opts"
 
 ---@class Generator
 ---@field generator function
----@field opts Generator_opts
 local Generator = {
   name = "Custom",
 }
@@ -23,26 +20,7 @@ function Generator:new(o)
     type(generator.generator) == "function",
     "Generator should have a function `generator` field"
   )
-  if not generator.opts then
-    return generator
-  end
-
-  generator.opts = Generator_opts:new(generator.opts)
-  local name = generator.opts.name or generator.name
-
-  generator.name = name
-  generator.opts.name = name
-
   return generator
-end
-
----@return boolean: Whether the generator is available in
----the current context
-function Generator:available()
-  if not self.opts then
-    return false
-  end
-  return self.opts:check_in_current_context()
 end
 
 ---Runs the generator function, and notifies any
@@ -67,7 +45,7 @@ function Generator:run()
   for _, o in pairs(tasks) do
     local err
     ok, err = pcall(function()
-      local task = Task:new(o, self.opts)
+      local task = Task:new(o)
       found_tasks[task.name] = task
     end)
     if not ok and type(err) == "string" then

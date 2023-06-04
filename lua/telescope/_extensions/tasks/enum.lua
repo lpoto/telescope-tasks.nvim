@@ -23,4 +23,6 @@ enum.OUTPUT = {
   },
 }
 
+enum.NIL = "<__TELESCOPE.TASKS.VALUE.NIL__>"
+
 return enum

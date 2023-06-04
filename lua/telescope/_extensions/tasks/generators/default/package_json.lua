@@ -1,5 +1,6 @@
 local Default = require "telescope._extensions.tasks.model.default_generator"
 local Path = require "plenary.path"
+local util = require "telescope._extensions.tasks.util"
 
 local package_json = Default:new {
   opts = {
@@ -54,14 +55,19 @@ function get_tasks(path, pkg)
         filename = filename,
         cmd = v,
         cwd = cwd,
-        __meta = {
+        keywords = {
           "package.json",
           filename,
           k,
         },
       }
-      if type(vim.g.MAKEFILE_ENV) == "table" and next(vim.g.MAKEFILE_ENV) then
-        t.env = vim.g.MAKEFILE_ENV
+      local env = util.get_env "package.json"
+      if type(env) == "table" and next(env) then
+        t.env = env
+      end
+      env = util.get_env "package.json"
+      if type(env) == "table" and next(env) then
+        t.env = vim.tbl_extend("force", t.env or {}, env)
       end
       table.insert(tasks, t)
     end
