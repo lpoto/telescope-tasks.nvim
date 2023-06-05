@@ -6,7 +6,8 @@ definitions and outputs in the telescope's previewer.
 
 ## Demo
 
-https://user-images.githubusercontent.com/67372390/215597313-babf9442-61ba-4b7b-8689-77cb84b492c5.mp4
+https://github.com/lpoto/telescope-tasks.nvim/assets/67372390/bf527ce3-602c-4d7a-9563-b5c1290f7113
+
 
 > The demo uses the default generators for `Go` and `Python` projects.
 
