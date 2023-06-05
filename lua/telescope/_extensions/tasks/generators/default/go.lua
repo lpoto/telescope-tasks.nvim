@@ -19,24 +19,28 @@ local go = Default:new {
 local is_main_file
 local run_current_file_task
 local run_project_task
+local check_go_files
 
 --- Build tasks by finding main go files in the subdirectories.
 --- If there are go.mod files, return tasks for running projects
 --- otherise returns just a task for running the current go file.
 function go.generator(buf)
-  local tasks = {}
-
   if not go:state() then
+    return {}
+  end
+  buf = buf or vim.api.nvim_get_current_buf()
+
+  local files = (go:state():find_files() or {}).by_extension
+  local entries = (files or {}).go
+  return check_go_files(entries, buf) or {}
+end
+
+check_go_files = function(entries, buf)
+  if type(entries) ~= "table" or not next(entries) then
     return
   end
-  local files = (go:state():find_files() or {}).by_extension
-  if type(files) ~= "table" or not next(files.go or {}) then
-    -- NOTE: only go files are relevant
-    return tasks
-  end
-
-  -- NOTE: iterate only over the go files
-  for _, entry in ipairs(files.go) do
+  local tasks = {}
+  for _, entry in ipairs(entries) do
     if entry:match ".*.go$" and is_main_file(entry) then
       local path = Path:new(entry)
       local root = Path:new(util.find_file_root(entry, { "go.mod" }))
@@ -46,7 +50,7 @@ function go.generator(buf)
         --project in the found file's directory.
         local cwd = path:parent():__tostring()
         local full_path = path:__tostring()
-        path:make_relative(vim.fn.getcwd())
+        path:normalize(vim.fn.getcwd())
         local name = "Go project: " .. path:__tostring()
         table.insert(tasks, run_project_task(cwd, name, full_path))
       elseif entry == vim.api.nvim_buf_get_name(buf) then
@@ -55,7 +59,15 @@ function go.generator(buf)
         --for only running the current file
         local cwd = vim.loop.cwd()
         local name = "Run current Go file"
-        table.insert(tasks, run_current_file_task(entry, cwd, name))
+        table.insert(
+          tasks,
+          run_current_file_task(
+            entry,
+            cwd,
+            name,
+            vim.api.nvim_buf_get_name(buf)
+          )
+        )
       end
     end
   end
@@ -83,13 +95,14 @@ run_project_task = function(cwd, name, full_path)
   return t
 end
 
-run_current_file_task = function(package, cwd, name)
+run_current_file_task = function(package, cwd, name, filename)
   local cmd = { "go", "run", package }
 
   local t = {
     name,
     cmd = cmd,
     cwd = cwd,
+    filename = filename,
     keywords = {
       "go",
       "file",

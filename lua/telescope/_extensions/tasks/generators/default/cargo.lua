@@ -3,12 +3,6 @@ local Path = require "plenary.path"
 local Default_generator =
   require "telescope._extensions.tasks.model.default_generator"
 
----Check if there exists a Cargo.toml file, if not return nil.
----Check targets in Cargo.toml and build tasks from them.
----If a binary is currently opened, add a task for running the binary.
----
----TODO: handle adding cargo.toml targets tasks!
----
 ---cargo run [options] [-- args]
 ---
 ---NOTE: this returns only tasks for running rust with cargo
@@ -26,43 +20,103 @@ local cargo = Default_generator:new {
   },
 }
 
+local run_cargo_project
+local check_cargo_files
+
 function cargo.generator()
-  if not util.parent_dir_includes { "Cargo.toml" } then
-    return nil
+  if not cargo:state() then
+    return {}
   end
-  local cwd = util.find_current_file_root { "Cargo.toml" }
-  local tasks = {}
+  local parent_cargo_exists = util.parent_dir_includes { "Cargo.toml" }
+  local parent_cargo_toml = nil
+  if parent_cargo_exists then
+    parent_cargo_toml =
+      Path:new(util.find_current_file_root { "Cargo.toml" }, "Cargo.toml")
+        :__tostring()
+  end
+  local files = (cargo:state():find_files() or {}).by_name
+  local entries = (files or {})["Cargo.toml"]
+
+  local tasks = check_cargo_files(entries)
   if
-    vim.fn.expand "%:p:h" == Path:new(cwd):joinpath("src", "bin"):__tostring()
+    parent_cargo_toml
+    and (
+      type(entries) ~= "table"
+      or not vim.tbl_contains(entries, parent_cargo_toml)
+    )
   then
-    local file = vim.fn.expand "%:p"
-    local tail = vim.fn.expand "%:p:t:r"
-    local cmd = {
-      "cargo",
-      "run",
-      "--bin",
-      tail,
-    }
-    local binary_task = {
-      name = "Run current Cargo binary",
+    local tasks2 = check_cargo_files { parent_cargo_toml }
+    if tasks2 then
+      for _, task in ipairs(tasks2) do
+        table.insert(tasks, task)
+      end
+    end
+  end
+  return tasks
+end
+
+check_cargo_files = function(entries)
+  if not entries or not next(entries) then
+    return {}
+  end
+  local tasks = {}
+  for _, entry in ipairs(entries) do
+    local path = Path:new(entry)
+    local full_path = path:__tostring()
+    local cwd = path:parent():__tostring()
+    for _, v in ipairs(run_cargo_project(cwd, full_path) or {}) do
+      table.insert(tasks, v)
+    end
+  end
+  return tasks
+end
+
+run_cargo_project = function(cwd, full_path)
+  local path = Path:new(full_path)
+  local lines = path:readlines()
+  path:normalize()
+  local next_name = false
+  local targets = {}
+  for _, l in ipairs(lines) do
+    local x = l:match "^%s*%[(.-)%]%s*$"
+    if x and x == "package" or x == "[bin]" then
+      next_name = true
+    elseif x then
+      next_name = false
+    end
+    if next_name then
+      local t = l:match '^%s*name%s*=%s*"(.-)"%s*$'
+      if not t then
+        t = l:match "^%s*name%s*=%s*'(.-)'%s*$"
+      end
+      if t then
+        targets[t] = true
+      end
+    end
+  end
+  local t = {}
+  local env = util.get_env "cargo"
+
+  for target, _ in pairs(targets) do
+    local cmd = { "cargo", "run", "--bin", target }
+    local task = {
+      name = "Cargo " .. target .. ": " .. path:__tostring(),
       cmd = cmd,
       cwd = cwd,
+      filename = full_path,
       keywords = {
         "cargo",
-        "binary",
-        file,
+        target,
+        full_path,
       },
     }
-    local env = util.get_env "cargo"
     if type(env) == "table" and next(env) then
-      binary_task.env = env
+      task.env = env
     end
-    table.insert(tasks, binary_task)
+    table.insert(t, task)
   end
-  if next(tasks or {}) then
-    return tasks
-  end
-  return nil
+
+  return t
 end
 
 return cargo
