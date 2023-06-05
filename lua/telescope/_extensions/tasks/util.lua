@@ -67,8 +67,9 @@ end
 ---@param n string
 function util.get_env(n)
   if
-    type(vim.g.telescope_tasks_env) ~= "table"
-    or type(vim.g.telescope_tasks_env[n]) ~= "table"
+    type(vim.g.telescope_tasks) ~= "table"
+    or type(vim.g.telescope_tasks.env) ~= "table"
+    or type(vim.g.telescope_tasks.env[n]) ~= "table"
   then
     return nil
   end
@@ -116,6 +117,19 @@ function notify(lvl, ...)
       })
     end
   end)
+end
+
+function util.get_binary(n)
+  if type(vim.g.telescope_tasks) ~= "table" then
+    return nil
+  end
+  if type(vim.g.telescope_tasks.binaries) ~= "table" then
+    return nil
+  end
+  if type(vim.g.telescope_tasks.binaries[n]) ~= "string" then
+    return nil
+  end
+  return vim.g.telescope_tasks.binaries[n]
 end
 
 return util

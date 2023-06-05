@@ -106,7 +106,8 @@ check_go_files = function(entries, buf, checked)
 end
 
 run_project_task = function(cwd, name, full_path)
-  local cmd = { "go", "run", "." }
+  local binary = util.get_binary "go" or "go"
+  local cmd = { binary, "run", "." }
 
   local t = {
     name,
@@ -127,7 +128,8 @@ run_project_task = function(cwd, name, full_path)
 end
 
 run_current_file_task = function(package, cwd, name, filename)
-  local cmd = { "go", "run", package }
+  local binary = util.get_binary "go" or "go"
+  local cmd = { binary, "run", package }
 
   local t = {
     name,
@@ -170,6 +172,17 @@ is_main_file = function(file)
     return r ~= nil
   end)
   return ok and ok2
+end
+
+function go.healthcheck()
+  local binary = util.get_binary "go" or "go"
+  if vim.fn.executable(binary) == 0 then
+    vim.health.warn("Go binary '" .. binary .. "' is not executable", {
+      "Install 'go' or set a different binary with vim.g.telescope_tasks = { binaries = { go=<new-binary> }}",
+    })
+  else
+    vim.health.ok("'" .. binary .. "' is executable")
+  end
 end
 
 return go

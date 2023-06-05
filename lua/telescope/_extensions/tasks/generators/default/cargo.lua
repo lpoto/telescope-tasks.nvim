@@ -97,8 +97,10 @@ run_cargo_project = function(cwd, full_path)
   local t = {}
   local env = util.get_env "cargo"
 
+  local binary = util.get_binary "cargo" or "cargo"
+
   for target, _ in pairs(targets) do
-    local cmd = { "cargo", "run", "--bin", target }
+    local cmd = { binary, "run", "--bin", target }
     local task = {
       name = "Cargo " .. target .. ": " .. path:__tostring(),
       cmd = cmd,
@@ -117,6 +119,17 @@ run_cargo_project = function(cwd, full_path)
   end
 
   return t
+end
+
+function cargo.healthcheck()
+  local binary = util.get_binary "cargo" or "cargo"
+  if vim.fn.executable(binary) == 0 then
+    vim.health.warn("Cargo binary '" .. binary .. "' is not executable", {
+      "Install 'cargo' or set a different binary with vim.g.telescope_tasks = { binaries = { cargo=<new-binary> }}",
+    })
+  else
+    vim.health.ok("'" .. binary .. "' is executable")
+  end
 end
 
 return cargo

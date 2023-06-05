@@ -39,11 +39,12 @@ function get_task(path, target)
   local relative_path = path:make_relative(vim.fn.getcwd())
   local cwd = path:parent():__tostring()
   local filename = path:__tostring()
+  local binary = util.get_binary "make" or "make"
 
   local t = {
     relative_path .. ": " .. target,
     filename = filename,
-    cmd = { "make", target },
+    cmd = { binary, target },
     cwd = cwd,
     keywords = {
       "makefile",
@@ -56,6 +57,17 @@ function get_task(path, target)
     t.env = env
   end
   return t
+end
+
+function makefile.healthcheck()
+  local binary = util.get_binary "make" or "make"
+  if vim.fn.executable(binary) == 0 then
+    vim.health.warn("Make binary '" .. binary .. "' is not executable", {
+      "Install 'make' or set a different binary with vim.g.telescope_tasks = { binaries = { make=<new-binary> }}",
+    })
+  else
+    vim.health.ok("'" .. binary .. "' is executable")
+  end
 end
 
 return makefile

@@ -50,7 +50,8 @@ function maven.generator()
 end
 
 run_project_task = function(cwd, name, full_path)
-  local cmd = { "mvn", "clean", "package", "-DskipTests" }
+  local binary = util.get_env "maven" or "mvn"
+  local cmd = { binary, "clean", "package", "-DskipTests" }
 
   local t = {
     name,
@@ -66,7 +67,7 @@ run_project_task = function(cwd, name, full_path)
   if type(env) == "table" and next(env) then
     t.env = env
   end
-  env = util.get_env "makefile"
+  env = util.get_env "maven"
   if type(env) == "table" and next(env) then
     t.env = vim.tbl_extend("force", t.env or {}, env)
   end
@@ -95,6 +96,17 @@ is_build_pom = function(file)
     return false
   end)
   return ok and ok2
+end
+
+function maven.healthcheck()
+  local binary = util.get_binary "maven" or "mvn"
+  if vim.fn.executable(binary) == 0 then
+    vim.health.warn("Maven binary '" .. binary .. "' is not executable", {
+      "Install 'maven' or set a different binary with vim.g.telescope_tasks = { binaries = { maven=<new-binary> }}",
+    })
+  else
+    vim.health.ok("'" .. binary .. "' is executable")
+  end
 end
 
 return maven

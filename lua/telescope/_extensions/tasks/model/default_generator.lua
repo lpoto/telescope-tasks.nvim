@@ -1,9 +1,11 @@
 local Generator = require "telescope._extensions.tasks.model.generator"
 local runner = require "telescope._extensions.tasks.generators.runner"
+local health = require "telescope-tasks.health"
 
 ---@class Default_generator
 ---@field errorformat string
 ---@field generator function: A generator function
+---@field healthcheck function?
 local Default_generator = {}
 Default_generator.__index = Default_generator
 
@@ -43,6 +45,10 @@ function Default_generator:load()
     end,
   }
   runner.add_generators { generator }
+
+  if type(self.healthcheck) == "function" then
+    health.__add_check(self.healthcheck)
+  end
 end
 
 return Default_generator

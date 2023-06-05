@@ -12,14 +12,18 @@ setup.opts = {
 }
 
 local parse_output_opts
+local errors = nil
 
 ---Creates the default picker options from the provided
 ---options. If the `theme` field with a string value is added,
 ---the telescope theme identified by that value is added to the options.
 ---@param opts table
 function setup.setup(opts)
+  errors = {}
   if type(opts) ~= "table" then
-    util.warn "Tasks config should be a table!"
+    local msg = "Tasks config should be a table!"
+    table.insert(errors, msg)
+    util.warn(msg)
     return
   end
 
@@ -32,7 +36,9 @@ function setup.setup(opts)
   if type(opts.theme) == "string" then
     local theme = require("telescope.themes")["get_" .. opts.theme]
     if theme == nil then
-      util.warn("No such telescope theme: '" .. opts.theme .. "'")
+      local msg = "No such telescope theme: '" .. opts.theme .. "'"
+      table.insert(errors, msg)
+      util.warn(msg)
     else
       opts = theme(opts)
     end
@@ -41,18 +47,29 @@ function setup.setup(opts)
   setup.opts = vim.tbl_extend("force", setup.opts, opts)
 end
 
+function setup.get_errors()
+  return errors
+end
+
 function parse_output_opts(opts)
+  if not errors then
+    errors = {}
+  end
   local o = {}
   if opts.scale ~= nil then
     if type(opts.scale) ~= "number" or opts.scale < 0.1 or opts.scale > 1 then
-      util.warn "'scale' should be a number between 0.1 and 1"
+      local msg = "'scale' should be a number between 0.1 and 1"
+      table.insert(errors, msg)
+      util.warn(msg)
     else
       o.scale = opts.scale
     end
   end
   if opts.style ~= nil then
     if type(opts.style) ~= "string" then
-      util.warn "'style' should be a string"
+      local msg = "'style' should be a string"
+      table.insert(errors, msg)
+      util.warn(msg)
     else
       if opts.style == "tab" or opts.style == "tabpage" then
         o.style = enum.OUTPUT.STYLE.TAB
@@ -76,14 +93,18 @@ function parse_output_opts(opts)
       then
         o.style = enum.OUTPUT.STYLE.FLOAT
       else
-        util.warn("Unknown output style: '" .. opts.style .. "'")
+        local msg = "Unknown output style: '" .. opts.style .. "'"
+        table.insert(errors, msg)
+        util.warn(msg)
       end
       o.style = opts.style
     end
   end
   if opts.layout ~= nil then
     if type(opts.layout) ~= "string" then
-      util.warn "'layout' should be a string"
+      local msg = "'layout' should be a string"
+      table.insert(errors, msg)
+      util.warn(msg)
     else
       if
         opts.layout == "center"
@@ -121,7 +142,9 @@ function parse_output_opts(opts)
       then
         o.layout = enum.OUTPUT.LAYOUT.RIGHT
       else
-        util.warn("Unknown output layout: '" .. opts.layout .. "'")
+        local msg = "Unknown output layout: '" .. opts.layout .. "'"
+        table.insert(errors, msg)
+        util.warn(msg)
       end
     end
   end

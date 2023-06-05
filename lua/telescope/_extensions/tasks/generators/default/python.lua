@@ -19,9 +19,10 @@ function python.generator(buf)
     return nil
   end
   local name = vim.api.nvim_buf_get_name(buf)
+  local binary = util.get_binary "python" or "python"
 
   local cmd = {
-    "python",
+    binary,
     name,
   }
   local t = {
@@ -38,6 +39,17 @@ function python.generator(buf)
     t.env = env
   end
   return t
+end
+
+function python.healthcheck()
+  local binary = util.get_binary "python" or "python"
+  if vim.fn.executable(binary) == 0 then
+    vim.health.warn("Python binary '" .. binary .. "' is not executable", {
+      "Install 'python' or set a different binary with vim.g.telescope_tasks = { binaries = { python=<new-binary> }}",
+    })
+  else
+    vim.health.ok("'" .. binary .. "' is executable")
+  end
 end
 
 return python
