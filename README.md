@@ -10,16 +10,14 @@ https://github.com/lpoto/telescope-tasks.nvim/assets/67372390/bf527ce3-602c-4d7a
 
 ## Installation
 
-### Packer
+The extension may be installed manually or with a plugin manager of choice.
+
+An example using [Lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
-use {"lpoto/telescope-tasks.nvim"}
-```
-
-### Vim-Plug
-
-```lua
-Plug  "lpoto/telescope-tasks.nvim"
+require("lazy").setup({
+  "lpoto/telescope-tasks.nvim",
+})
 ```
 
 ## Setup and usage
