@@ -1,4 +1,4 @@
-local setup = require "telescope._extensions.tasks.setup"
+local setup = require "telescope-tasks.setup"
 
 local health = {}
 
