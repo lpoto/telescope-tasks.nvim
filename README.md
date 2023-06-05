@@ -8,9 +8,6 @@ definitions and outputs in the telescope's previewer.
 
 https://github.com/lpoto/telescope-tasks.nvim/assets/67372390/bf527ce3-602c-4d7a-9563-b5c1290f7113
 
-
-> The demo uses the default generators for `Go` and `Python` projects.
-
 ## Installation
 
 ### Packer
