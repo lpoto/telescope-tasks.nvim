@@ -44,6 +44,8 @@ require("telescope").setup {
 require("telescope").load_extension "tasks"
 ```
 
+> **_NOTE_**: If you encounter any issues, try `:checkhealth telescope-tasks`
+
 See [Generators](#generators) on how to generate tasks.
 
 Then use the extension:

@@ -1,9 +1,9 @@
-local util = require "telescope._extensions.tasks.util"
-local enum = require "telescope._extensions.tasks.enum"
-local picker = require "telescope._extensions.tasks.picker"
-local setup = require "telescope._extensions.tasks.setup"
-local actions = require "telescope._extensions.tasks.picker.actions"
-local generators = require "telescope._extensions.tasks.generators"
+local util = require "telescope-tasks.util"
+local enum = require "telescope-tasks.enum"
+local picker = require "telescope-tasks.picker"
+local setup = require "telescope-tasks.setup"
+local actions = require "telescope-tasks.picker.actions"
+local generators = require "telescope-tasks.generators"
 
 -- NOTE: ensure the telescope is loaded
 -- before registering the extension
