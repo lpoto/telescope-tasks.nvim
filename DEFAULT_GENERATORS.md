@@ -28,5 +28,5 @@ Call any of the functions described bellow to enable just some of them.
 | `default.go()`           | Finds all Go projects in subdirectories and generates tasks for running or building them. If no `go.mod` file is found, generates a task for running the current Go file. |
 | `default.maven()`        | Finds all pom.xml files with `<build>` tag and generates tasks for building them.                                                                                         |
 | `default.lua()`          | Generates a task for running a current lua file.                                                                                                                          |
-| `default.cargo()`        | Currently in progress ...                                                                                                                                                 |
-| `default.python()`       | Currently in progress ...                                                                                                                                                 |
+| `default.cargo()`        | Finds Cargo.toml files and generates tasks for the package and defined binaries.                                                                                          |
+| `default.python()`       | Finds \_\_main\_\_.py files and generates tasks for running them. Also generates a task for currently opened python file.                                                 |
