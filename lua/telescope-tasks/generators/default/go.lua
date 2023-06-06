@@ -1,6 +1,5 @@
 local util = require "telescope-tasks.util"
 local Path = require "plenary.path"
-local scan = require "plenary.scandir"
 local Default = require "telescope-tasks.model.default_generator"
 local State = require "telescope-tasks.model.state"
 
@@ -32,14 +31,12 @@ function go.generator(buf)
   end
   buf = buf or vim.api.nvim_get_current_buf()
 
-  local checked = {}
-
   local files = (go:state():find_files(5) or {}).by_extension
   local entries = (files or {}).go
-  return check_go_files(entries, buf, checked) or {}
+  return check_go_files(entries, buf) or {}
 end
 
-check_go_files = function(entries, buf, checked)
+check_go_files = function(entries, buf)
   if type(entries) ~= "table" or not next(entries) then
     return
   end
@@ -53,7 +50,6 @@ check_go_files = function(entries, buf, checked)
         --a parent go.mod file, add a task for running the
         --project in the found file's directory.
         local cwd = path:parent():__tostring()
-        checked[cwd] = true
         local full_path = path:__tostring()
         path:normalize(vim.fn.getcwd())
         local name = "Go project: " .. path:__tostring()
