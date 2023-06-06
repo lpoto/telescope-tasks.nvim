@@ -6,6 +6,7 @@ local health = require "telescope-tasks.health"
 ---@field errorformat string
 ---@field generator function: A generator function
 ---@field healthcheck function?
+---@field on_load function?
 local Default_generator = {}
 Default_generator.__index = Default_generator
 
@@ -45,6 +46,10 @@ function Default_generator:load()
     end,
   }
   runner.add_generators { generator }
+
+  if self.on_load then
+    self.on_load()
+  end
 
   if type(self.healthcheck) == "function" then
     health.__add_check(self.healthcheck)

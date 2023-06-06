@@ -1,7 +1,7 @@
 local util = require "telescope-tasks.util"
 local Path = require "plenary.path"
-local Default_generator =
-  require "telescope-tasks.model.default_generator"
+local Default_generator = require "telescope-tasks.model.default_generator"
+local State = require "telescope-tasks.model.state"
 
 ---cargo run [options] [-- args]
 ---
@@ -27,32 +27,9 @@ function cargo.generator()
   if not cargo:state() then
     return {}
   end
-  local parent_cargo_exists = util.parent_dir_includes { "Cargo.toml" }
-  local parent_cargo_toml = nil
-  if parent_cargo_exists then
-    parent_cargo_toml =
-      Path:new(util.find_current_file_root { "Cargo.toml" }, "Cargo.toml")
-        :__tostring()
-  end
-  local files = (cargo:state():find_files() or {}).by_name
+  local files = (cargo:state():find_files(5) or {}).by_name
   local entries = (files or {})["Cargo.toml"]
-
-  local tasks = check_cargo_files(entries)
-  if
-    parent_cargo_toml
-    and (
-      type(entries) ~= "table"
-      or not vim.tbl_contains(entries, parent_cargo_toml)
-    )
-  then
-    local tasks2 = check_cargo_files { parent_cargo_toml }
-    if tasks2 then
-      for _, task in ipairs(tasks2) do
-        table.insert(tasks, task)
-      end
-    end
-  end
-  return tasks
+  return check_cargo_files(entries)
 end
 
 check_cargo_files = function(entries)
@@ -130,6 +107,10 @@ function cargo.healthcheck()
   else
     vim.health.ok("'" .. binary .. "' is executable")
   end
+end
+
+function cargo.on_load()
+  State.register_file_names { "Cargo.toml" }
 end
 
 return cargo

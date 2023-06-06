@@ -2,6 +2,7 @@ local util = require "telescope-tasks.util"
 local Path = require "plenary.path"
 local scan = require "plenary.scandir"
 local Default = require "telescope-tasks.model.default_generator"
+local State = require "telescope-tasks.model.state"
 
 ---Generate tasks for running go projects in subdirectories,
 ---or a task for running the current file if there is no
@@ -33,36 +34,9 @@ function go.generator(buf)
 
   local checked = {}
 
-  local files = (go:state():find_files() or {}).by_extension
+  local files = (go:state():find_files(5) or {}).by_extension
   local entries = (files or {}).go
-  local tasks = check_go_files(entries, buf, checked) or {}
-
-  local parent_go_mod_exists = util.parent_dir_includes { "go.mod" }
-  if not parent_go_mod_exists then
-    return tasks
-  end
-  local parent_go_mod_dir = util.find_current_file_root { "go.mod" }
-
-  if checked[parent_go_mod_dir] then
-    return tasks
-  end
-  local found = false
-  scan.scan_dir(parent_go_mod_dir, {
-    add_dirs = true,
-    depth = 1,
-    on_insert = function(entry)
-      if not found and entry:match ".*.go$" and is_main_file(entry) then
-        local path = Path:new(entry)
-        local cwd = path:parent():__tostring()
-        local full_path = path:__tostring()
-        path:normalize(vim.fn.getcwd())
-        checked[cwd] = true
-        local name = "Go project: " .. path:__tostring()
-        table.insert(tasks, run_project_task(cwd, name, full_path))
-      end
-    end,
-  })
-  return tasks
+  return check_go_files(entries, buf, checked) or {}
 end
 
 check_go_files = function(entries, buf, checked)
@@ -183,6 +157,11 @@ function go.healthcheck()
   else
     vim.health.ok("'" .. binary .. "' is executable")
   end
+end
+
+function go.on_load()
+  State.register_file_names { "go.mod" }
+  State.register_file_extensions { "go" }
 end
 
 return go
