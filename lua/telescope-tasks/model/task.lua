@@ -120,20 +120,32 @@ function Task:new(o)
   a.env = o.env or {}
   a.__orig_env = vim.deepcopy(a.env)
 
-  if type(o.keywords) == "table" then
+  if
+    type(o.keywords) == "table" and not next(o.keywords) or o.keywords == nil
+  then
+    local keywords = { "__derived" }
+    if type(a.filename) == "string" then
+      table.insert(keywords, "__file")
+      table.insert(keywords, a.filename)
+    end
+    if type(a.name) == "string" then
+      table.insert(keywords, "__name")
+      table.insert(keywords, a.name)
+    end
+    if #keywords > 1 then
+      a.keywords = keywords
+    end
+  elseif type(o.keywords) == "table" then
     for k, v in pairs(o.keywords) do
       assert(
         type(v) == "string" and type(k) == "number",
         "keywords should be a table of strings!"
       )
     end
+    a.keywords = o.keywords
   else
-    assert(
-      o.keywords == nil or type(o.keywords) == "table",
-      "keywords field should be a table"
-    )
+    assert(false, "keywords field should be a table of strings!")
   end
-  a.keywords = o.keywords
   a.cmd = format_cmd(a.cmd)
   a.__orig_cmd = format_cmd(a.cmd)
 
