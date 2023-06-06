@@ -1,5 +1,6 @@
 local Default = require "telescope-tasks.model.default_generator"
 local Path = require "plenary.path"
+local State = require "telescope-tasks.model.state"
 local util = require "telescope-tasks.util"
 
 local makefile = Default:new {
@@ -12,7 +13,7 @@ local makefile = Default:new {
 local get_task
 
 function makefile.generator()
-  local files = (makefile:state():find_files() or {}).by_name
+  local files = (makefile:state():find_files(5) or {}).by_name
   if not next(files or {}) then
     return {}
   end
@@ -68,6 +69,10 @@ function makefile.healthcheck()
   else
     vim.health.ok("'" .. binary .. "' is executable")
   end
+end
+
+function makefile.on_load()
+  State.register_file_names { "makefile", "Makefile" }
 end
 
 return makefile

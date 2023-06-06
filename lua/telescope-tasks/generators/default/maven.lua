@@ -1,6 +1,7 @@
 local Path = require "plenary.path"
 local Default = require "telescope-tasks.model.default_generator"
 local util = require "telescope-tasks.util"
+local State = require "telescope-tasks.model.state"
 
 ---Generate tasks for running maven projects in subdirectories,
 ---
@@ -24,7 +25,7 @@ function maven.generator()
   if not maven:state() then
     return
   end
-  local files = (maven:state():find_files() or {}).by_name
+  local files = (maven:state():find_files(5) or {}).by_name
   local pom = "pom.xml"
   if type(files) ~= "table" or not next(files[pom] or {}) then
     -- NOTE: only pom.xml files are relevant
@@ -41,7 +42,7 @@ function maven.generator()
       --a parent maven.mod file, add a task for running the
       --project in the found file's directory.
       local full_path = path:__tostring()
-      path:make_relative(vim.fn.getcwd())
+      path:normalize(vim.fn.getcwd())
       local name = "Maven project: " .. path:__tostring()
       table.insert(tasks, run_project_task(cwd, name, full_path))
     end
@@ -107,6 +108,10 @@ function maven.healthcheck()
   else
     vim.health.ok("'" .. binary .. "' is executable")
   end
+end
+
+function maven.on_load()
+  State.register_file_names { "pom.xml" }
 end
 
 return maven

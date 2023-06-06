@@ -1,5 +1,6 @@
 local Default = require "telescope-tasks.model.default_generator"
 local Path = require "plenary.path"
+local State = require "telescope-tasks.model.state"
 local util = require "telescope-tasks.util"
 
 local package_json = Default:new {
@@ -12,7 +13,7 @@ local package_json = Default:new {
 local get_tasks
 
 function package_json.generator()
-  local files = (package_json:state():find_files() or {}).by_name
+  local files = (package_json:state():find_files(5) or {}).by_name
   if not next(files or {}) then
     return {}
   end
@@ -73,6 +74,10 @@ function get_tasks(path, pkg)
     end
   end
   return tasks
+end
+
+function package_json.on_load()
+  State.register_file_names { "package.json" }
 end
 
 return package_json
