@@ -36,6 +36,7 @@ function python.generator(buf)
     filename = name,
     keywords = {
       "python",
+      "file",
       name,
     },
   }

@@ -22,17 +22,61 @@ local cargo = Default_generator:new {
 
 local run_cargo_project
 local check_cargo_files
+local check_current_binary
 
-function cargo.generator()
+function cargo.generator(buf)
   if not cargo:state() then
     return {}
   end
   local files = (cargo:state():find_files(5) or {}).by_name
   local entries = (files or {})["Cargo.toml"]
-  return check_cargo_files(entries)
+  local checked_targets = {}
+  local tasks = check_cargo_files(entries, checked_targets)
+  local current_binary = check_current_binary(buf, checked_targets)
+  if type(current_binary) == "table" then
+    table.insert(tasks, current_binary)
+  end
+  return tasks
 end
 
-check_cargo_files = function(entries)
+check_current_binary = function(buf, checked_targets)
+  local filtype = vim.api.nvim_buf_get_option(buf, "filetype")
+  if filtype ~= "rust" then
+    return
+  end
+  local filename = vim.api.nvim_buf_get_name(buf)
+  local target = filename:match "src/bin/(.-)%.rs"
+  if not target or checked_targets[target] then
+    return
+  end
+  local path = Path:new(filename)
+  local cwd = path:parent():parent():parent()
+  local cargo_toml = cwd:joinpath "Cargo.toml"
+  if not cargo_toml:is_file() then
+    return
+  end
+
+  local env = util.get_env "cargo"
+  local binary = util.get_binary "cargo" or "cargo"
+
+  local t = {
+    "Run current Cargo binary",
+    cmd = { binary, "run", "--bin", target },
+    filename = filename,
+    keywords = {
+      "cargo",
+      "current_binary",
+      target,
+      filename,
+    },
+  }
+  if type(env) == "table" and next(env) then
+    t.env = env
+  end
+  return t
+end
+
+check_cargo_files = function(entries, checked_targets)
   if not entries or not next(entries) then
     return {}
   end
@@ -41,14 +85,16 @@ check_cargo_files = function(entries)
     local path = Path:new(entry)
     local full_path = path:__tostring()
     local cwd = path:parent():__tostring()
-    for _, v in ipairs(run_cargo_project(cwd, full_path) or {}) do
+    for _, v in
+      ipairs(run_cargo_project(cwd, full_path, checked_targets) or {})
+    do
       table.insert(tasks, v)
     end
   end
   return tasks
 end
 
-run_cargo_project = function(cwd, full_path)
+run_cargo_project = function(cwd, full_path, checked_targets)
   local path = Path:new(full_path)
   local lines = path:readlines()
   path:normalize()
@@ -77,22 +123,25 @@ run_cargo_project = function(cwd, full_path)
   local binary = util.get_binary "cargo" or "cargo"
 
   for target, _ in pairs(targets) do
-    local cmd = { binary, "run", "--bin", target }
-    local task = {
-      name = "Cargo " .. target .. ": " .. path:__tostring(),
-      cmd = cmd,
-      cwd = cwd,
-      filename = full_path,
-      keywords = {
-        "cargo",
-        target,
-        full_path,
-      },
-    }
-    if type(env) == "table" and next(env) then
-      task.env = env
+    if not checked_targets[target] then
+      checked_targets[target] = true
+      local cmd = { binary, "run", "--bin", target }
+      local task = {
+        name = "Cargo " .. target .. ": " .. path:__tostring(),
+        cmd = cmd,
+        cwd = cwd,
+        filename = full_path,
+        keywords = {
+          "cargo",
+          target,
+          full_path,
+        },
+      }
+      if type(env) == "table" and next(env) then
+        task.env = env
+      end
+      table.insert(t, task)
     end
-    table.insert(t, task)
   end
 
   return t
