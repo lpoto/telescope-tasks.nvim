@@ -1,4 +1,5 @@
 local Default = require "telescope-tasks.model.default_generator"
+local enum = require "telescope-tasks.enum"
 local Path = require "plenary.path"
 local State = require "telescope-tasks.model.state"
 local util = require "telescope-tasks.util"
@@ -47,6 +48,7 @@ function get_task(path, target)
     filename = filename,
     cmd = { binary, target },
     cwd = cwd,
+    priority = enum.PRIORITY.ZERO,
     keywords = {
       "makefile",
       filename,

@@ -28,7 +28,7 @@ function State:find_files(check_parents_nr)
   end
   check_parents_nr = math.min(check_parents_nr, 10)
 
-  local cwd = vim.loop.cwd()
+  local cwd = vim.fn.getcwd()
   if
     self.iterated_subdirectories == cwd
     and self.parents_checked == check_parents_nr
@@ -63,7 +63,7 @@ end
 local on_insert
 
 function State:__iterate_subdirectories()
-  local cwd = vim.loop.cwd()
+  local cwd = vim.fn.getcwd()
   local cur_name = vim.api.nvim_buf_get_name(0)
 
   -- NOTE: identify the latest scan with
@@ -84,7 +84,7 @@ function State:__iterate_subdirectories()
   on_insert(self.found_files, cur_name)
 
   local max_depth = 7
-  if cwd == vim.loop.os_homedir() then
+  if cwd == os.getenv "HOME" then
     max_depth = 4
   end
 
@@ -143,7 +143,7 @@ function State:__iterate_parents(n)
   local cur_name = vim.api.nvim_buf_get_name(0)
 
   ---@type Path
-  local cur = Path:new(vim.loop.cwd())
+  local cur = Path:new(vim.fn.getcwd())
   for i = 1, n do
     cur = cur:parent()
     if i > self.parents_checked then

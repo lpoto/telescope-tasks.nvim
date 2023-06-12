@@ -26,7 +26,7 @@ end
 ---When no such parent is found, the current working directory is returned.
 ---@return string
 function util.find_parent_root(files_and_directories)
-  local _, root = find_root(files_and_directories, vim.loop.cwd())
+  local _, root = find_root(files_and_directories, vim.fn.getcwd())
   return root
 end
 

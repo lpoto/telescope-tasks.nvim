@@ -1,5 +1,6 @@
 local Default = require "telescope-tasks.model.default_generator"
 local util = require "telescope-tasks.util"
+local enum = require "telescope-tasks.enum"
 
 ---Add a task for running the current lua file.
 local lua = Default:new {
@@ -32,6 +33,7 @@ function lua.generator(buf)
     "Run current Lua file",
     cmd = cmd,
     filename = name,
+    priority = enum.PRIORITY.MEDIUM,
     keywords = {
       "lua",
       name,

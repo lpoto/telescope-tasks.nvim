@@ -1,4 +1,5 @@
 local util = require "telescope-tasks.util"
+local enum = require "telescope-tasks.enum"
 local Path = require "plenary.path"
 local Default = require "telescope-tasks.model.default_generator"
 local State = require "telescope-tasks.model.state"
@@ -58,7 +59,7 @@ check_go_files = function(entries, buf)
         --NOTE: if the CURRENT file is a main go file
         --but there is no parent go.mod file, add a task
         --for only running the current file
-        local cwd = vim.loop.cwd()
+        local cwd = vim.fn.getcwd()
         local name = "Run current Go file"
         table.insert(
           tasks,
@@ -84,6 +85,7 @@ run_project_task = function(cwd, name, full_path)
     cmd = cmd,
     cwd = cwd,
     filename = full_path,
+    priority = enum.PRIORITY.LOW,
     keywords = {
       "go",
       "project",
@@ -106,6 +108,7 @@ run_current_file_task = function(package, cwd, name, filename)
     cmd = cmd,
     cwd = cwd,
     filename = filename,
+    priority = enum.PRIORITY.MEDIUM,
     keywords = {
       "go",
       "file",
