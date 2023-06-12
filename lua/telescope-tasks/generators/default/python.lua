@@ -1,5 +1,6 @@
 local Default = require "telescope-tasks.model.default_generator"
 local util = require "telescope-tasks.util"
+local enum = require "telescope-tasks.enum"
 local Path = require "plenary.path"
 local State = require "telescope-tasks.model.state"
 
@@ -34,6 +35,7 @@ function python.generator(buf)
     "Run current Python file",
     cmd = { get_binary(), name },
     filename = name,
+    priority = enum.PRIORITY.MEDIUM,
     keywords = {
       "python",
       "file",
@@ -66,6 +68,7 @@ check_main_files = function(entries, checked)
       cmd = { "python", "." },
       cwd = cwd,
       filename = full_path,
+      priority = enum.PRIORITY.LOW,
       keywords = {
         "python",
         "project",

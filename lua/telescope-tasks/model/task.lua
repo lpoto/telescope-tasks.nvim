@@ -9,6 +9,7 @@ local storage = require "telescope-tasks.storage"
 ---@field filename string?: The task's reference file, which may be opened from the picker.
 ---@field cwd string?: The working directory of the task.
 ---@field errorformat string|nil
+---@field priority number
 ---@field keywords string[]
 ---@field __default_generator boolean
 ---@field __experimental boolean
@@ -73,6 +74,12 @@ function Task:new(o)
     "Task '" .. a.name .. "'s `filename` field should be a string!"
   )
   a.filename = filename
+
+  assert(
+    o.priority == nil or type(o.priority) == "number",
+    "Task '" .. a.name .. "'s `priority` field should be number!"
+  )
+  a.priority = o.priority or enum.PRIORITY.LOW
 
   local cmd = o.cmd
   assert(

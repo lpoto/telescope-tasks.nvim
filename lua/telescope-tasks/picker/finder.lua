@@ -79,13 +79,15 @@ get_task_display = function(task)
 end
 
 local task_names = {}
-local function get_tasks_ordering(tasks, new)
+local function get_tasks_ordering(tasks_tbl, new)
   if not new and next(task_names) then
     return task_names
   end
+  local priorities = {}
   task_names = {}
-  for _, task in pairs(tasks) do
+  for _, task in pairs(tasks_tbl) do
     table.insert(task_names, task.name)
+    priorities[task.name] = task.priority
   end
   table.sort(task_names, function(a, b)
     local a_running = executor.is_running(a)
@@ -108,25 +110,27 @@ local function get_tasks_ordering(tasks, new)
       return true
     elseif a_timestamp == nil and b_timestamp ~= nil then
       return false
-    elseif a_timestamp == nil and b_timestamp == nil then
-      return a < b
+    elseif a_timestamp ~= nil and b_timestamp ~= nil then
+      return a_timestamp > b_timestamp
     end
-    return a_timestamp > b_timestamp
+    local a_priority = priorities[a] or 0
+    local b_priority = priorities[b] or 0
+    return a_priority > b_priority
   end)
   return task_names
 end
 
-function order_tasks(tasks, regen_ordering)
+function order_tasks(tasks_tbl, regen_ordering)
   local new_tasks = {}
   local inserted = {}
-  local ordering = get_tasks_ordering(tasks, regen_ordering) or {}
+  local ordering = get_tasks_ordering(tasks_tbl, regen_ordering) or {}
   for _, name in ipairs(ordering) do
     inserted[name] = true
     if tasks[name] then
-      table.insert(new_tasks, tasks[name])
+      table.insert(new_tasks, tasks_tbl[name])
     end
   end
-  for name, task in pairs(tasks) do
+  for name, task in pairs(tasks_tbl) do
     if not inserted[name] then
       table.insert(new_tasks, task)
     end

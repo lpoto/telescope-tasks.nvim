@@ -1,4 +1,5 @@
 local Default = require "telescope-tasks.model.default_generator"
+local enum = require "telescope-tasks.enum"
 local Path = require "plenary.path"
 local State = require "telescope-tasks.model.state"
 local util = require "telescope-tasks.util"
@@ -56,6 +57,7 @@ function get_tasks(path, pkg)
         filename = filename,
         cmd = v,
         cwd = cwd,
+        priority = enum.PRIORITY.LOW,
         keywords = {
           "package.json",
           filename,

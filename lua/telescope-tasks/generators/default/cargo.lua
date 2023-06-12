@@ -1,4 +1,5 @@
 local util = require "telescope-tasks.util"
+local enum = require "telescope-tasks.enum"
 local Path = require "plenary.path"
 local Default_generator = require "telescope-tasks.model.default_generator"
 local State = require "telescope-tasks.model.state"
@@ -63,6 +64,7 @@ check_current_binary = function(buf, checked_targets)
     "Run current Cargo binary",
     cmd = { binary, "run", "--bin", target },
     filename = filename,
+    priority = enum.PRIORITY.MEDIUM,
     keywords = {
       "cargo",
       "current_binary",
@@ -131,6 +133,7 @@ run_cargo_project = function(cwd, full_path, checked_targets)
         cmd = cmd,
         cwd = cwd,
         filename = full_path,
+        priority = enum.PRIORITY.LOW,
         keywords = {
           "cargo",
           target,

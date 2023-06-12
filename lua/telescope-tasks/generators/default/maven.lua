@@ -1,6 +1,7 @@
 local Path = require "plenary.path"
 local Default = require "telescope-tasks.model.default_generator"
 local util = require "telescope-tasks.util"
+local enum = require "telescope-tasks.enum"
 local State = require "telescope-tasks.model.state"
 
 ---Generate tasks for running maven projects in subdirectories,
@@ -59,6 +60,7 @@ run_project_task = function(cwd, name, full_path)
     cmd = cmd,
     cwd = cwd,
     filename = full_path,
+    priority = enum.PRIORITY.LOW,
     keywords = {
       "maven",
       full_path,
