@@ -74,7 +74,7 @@ end
 
 get_bottom_opts = function(lines, columns, scale)
   local pref_h = math.floor(lines * scale)
-  local h = math.max(20, math.floor(pref_h))
+  local h = math.max(20, pref_h)
 
   return {
     width = columns,
@@ -88,7 +88,7 @@ end
 
 get_top_opts = function(lines, columns, scale)
   local pref_h = math.floor(lines * scale)
-  local h = math.max(20, math.floor(pref_h))
+  local h = math.max(20, pref_h)
 
   return {
     width = columns,
@@ -101,10 +101,8 @@ get_top_opts = function(lines, columns, scale)
 end
 
 get_left_opts = function(lines, columns, scale)
-  local w = math.min(math.max(20, math.floor(columns * scale)), columns / 2)
-  if w > 100 then
-    w = 100
-  end
+  local pref_w = math.floor(columns * scale)
+  local w = math.max(20, pref_w)
 
   return {
     width = w,
@@ -117,10 +115,8 @@ get_left_opts = function(lines, columns, scale)
 end
 
 get_right_opts = function(lines, columns, scale)
-  local w = math.min(math.max(20, math.floor(columns * scale)), columns / 2)
-  if w > 100 then
-    w = 100
-  end
+  local pref_w = math.floor(columns * scale)
+  local w = math.max(20, pref_w)
 
   return {
     width = w,
