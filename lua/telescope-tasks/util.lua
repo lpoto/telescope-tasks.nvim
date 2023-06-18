@@ -1,5 +1,5 @@
-local enum = require "telescope-tasks.enum"
-local Path = require "plenary.path"
+local enum = require("telescope-tasks.enum")
+local Path = require("plenary.path")
 
 local util = {}
 
@@ -36,7 +36,7 @@ end
 ---When no such parent is found, the file's parent directory is returned.
 ---@return string
 function util.find_current_file_root(files_and_directories)
-  local _, root = find_root(files_and_directories, vim.fn.expand "%:p:h")
+  local _, root = find_root(files_and_directories, vim.fn.expand("%:p:h"))
   return root
 end
 
@@ -54,7 +54,7 @@ end
 ---parent directories include any of the provided files or directories.
 ---@return boolean
 function util.parent_dir_includes(files_and_directories)
-  local ok, _ = find_root(files_and_directories, vim.fn.expand "%:p:h")
+  local ok, _ = find_root(files_and_directories, vim.fn.expand("%:p:h"))
   return ok
 end
 

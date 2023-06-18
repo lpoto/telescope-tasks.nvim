@@ -1,8 +1,8 @@
-local util = require "telescope-tasks.util"
-local enum = require "telescope-tasks.enum"
-local Path = require "plenary.path"
-local Default = require "telescope-tasks.model.default_generator"
-local State = require "telescope-tasks.model.state"
+local util = require("telescope-tasks.util")
+local enum = require("telescope-tasks.enum")
+local Path = require("plenary.path")
+local Default = require("telescope-tasks.model.default_generator")
+local State = require("telescope-tasks.model.state")
 
 ---Generate tasks for running go projects in subdirectories,
 ---or a task for running the current file if there is no
@@ -10,13 +10,13 @@ local State = require "telescope-tasks.model.state"
 ---
 ---go run [build flags] [-exec xprog] package [arguments...]
 ---
-local go = Default:new {
+local go = Default:new({
   errorformat = "%f:%l.%c-%[%^:]%#:\\ %m,%f:%l:%c:\\ %m",
   opts = {
     name = "Default Go Generator",
     experimental = true,
   },
-}
+})
 
 local is_main_file
 local run_current_file_task
@@ -43,7 +43,7 @@ check_go_files = function(entries, buf)
   end
   local tasks = {}
   for _, entry in ipairs(entries) do
-    if entry:match ".*.go$" and is_main_file(entry) then
+    if entry:match(".*.go$") and is_main_file(entry) then
       local path = Path:new(entry)
       local root = Path:new(util.find_file_root(entry, { "go.mod" }))
       if root:joinpath("go.mod"):is_file() then
@@ -77,7 +77,7 @@ check_go_files = function(entries, buf)
 end
 
 run_project_task = function(cwd, name, full_path)
-  local binary = util.get_binary "go" or "go"
+  local binary = util.get_binary("go") or "go"
   local cmd = { binary, "run", "." }
 
   local t = {
@@ -92,7 +92,7 @@ run_project_task = function(cwd, name, full_path)
       full_path,
     },
   }
-  local env = util.get_env "go"
+  local env = util.get_env("go")
   if type(env) == "table" and next(env) then
     t.env = env
   end
@@ -100,7 +100,7 @@ run_project_task = function(cwd, name, full_path)
 end
 
 run_current_file_task = function(package, cwd, name, filename)
-  local binary = util.get_binary "go" or "go"
+  local binary = util.get_binary("go") or "go"
   local cmd = { binary, "run", package }
 
   local t = {
@@ -115,7 +115,7 @@ run_current_file_task = function(package, cwd, name, filename)
       package,
     },
   }
-  local env = util.get_env "go"
+  local env = util.get_env("go")
   if type(env) == "table" and next(env) then
     t.env = env
   end
@@ -148,7 +148,7 @@ is_main_file = function(file)
 end
 
 function go.healthcheck()
-  local binary = util.get_binary "go" or "go"
+  local binary = util.get_binary("go") or "go"
   if vim.fn.executable(binary) == 0 then
     vim.health.warn("Go binary '" .. binary .. "' is not executable", {
       "Install 'go' or set a different binary with vim.g.telescope_tasks = { binaries = { go=<new-binary> }}",
@@ -159,8 +159,8 @@ function go.healthcheck()
 end
 
 function go.on_load()
-  State.register_file_names { "go.mod" }
-  State.register_file_extensions { "go" }
+  State.register_file_names({ "go.mod" })
+  State.register_file_extensions({ "go" })
 end
 
 return go

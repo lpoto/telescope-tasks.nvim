@@ -1,6 +1,6 @@
-local util = require "telescope-tasks.util"
-local executor = require "telescope-tasks.executor"
-local State = require "telescope-tasks.model.state"
+local util = require("telescope-tasks.util")
+local executor = require("telescope-tasks.executor")
+local State = require("telescope-tasks.model.state")
 
 local should_run_generators
 
@@ -48,7 +48,7 @@ function runner.run(buf)
       vim.tbl_extend("force", found_tasks, executor.get_running_tasks() or {})
 
     if not generators_supported and not next(found_tasks or {}) then
-      util.warn "Generating tasks is not supported in current buffer"
+      util.warn("Generating tasks is not supported in current buffer")
     end
 
     return found_tasks

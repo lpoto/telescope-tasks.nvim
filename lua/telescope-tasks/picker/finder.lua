@@ -1,8 +1,8 @@
-local finders = require "telescope.finders"
-local util = require "telescope-tasks.util"
-local entry_display = require "telescope.pickers.entry_display"
-local executor = require "telescope-tasks.executor"
-local runner = require "telescope-tasks.generators.runner"
+local finders = require("telescope.finders")
+local util = require("telescope-tasks.util")
+local entry_display = require("telescope.pickers.entry_display")
+local executor = require("telescope-tasks.executor")
+local runner = require("telescope-tasks.generators.runner")
 
 local finder = {}
 
@@ -30,13 +30,13 @@ function finder.available_tasks_finder(
   if find_tasks then
     tasks = runner.run(buf) or {}
     if exit_on_no_results and not next(tasks) then
-      util.warn "There are no available tasks"
+      util.warn("There are no available tasks")
       return nil
     end
     tasks = order_tasks(tasks, sort)
   end
 
-  return finders.new_table {
+  return finders.new_table({
     results = tasks,
     entry_maker = function(entry)
       return {
@@ -48,34 +48,34 @@ function finder.available_tasks_finder(
         end,
       }
     end,
-  }
+  })
 end
 
 get_task_display = function(task)
-  local displayer = entry_display.create {
+  local displayer = entry_display.create({
     separator = " ",
     items = {
       { width = 8 },
       { remaining = true },
     },
-  }
+  })
   if executor.is_running(task.name) then
-    return displayer {
+    return displayer({
       { "Running", "Function" },
       task.name,
-    }
+    })
   end
   local buf = executor.get_task_output_buf(task.name)
   if buf ~= nil and vim.api.nvim_buf_is_valid(buf) then
-    return displayer {
+    return displayer({
       { "Output", "Comment" },
       task.name,
-    }
+    })
   end
-  return displayer {
+  return displayer({
     { "" },
     task.name,
-  }
+  })
 end
 
 local task_names = {}

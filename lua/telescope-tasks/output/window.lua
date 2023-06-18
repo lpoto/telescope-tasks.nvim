@@ -1,9 +1,9 @@
-local enum = require "telescope-tasks.enum"
-local util = require "telescope-tasks.util"
-local setup = require "telescope-tasks.setup"
-local highlight = require "telescope-tasks.output.highlight"
-local float = require "telescope-tasks.output.float"
-local executor = require "telescope-tasks.executor"
+local enum = require("telescope-tasks.enum")
+local util = require("telescope-tasks.util")
+local setup = require("telescope-tasks.setup")
+local highlight = require("telescope-tasks.output.highlight")
+local float = require("telescope-tasks.output.float")
+local executor = require("telescope-tasks.executor")
 
 local window = {}
 
@@ -26,7 +26,7 @@ function window.create(buf, title)
     return -1
   end
   if not vim.api.nvim_win_is_valid(winid) then
-    util.error "Failed to create a window"
+    util.error("Failed to create a window")
     return -1
   end
 
@@ -44,7 +44,7 @@ local function create_split_window(buf, _, layout)
   if
     layout == enum.OUTPUT.LAYOUT.BOTTOM or layout == enum.OUTPUT.LAYOUT.TOP
   then
-    local splitbelow = vim.api.nvim_get_option "splitbelow"
+    local splitbelow = vim.api.nvim_get_option("splitbelow")
 
     if layout == enum.OUTPUT.LAYOUT.BOTTOM then
       vim.api.nvim_set_option("splitbelow", true)
@@ -57,7 +57,7 @@ local function create_split_window(buf, _, layout)
     vim.api.nvim_set_option("splitbelow", splitbelow)
   else
     local winid = vim.fn.win_getid(vim.fn.winnr())
-    local splitright = vim.api.nvim_get_option "splitright"
+    local splitright = vim.api.nvim_get_option("splitright")
 
     if layout == enum.OUTPUT.LAYOUT.RIGHT then
       vim.api.nvim_set_option("splitright", true)
@@ -110,11 +110,11 @@ determine_output_window_type = function()
 end
 
 add_autocmd = function(buf)
-  vim.api.nvim_clear_autocmds {
+  vim.api.nvim_clear_autocmds({
     event = { "BufLeave" },
     buffer = buf,
     group = enum.TASKS_AUGROUP,
-  }
+  })
   vim.api.nvim_create_autocmd({ "BufLeave", "WinLeave" }, {
     group = enum.TASKS_AUGROUP,
     buffer = buf,

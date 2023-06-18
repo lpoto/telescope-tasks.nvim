@@ -1,15 +1,15 @@
-local Default = require "telescope-tasks.model.default_generator"
-local enum = require "telescope-tasks.enum"
-local Path = require "plenary.path"
-local State = require "telescope-tasks.model.state"
-local util = require "telescope-tasks.util"
+local Default = require("telescope-tasks.model.default_generator")
+local enum = require("telescope-tasks.enum")
+local Path = require("plenary.path")
+local State = require("telescope-tasks.model.state")
+local util = require("telescope-tasks.util")
 
-local makefile = Default:new {
+local makefile = Default:new({
   opts = {
     name = "Default Makefile targets Generator",
     experimental = true,
   },
-}
+})
 
 local get_task
 
@@ -20,14 +20,14 @@ function makefile.generator()
   end
   local tasks = {}
 
-  for _, n in ipairs { "makefile", "Makefile" } do
+  for _, n in ipairs({ "makefile", "Makefile" }) do
     for _, m in ipairs(files[n] or {}) do
       m = Path.new(m)
       local ok, lines = pcall(m.readlines, m)
       if ok then
         for _, line in ipairs(lines) do
-          if not line:match "^%s*#" and line:match "^%w+%:" then
-            local target = line:match "^%w+"
+          if not line:match("^%s*#") and line:match("^%w+%:") then
+            local target = line:match("^%w+")
             table.insert(tasks, get_task(m, target))
           end
         end
@@ -40,7 +40,7 @@ end
 function get_task(path, target)
   local cwd = path:parent():__tostring()
   local filename = path:__tostring()
-  local binary = util.get_binary "make" or "make"
+  local binary = util.get_binary("make") or "make"
   path:normalize(vim.fn.getcwd())
 
   local t = {
@@ -55,7 +55,7 @@ function get_task(path, target)
       target,
     },
   }
-  local env = util.get_env "makefile"
+  local env = util.get_env("makefile")
   if type(env) == "table" and next(env) then
     t.env = env
   end
@@ -63,7 +63,7 @@ function get_task(path, target)
 end
 
 function makefile.healthcheck()
-  local binary = util.get_binary "make" or "make"
+  local binary = util.get_binary("make") or "make"
   if vim.fn.executable(binary) == 0 then
     vim.health.warn("Make binary '" .. binary .. "' is not executable", {
       "Install 'make' or set a different binary with vim.g.telescope_tasks = { binaries = { make=<new-binary> }}",
@@ -74,7 +74,7 @@ function makefile.healthcheck()
 end
 
 function makefile.on_load()
-  State.register_file_names { "makefile", "Makefile" }
+  State.register_file_names({ "makefile", "Makefile" })
 end
 
 return makefile

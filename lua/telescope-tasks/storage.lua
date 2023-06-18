@@ -1,8 +1,8 @@
-local Path = require "plenary.path"
-local enum = require "telescope-tasks.enum"
+local Path = require("plenary.path")
+local enum = require("telescope-tasks.enum")
 
 local storage = {
-  file = Path:new(vim.fn.stdpath "data", "telescope_tasks.json"),
+  file = Path:new(vim.fn.stdpath("data"), "telescope_tasks.json"),
 }
 
 local data = {}

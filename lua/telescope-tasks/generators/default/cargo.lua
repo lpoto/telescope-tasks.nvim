@@ -1,13 +1,13 @@
-local util = require "telescope-tasks.util"
-local enum = require "telescope-tasks.enum"
-local Path = require "plenary.path"
-local Default_generator = require "telescope-tasks.model.default_generator"
-local State = require "telescope-tasks.model.state"
+local util = require("telescope-tasks.util")
+local enum = require("telescope-tasks.enum")
+local Path = require("plenary.path")
+local Default_generator = require("telescope-tasks.model.default_generator")
+local State = require("telescope-tasks.model.state")
 
 ---cargo run [options] [-- args]
 ---
 ---NOTE: this returns only tasks for running rust with cargo
-local cargo = Default_generator:new {
+local cargo = Default_generator:new({
   errorformat = [[%Eerror: %\%%(aborting %\|could not compile%\)%\@!%m,]]
     .. [[%Eerror[E%n]: %m,]]
     .. [[%Inote: %m,]]
@@ -19,7 +19,7 @@ local cargo = Default_generator:new {
     name = "Default Cargo Generator",
     experimental = true,
   },
-}
+})
 
 local run_cargo_project
 local check_cargo_files
@@ -46,19 +46,19 @@ check_current_binary = function(buf, checked_targets)
     return
   end
   local filename = vim.api.nvim_buf_get_name(buf)
-  local target = filename:match "src/bin/(.-)%.rs"
+  local target = filename:match("src/bin/(.-)%.rs")
   if not target or checked_targets[target] then
     return
   end
   local path = Path:new(filename)
   local cwd = path:parent():parent():parent()
-  local cargo_toml = cwd:joinpath "Cargo.toml"
+  local cargo_toml = cwd:joinpath("Cargo.toml")
   if not cargo_toml:is_file() then
     return
   end
 
-  local env = util.get_env "cargo"
-  local binary = util.get_binary "cargo" or "cargo"
+  local env = util.get_env("cargo")
+  local binary = util.get_binary("cargo") or "cargo"
 
   local t = {
     "Run current Cargo binary",
@@ -103,16 +103,16 @@ run_cargo_project = function(cwd, full_path, checked_targets)
   local next_name = false
   local targets = {}
   for _, l in ipairs(lines) do
-    local x = l:match "^%s*%[(.-)%]%s*$"
+    local x = l:match("^%s*%[(.-)%]%s*$")
     if x and x == "package" or x == "[bin]" then
       next_name = true
     elseif x then
       next_name = false
     end
     if next_name then
-      local t = l:match '^%s*name%s*=%s*"(.-)"%s*$'
+      local t = l:match('^%s*name%s*=%s*"(.-)"%s*$')
       if not t then
-        t = l:match "^%s*name%s*=%s*'(.-)'%s*$"
+        t = l:match("^%s*name%s*=%s*'(.-)'%s*$")
       end
       if t then
         targets[t] = true
@@ -120,9 +120,9 @@ run_cargo_project = function(cwd, full_path, checked_targets)
     end
   end
   local t = {}
-  local env = util.get_env "cargo"
+  local env = util.get_env("cargo")
 
-  local binary = util.get_binary "cargo" or "cargo"
+  local binary = util.get_binary("cargo") or "cargo"
 
   for target, _ in pairs(targets) do
     if not checked_targets[target] then
@@ -151,7 +151,7 @@ run_cargo_project = function(cwd, full_path, checked_targets)
 end
 
 function cargo.healthcheck()
-  local binary = util.get_binary "cargo" or "cargo"
+  local binary = util.get_binary("cargo") or "cargo"
   if vim.fn.executable(binary) == 0 then
     vim.health.warn("Cargo binary '" .. binary .. "' is not executable", {
       "Install 'cargo' or set a different binary with vim.g.telescope_tasks = { binaries = { cargo=<new-binary> }}",
@@ -162,7 +162,7 @@ function cargo.healthcheck()
 end
 
 function cargo.on_load()
-  State.register_file_names { "Cargo.toml" }
+  State.register_file_names({ "Cargo.toml" })
 end
 
 return cargo

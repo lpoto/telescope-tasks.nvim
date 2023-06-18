@@ -1,5 +1,5 @@
-local util = require "telescope-tasks.util"
-local enum = require "telescope-tasks.enum"
+local util = require("telescope-tasks.util")
+local enum = require("telescope-tasks.enum")
 
 local setup = {}
 

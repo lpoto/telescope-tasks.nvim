@@ -45,7 +45,7 @@ function popup.handle_window(bufnr, winid, selection_callback)
       vim.api.nvim_buf_delete(bufnr, { force = true })
     end,
   })
-  for _, k in ipairs { "<Esc>", "q" } do
+  for _, k in ipairs({ "<Esc>", "q" }) do
     vim.keymap.set("", k, function()
       vim.api.nvim_exec_autocmds("FocusLost", { buffer = bufnr })
     end)

@@ -1,5 +1,5 @@
-local util = require "telescope-tasks.util"
-local enum = require "telescope-tasks.enum"
+local util = require("telescope-tasks.util")
+local enum = require("telescope-tasks.enum")
 
 local buffer = {}
 
@@ -31,11 +31,11 @@ handle_buffer = function(buf)
   vim.api.nvim_buf_set_option(buf, "modifiable", true)
   vim.api.nvim_buf_set_option(buf, "filetype", enum.OUTPUT_BUFFER_FILETYPE)
 
-  vim.api.nvim_clear_autocmds {
+  vim.api.nvim_clear_autocmds({
     event = { "TermClose", "TermEnter" },
     buffer = buf,
     group = enum.TASKS_AUGROUP,
-  }
+  })
 
   --NOTE: set the autocmd for the terminal buffer, so that
   --when it finishes, we cannot enter the insert mode.
@@ -44,11 +44,11 @@ handle_buffer = function(buf)
     buffer = buf,
     group = enum.TASKS_AUGROUP,
     callback = function()
-      vim.cmd "stopinsert"
+      vim.cmd("stopinsert")
       vim.api.nvim_create_autocmd("TermEnter", {
         group = enum.TASKS_AUGROUP,
         callback = function()
-          vim.cmd "stopinsert"
+          vim.cmd("stopinsert")
         end,
         buffer = buf,
       })

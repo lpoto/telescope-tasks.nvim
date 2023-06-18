@@ -1,18 +1,18 @@
-local Default = require "telescope-tasks.model.default_generator"
-local util = require "telescope-tasks.util"
-local enum = require "telescope-tasks.enum"
-local Path = require "plenary.path"
-local State = require "telescope-tasks.model.state"
+local Default = require("telescope-tasks.model.default_generator")
+local util = require("telescope-tasks.util")
+local enum = require("telescope-tasks.enum")
+local Path = require("plenary.path")
+local State = require("telescope-tasks.model.state")
 
 ---Add a task for running the current python file.
-local python = Default:new {
+local python = Default:new({
   errorformat = '%C\\ %.%#,%A\\ \\ File\\ "%f"\\,'
     .. "\\ line\\ %l%.%#,%Z%[%^\\ ]%\\@=%m",
   opts = {
     name = "Default Python Generator",
     experimental = true,
   },
-}
+})
 
 local get_binary
 local check_main_files
@@ -42,7 +42,7 @@ function python.generator(buf)
       name,
     },
   }
-  local env = util.get_env "python"
+  local env = util.get_env("python")
   if type(env) == "table" and next(env) then
     t.env = env
   end
@@ -54,7 +54,7 @@ check_main_files = function(entries, checked)
   if type(entries) ~= "table" or not next(entries) then
     return {}
   end
-  local env = util.get_env "python"
+  local env = util.get_env("python")
   local tasks = {}
   for _, entry in ipairs(entries) do
     local path = Path:new(entry)
@@ -84,10 +84,12 @@ check_main_files = function(entries, checked)
 end
 
 function get_binary()
-  local binary = util.get_binary "python"
+  local binary = util.get_binary("python")
   if type(binary) ~= "string" then
     binary = "python"
-    if vim.fn.executable(binary) == 0 and vim.fn.executable "python3" == 1 then
+    if
+      vim.fn.executable(binary) == 0 and vim.fn.executable("python3") == 1
+    then
       return "python3",
         nil,
         "'python' is not executable, using 'python3' instead"
@@ -113,7 +115,7 @@ function python.healthcheck()
 end
 
 function python.on_load()
-  State.register_file_names { "__main__.py" }
+  State.register_file_names({ "__main__.py" })
 end
 
 return python

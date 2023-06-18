@@ -1,9 +1,9 @@
-local enum = require "telescope-tasks.enum"
-local util = require "telescope-tasks.util"
-local executor = require "telescope-tasks.executor"
-local buffer = require "telescope-tasks.output.buffer"
-local window = require "telescope-tasks.output.window"
-local telescope_actions = require "telescope.actions"
+local enum = require("telescope-tasks.enum")
+local util = require("telescope-tasks.util")
+local executor = require("telescope-tasks.executor")
+local buffer = require("telescope-tasks.output.buffer")
+local window = require("telescope-tasks.output.window")
+local telescope_actions = require("telescope.actions")
 
 local output = {}
 
@@ -45,7 +45,7 @@ function output.toggle_last()
   local buf, name = executor.get_last_task_output_buf()
 
   if not buf then
-    util.warn "There is no available output"
+    util.warn("There is no available output")
     return
   end
 

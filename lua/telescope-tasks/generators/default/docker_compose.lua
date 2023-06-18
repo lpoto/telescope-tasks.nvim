@@ -1,15 +1,15 @@
-local Default = require "telescope-tasks.model.default_generator"
-local enum = require "telescope-tasks.enum"
-local Path = require "plenary.path"
-local State = require "telescope-tasks.model.state"
-local util = require "telescope-tasks.util"
+local Default = require("telescope-tasks.model.default_generator")
+local enum = require("telescope-tasks.enum")
+local Path = require("plenary.path")
+local State = require("telescope-tasks.model.state")
+local util = require("telescope-tasks.util")
 
-local docker_compose = Default:new {
+local docker_compose = Default:new({
   opts = {
     name = "Default docker-compose Generator",
     experimental = true,
   },
-}
+})
 
 local get_task
 
@@ -44,12 +44,12 @@ function get_task(yaml_file)
   local filename = path:__tostring()
   path:normalize(vim.fn.getcwd())
 
-  local binary = util.get_binary "docker-compose" or "docker compose"
+  local binary = util.get_binary("docker-compose") or "docker compose"
   if not binary then
-    binary = util.get_binary "docker_compose"
+    binary = util.get_binary("docker_compose")
   end
   if not binary then
-    if vim.fn.executable "docker-compose" == 1 then
+    if vim.fn.executable("docker-compose") == 1 then
       binary = "docker-compose"
     else
       binary = "docker compose"
@@ -77,11 +77,11 @@ function get_task(yaml_file)
       filename,
     },
   }
-  local env = util.get_env "docker-compose"
+  local env = util.get_env("docker-compose")
   if type(env) == "table" and next(env) then
     t.env = env
   else
-    env = util.get_env "docker_compose"
+    env = util.get_env("docker_compose")
     if type(env) == "table" and next(env) then
       t.env = env
     end
@@ -101,10 +101,10 @@ function is_compose_file(file)
     if patterns_found >= 2 then
       return true
     end
-    if patterns_found == 0 and line:match "^%s*services:%s*" then
+    if patterns_found == 0 and line:match("^%s*services:%s*") then
       patterns_found = 1
     elseif patterns_found > 0 then
-      if line:match "^%s*image:" or line:match "^%s*build:" then
+      if line:match("^%s*image:") or line:match("^%s*build:") then
         patterns_found = patterns_found + 1
       end
     end
@@ -113,7 +113,7 @@ function is_compose_file(file)
 end
 
 function docker_compose.on_load()
-  State.register_file_extensions { "yml", "yaml" }
+  State.register_file_extensions({ "yml", "yaml" })
 end
 
 return docker_compose

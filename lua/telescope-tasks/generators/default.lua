@@ -1,4 +1,4 @@
-local util = require "telescope-tasks.util"
+local util = require("telescope-tasks.util")
 
 local default = {}
 

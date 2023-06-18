@@ -1,9 +1,9 @@
-local util = require "telescope-tasks.util"
-local enum = require "telescope-tasks.enum"
-local picker = require "telescope-tasks.picker"
-local setup = require "telescope-tasks.setup"
-local actions = require "telescope-tasks.picker.actions"
-local generators = require "telescope-tasks.generators"
+local util = require("telescope-tasks.util")
+local enum = require("telescope-tasks.enum")
+local picker = require("telescope-tasks.picker")
+local setup = require("telescope-tasks.setup")
+local actions = require("telescope-tasks.picker.actions")
+local generators = require("telescope-tasks.generators")
 
 -- NOTE: ensure the telescope is loaded
 -- before registering the extension
@@ -27,7 +27,7 @@ end
 vim.api.nvim_create_augroup(enum.TASKS_AUGROUP, { clear = true })
 
 -- NOTE: register the extension
-return telescope.register_extension {
+return telescope.register_extension({
   setup = setup.setup,
   exports = {
     tasks = tasks,
@@ -36,4 +36,4 @@ return telescope.register_extension {
     util = util,
     _picker = picker,
   },
-}
+})

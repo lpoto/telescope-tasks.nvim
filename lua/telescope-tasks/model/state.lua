@@ -1,5 +1,5 @@
-local scan = require "plenary.scandir"
-local Path = require "plenary.path"
+local scan = require("plenary.scandir")
+local Path = require("plenary.path")
 
 ---@class State
 ---@field iterated_subdirectories string?
@@ -84,7 +84,7 @@ function State:__iterate_subdirectories()
   on_insert(self.found_files, cur_name)
 
   local max_depth = 7
-  if cwd == os.getenv "HOME" then
+  if cwd == os.getenv("HOME") then
     max_depth = 4
   end
 
