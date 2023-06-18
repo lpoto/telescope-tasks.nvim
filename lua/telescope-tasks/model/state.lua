@@ -83,8 +83,9 @@ function State:__iterate_subdirectories()
   -- of the cwd's subdirectories or not
   on_insert(self.found_files, cur_name)
 
+  local home = os.getenv("HOME")
   local max_depth = 7
-  if cwd == os.getenv("HOME") then
+  if cwd == home then
     max_depth = 4
   end
 
@@ -98,9 +99,10 @@ function State:__iterate_subdirectories()
   while #stack > 0 do
     -- pop a directory of the stack
     local o = table.remove(stack)
+    local hidden = o.dir ~= home
 
     scan.scan_dir(o.dir, {
-      hidden = false,
+      hidden = hidden,
       add_dirs = true,
       depth = 1,
       on_insert = function(entry)
@@ -119,11 +121,9 @@ function State:__iterate_subdirectories()
         if o.depth >= max_depth then
           return
         end
-        for _, pattern in ipairs(State.ignore_directories) do
-          local tail = vim.fn.fnamemodify(entry, ":t")
-          if tail == pattern then
-            return
-          end
+        local tail = vim.fn.fnamemodify(entry, ":t")
+        if State.ignore_directories[tail] then
+          return
         end
         -- NOTE: the directory is not ignored,
         -- so we add it to the stack and scan it later
@@ -164,27 +164,35 @@ function State:__iterate_parents(n)
 end
 
 State.ignore_directories = {
-  "node_modules",
-  "vendor",
-  "target",
-  "dist",
-  "build",
-  "out",
-  "bin",
-  "obj",
-  "lib",
-  "deps",
-  "venv",
-  "env",
-  "var",
-  "Videos",
-  "Pictures",
-  "Games",
-  "Movies",
-  "snap",
-  "usr",
-  "tmp",
-  ".settings",
+  ["node_modules"] = true,
+  ["vendor"] = true,
+  ["target"] = true,
+  ["dist"] = true,
+  ["build"] = true,
+  ["out"] = true,
+  ["bin"] = true,
+  ["obj"] = true,
+  ["lib"] = true,
+  ["deps"] = true,
+  ["venv"] = true,
+  ["env"] = true,
+  ["var"] = true,
+  ["Videos"] = true,
+  ["Pictures"] = true,
+  ["Games"] = true,
+  ["Movies"] = true,
+  ["snap"] = true,
+  ["usr"] = true,
+  ["tmp"] = true,
+  [".git"] = true,
+  [".build"] = true,
+  [".out"] = true,
+  [".lib"] = true,
+  [".deps"] = true,
+  [".vendor"] = true,
+  [".dist"] = true,
+  [".settings"] = true,
+  [".project"] = true,
 }
 
 --- This will be called every time a file
