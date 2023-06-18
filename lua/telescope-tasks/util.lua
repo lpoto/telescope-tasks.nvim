@@ -73,7 +73,7 @@ function util.get_env(n)
   then
     return nil
   end
-  return vim.g.telescope_tasks_env[n]
+  return vim.g.telescope_tasks.env[n]
 end
 
 find_root = function(patterns, start)
