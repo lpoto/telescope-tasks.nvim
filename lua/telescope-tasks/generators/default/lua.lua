@@ -1,22 +1,22 @@
-local Default = require "telescope-tasks.model.default_generator"
-local util = require "telescope-tasks.util"
-local enum = require "telescope-tasks.enum"
+local Default = require("telescope-tasks.model.default_generator")
+local util = require("telescope-tasks.util")
+local enum = require("telescope-tasks.enum")
 
 ---Add a task for running the current lua file.
-local lua = Default:new {
+local lua = Default:new({
   opts = {
     name = "Default Lua Generator",
     experimental = true,
   },
-  errorformat = vim.fn.exepath "lua"
+  errorformat = vim.fn.exepath("lua")
     .. ": [string %.%\\+]:%\\d%\\+: %m,"
-    .. vim.fn.exepath "lua"
+    .. vim.fn.exepath("lua")
     .. ": %f:%l: %m,"
-    .. vim.fn.exepath "lua"
+    .. vim.fn.exepath("lua")
     .. ": %m,"
     .. "%\\s%\\+[string %.%\\+]:%\\d%\\+: %m,"
     .. "%f:%l: %m",
-}
+})
 
 function lua.generator(buf)
   local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
@@ -26,20 +26,20 @@ function lua.generator(buf)
   local name = vim.api.nvim_buf_get_name(buf)
 
   local cmd = {
-    util.get_binary "lua" or "lua",
+    util.get_binary("lua") or "lua",
     name,
   }
   local t = {
     "Run current Lua file",
     cmd = cmd,
     filename = name,
-    priority = enum.PRIORITY.MEDIUM,
+    priority = enum.PRIORITY.MEDIUM + 1,
     keywords = {
       "lua",
       name,
     },
   }
-  local env = util.get_env "lua"
+  local env = util.get_env("lua")
   if type(env) == "table" and next(env) then
     t.env = env
   end
@@ -47,7 +47,7 @@ function lua.generator(buf)
 end
 
 function lua.healthcheck()
-  local binary = util.get_binary "lua" or "lua"
+  local binary = util.get_binary("lua") or "lua"
   if vim.fn.executable(binary) == 0 then
     vim.health.warn("Lua binary '" .. binary .. "' is not executable", {
       "Install 'lua' or set a different binary with vim.g.telescope_tasks = { binaries = { lua=<new-binary> }}",

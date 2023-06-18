@@ -1,9 +1,9 @@
-local finder = require "telescope-tasks.picker.finder"
-local previewer = require "telescope-tasks.picker.previewer"
-local mappings = require "telescope-tasks.picker.mappings"
-local enum = require "telescope-tasks.enum"
+local finder = require("telescope-tasks.picker.finder")
+local previewer = require("telescope-tasks.picker.previewer")
+local mappings = require("telescope-tasks.picker.mappings")
+local enum = require("telescope-tasks.enum")
 
-local pickers = require "telescope.pickers"
+local pickers = require("telescope.pickers")
 local conf = require("telescope.config").values
 
 local available_tasks_telescope_picker = function(options)

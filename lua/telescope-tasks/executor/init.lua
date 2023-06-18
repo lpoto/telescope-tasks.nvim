@@ -1,5 +1,5 @@
-local util = require "telescope-tasks.util"
-local output_buffer = require "telescope-tasks.output.buffer"
+local util = require("telescope-tasks.util")
+local output_buffer = require("telescope-tasks.output.buffer")
 
 local idx = 0
 local running_tasks = {}

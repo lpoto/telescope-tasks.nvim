@@ -1,20 +1,20 @@
-local Path = require "plenary.path"
-local Default = require "telescope-tasks.model.default_generator"
-local util = require "telescope-tasks.util"
-local enum = require "telescope-tasks.enum"
-local State = require "telescope-tasks.model.state"
+local Path = require("plenary.path")
+local Default = require("telescope-tasks.model.default_generator")
+local util = require("telescope-tasks.util")
+local enum = require("telescope-tasks.enum")
+local State = require("telescope-tasks.model.state")
 
 ---Generate tasks for running maven projects in subdirectories,
 ---
 ---maven clean package
 ---
-local maven = Default:new {
+local maven = Default:new({
   errorformat = "[ERROR] %f:[%l\\,%v] %m",
   opts = {
     name = "Default Maven Generator",
     experimental = true,
   },
-}
+})
 
 local is_build_pom
 local run_project_task
@@ -52,7 +52,7 @@ function maven.generator()
 end
 
 run_project_task = function(cwd, name, full_path)
-  local binary = util.get_env "maven" or "mvn"
+  local binary = util.get_env("maven") or "mvn"
   local cmd = { binary, "clean", "package", "-DskipTests" }
 
   local t = {
@@ -60,17 +60,17 @@ run_project_task = function(cwd, name, full_path)
     cmd = cmd,
     cwd = cwd,
     filename = full_path,
-    priority = enum.PRIORITY.LOW,
+    priority = enum.PRIORITY.LOW + 4,
     keywords = {
       "maven",
       full_path,
     },
   }
-  local env = util.get_env "java"
+  local env = util.get_env("java")
   if type(env) == "table" and next(env) then
     t.env = env
   end
-  env = util.get_env "maven"
+  env = util.get_env("maven")
   if type(env) == "table" and next(env) then
     t.env = vim.tbl_extend("force", t.env or {}, env)
   end
@@ -92,7 +92,7 @@ is_build_pom = function(file)
 
     local lines = path:readlines()
     for _, line in ipairs(lines) do
-      if line:match "<build>" then
+      if line:match("<build>") then
         return true
       end
     end
@@ -102,7 +102,7 @@ is_build_pom = function(file)
 end
 
 function maven.healthcheck()
-  local binary = util.get_binary "maven" or "mvn"
+  local binary = util.get_binary("maven") or "mvn"
   if vim.fn.executable(binary) == 0 then
     vim.health.warn("Maven binary '" .. binary .. "' is not executable", {
       "Install 'maven' or set a different binary with vim.g.telescope_tasks = { binaries = { maven=<new-binary> }}",
@@ -113,7 +113,7 @@ function maven.healthcheck()
 end
 
 function maven.on_load()
-  State.register_file_names { "pom.xml" }
+  State.register_file_names({ "pom.xml" })
 end
 
 return maven

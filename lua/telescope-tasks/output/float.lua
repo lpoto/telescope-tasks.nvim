@@ -1,5 +1,5 @@
-local setup = require "telescope-tasks.setup"
-local enum = require "telescope-tasks.enum"
+local setup = require("telescope-tasks.setup")
+local enum = require("telescope-tasks.enum")
 
 local float = {}
 

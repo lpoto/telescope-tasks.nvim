@@ -1,4 +1,4 @@
-local util = require "telescope-tasks.util"
+local util = require("telescope-tasks.util")
 
 local default = {}
 
@@ -47,6 +47,11 @@ end
 ---Enable maven default generator
 function default.maven()
   require("telescope-tasks.generators.default.maven"):load()
+end
+
+---Enable docker-compose default generator
+function default.docker_compose()
+  require("telescope-tasks.generators.default.docker_compose"):load()
 end
 
 return default

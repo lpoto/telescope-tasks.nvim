@@ -1,9 +1,9 @@
-local util = require "telescope-tasks.util"
-local executor = require "telescope-tasks.executor"
-local finder = require "telescope-tasks.picker.finder"
-local output = require "telescope-tasks.output"
-local telescope_actions = require "telescope.actions"
-local action_state = require "telescope.actions.state"
+local util = require("telescope-tasks.util")
+local executor = require("telescope-tasks.executor")
+local finder = require("telescope-tasks.picker.finder")
+local output = require("telescope-tasks.output")
+local telescope_actions = require("telescope.actions")
+local action_state = require("telescope.actions.state")
 
 local actions = {}
 
@@ -30,7 +30,7 @@ function actions.edit_task_file(prompt_bufnr)
   local selection = action_state.get_selected_entry()
   local task = selection.value
   if not task or not task.filename then
-    util.warn "Selected task has no associated filename"
+    util.warn("Selected task has no associated filename")
     return
   end
 
@@ -42,7 +42,7 @@ function actions.modify_task_command(prompt_bufnr)
   local task = selection.value
 
   if executor.is_running(task.name) then
-    util.error "Task is running"
+    util.error("Task is running")
     return
   end
   task:modify_command_from_input(prompt_bufnr)
@@ -54,7 +54,7 @@ function actions.modify_task_env(prompt_bufnr)
   local task = selection.value
 
   if executor.is_running(task.name) then
-    util.error "Task is running"
+    util.error("Task is running")
     return
   end
   task:modify_env_from_input(prompt_bufnr)
@@ -66,7 +66,7 @@ function actions.modify_task_cwd(prompt_bufnr)
   local task = selection.value
 
   if executor.is_running(task.name) then
-    util.error "Task is running"
+    util.error("Task is running")
     return
   end
   task:modify_cwd_from_input(prompt_bufnr)
@@ -78,7 +78,7 @@ function actions.delete_task_modifications(prompt_bufnr)
   local task = selection.value
 
   if executor.is_running(task.name) then
-    util.error "Task is running"
+    util.error("Task is running")
     return
   end
   task:delete_modifications(prompt_bufnr)

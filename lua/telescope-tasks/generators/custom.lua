@@ -1,6 +1,6 @@
-local runner = require "telescope-tasks.generators.runner"
-local util = require "telescope-tasks.util"
-local Generator = require "telescope-tasks.model.generator"
+local runner = require("telescope-tasks.generators.runner")
+local util = require("telescope-tasks.util")
+local Generator = require("telescope-tasks.model.generator")
 
 local custom = {}
 
@@ -13,7 +13,7 @@ local custom = {}
 ---  - `opts` (Generator_opts|nil) The generator conditions.
 function custom.add(...)
   local generators = {}
-  for _, gen in ipairs { select(1, ...) } do
+  for _, gen in ipairs({ select(1, ...) }) do
     local ok, e = pcall(function()
       local generator = Generator:new(gen)
       table.insert(generators, generator)

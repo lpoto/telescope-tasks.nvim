@@ -1,6 +1,6 @@
-local util = require "telescope-tasks.util"
-local enum = require "telescope-tasks.enum"
-local storage = require "telescope-tasks.storage"
+local util = require("telescope-tasks.util")
+local enum = require("telescope-tasks.enum")
+local storage = require("telescope-tasks.storage")
 
 ---@class Task
 ---@field name string: This is taken from the key in vim.g.telescope_tasks table
@@ -267,11 +267,11 @@ function Task:modify_command_from_input()
   local orig_cmd = format_cmd(self.__orig_cmd)
   local cmd = format_cmd(self.cmd)
 
-  local cmd2 = vim.fn.input {
+  local cmd2 = vim.fn.input({
     prompt = "$ ",
     default = cmd .. " ",
     cancelreturn = false,
-  }
+  })
   if type(cmd2) ~= "string" then
     return false
   end
@@ -298,19 +298,19 @@ end
 
 ---@return boolean
 function Task:modify_env_from_input()
-  local key = vim.fn.input {
+  local key = vim.fn.input({
     prompt = "Environment variable name: ",
     default = "",
     cancelreturn = false,
-  }
+  })
   if type(key) ~= "string" or key:len() == 0 then
     return false
   end
-  local value = vim.fn.input {
+  local value = vim.fn.input({
     prompt = "Environment variable value: ",
     default = "",
     cancelreturn = false,
-  }
+  })
   if type(value) ~= "string" then
     return false
   end
@@ -339,11 +339,11 @@ function Task:modify_env_from_input()
 end
 
 function Task:modify_cwd_from_input()
-  local cwd = vim.fn.input {
+  local cwd = vim.fn.input({
     prompt = "Working directory: ",
     default = self.cwd,
     cancelreturn = false,
-  }
+  })
   if type(cwd) ~= "string" then
     return false
   end

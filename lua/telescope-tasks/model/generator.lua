@@ -1,5 +1,5 @@
-local util = require "telescope-tasks.util"
-local Task = require "telescope-tasks.model.task"
+local util = require("telescope-tasks.util")
+local Task = require("telescope-tasks.model.task")
 
 ---@class Generator
 ---@field generator function
@@ -34,7 +34,7 @@ function Generator:run()
     return nil
   elseif type(tasks) ~= "table" then
     if tasks ~= nil then
-      util.error "Genrator should return a table"
+      util.error("Genrator should return a table")
     end
     return nil
   end

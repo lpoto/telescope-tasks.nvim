@@ -1,5 +1,5 @@
-local default = require "telescope-tasks.generators.default"
-local custom = require "telescope-tasks.generators.custom"
+local default = require("telescope-tasks.generators.default")
+local custom = require("telescope-tasks.generators.custom")
 
 return {
 

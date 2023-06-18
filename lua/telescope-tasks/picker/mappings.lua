@@ -1,5 +1,5 @@
-local actions = require "telescope-tasks.picker.actions"
-local telescope_actions = require "telescope.actions"
+local actions = require("telescope-tasks.picker.actions")
+local telescope_actions = require("telescope.actions")
 
 local mappings = {}
 

@@ -1,6 +1,6 @@
-local Generator = require "telescope-tasks.model.generator"
-local runner = require "telescope-tasks.generators.runner"
-local health = require "telescope-tasks.health"
+local Generator = require("telescope-tasks.model.generator")
+local runner = require("telescope-tasks.generators.runner")
+local health = require("telescope-tasks.health")
 
 ---@class Default_generator
 ---@field errorformat string
@@ -25,7 +25,7 @@ function Default_generator:state()
 end
 
 function Default_generator:load()
-  local generator = Generator:new {
+  local generator = Generator:new({
     generator = function(buf)
       local tasks = self.generator(buf)
       local _tasks = {}
@@ -44,8 +44,8 @@ function Default_generator:load()
       end
       return _tasks
     end,
-  }
-  runner.add_generators { generator }
+  })
+  runner.add_generators({ generator })
 
   if self.on_load then
     self.on_load()

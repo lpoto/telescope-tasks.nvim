@@ -1,7 +1,7 @@
-local previewers = require "telescope.previewers"
-local executor = require "telescope-tasks.executor"
-local highlight = require "telescope-tasks.output.highlight"
-local util = require "telescope-tasks.util"
+local previewers = require("telescope.previewers")
+local executor = require("telescope-tasks.executor")
+local highlight = require("telescope-tasks.output.highlight")
+local util = require("telescope-tasks.util")
 
 local previewer = {}
 
@@ -14,7 +14,7 @@ local preview_fn
 ---displayes the output, otherwise it displays the task's definition
 ---@return table: a telescope previewer
 function previewer.task_previewer()
-  return previewers.new {
+  return previewers.new({
     title = "Task Preview",
     dynamic_title = function(_, entry)
       local running_buf = executor.get_task_output_buf(entry.value.name)
@@ -28,7 +28,7 @@ function previewer.task_previewer()
     preview_fn = function(self, entry, status)
       preview_fn(self, entry, status)
     end,
-  }
+  })
 end
 
 scroll_fn = function(self, direction)
@@ -112,7 +112,7 @@ local function display_definition_buf(status, task)
     if type(item) == "table" and next(item) then
       local key_hl = "Conditional"
       local value_hl = "Normal"
-      if item.key:match "^#" then
+      if item.key:match("^#") then
         key_hl = "Comment"
         value_hl = "Comment"
       end
@@ -148,6 +148,7 @@ end
 preview_fn = function(self, entry, status)
   highlight.set_previewer_highlights(status.preview_win)
   local old_buf = previewer.old_preview_buf
+  vim.api.nvim_win_set_option(status.preview_win, "wrap", true)
 
   if not display_running_buf(status, entry.value) then
     display_definition_buf(status, entry.value)
@@ -178,7 +179,7 @@ teardown_fn = function(self)
     return
   end
   local buf = vim.api.nvim_create_buf(false, true)
-  vim.cmd "noautocmd"
+  vim.cmd("noautocmd")
   vim.api.nvim_win_set_buf(winid, buf)
 end
 

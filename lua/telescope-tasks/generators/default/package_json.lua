@@ -1,15 +1,15 @@
-local Default = require "telescope-tasks.model.default_generator"
-local enum = require "telescope-tasks.enum"
-local Path = require "plenary.path"
-local State = require "telescope-tasks.model.state"
-local util = require "telescope-tasks.util"
+local Default = require("telescope-tasks.model.default_generator")
+local enum = require("telescope-tasks.enum")
+local Path = require("plenary.path")
+local State = require("telescope-tasks.model.state")
+local util = require("telescope-tasks.util")
 
-local package_json = Default:new {
+local package_json = Default:new({
   opts = {
     name = "Default package.json scripts Generator",
     experimental = true,
   },
-}
+})
 
 local get_tasks
 
@@ -44,33 +44,29 @@ function get_tasks(path, pkg)
   then
     return {}
   end
-  local relative_path = path:make_relative(vim.fn.getcwd())
   local cwd = path:parent():__tostring()
   local filename = path:__tostring()
+  path:normalize(vim.fn.getcwd())
 
   local tasks = {}
 
   for k, v in pairs(pkg.scripts) do
     if type(v) == "string" then
       local t = {
-        relative_path .. ": " .. k,
+        path:__tostring() .. ": " .. k,
         filename = filename,
         cmd = v,
         cwd = cwd,
-        priority = enum.PRIORITY.LOW,
+        priority = enum.PRIORITY.LOW + 1,
         keywords = {
           "package.json",
           filename,
           k,
         },
       }
-      local env = util.get_env "package.json"
+      local env = util.get_env("package.json")
       if type(env) == "table" and next(env) then
         t.env = env
-      end
-      env = util.get_env "package.json"
-      if type(env) == "table" and next(env) then
-        t.env = vim.tbl_extend("force", t.env or {}, env)
       end
       table.insert(tasks, t)
     end
@@ -79,7 +75,7 @@ function get_tasks(path, pkg)
 end
 
 function package_json.on_load()
-  State.register_file_names { "package.json" }
+  State.register_file_names({ "package.json" })
 end
 
 return package_json
