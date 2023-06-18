@@ -148,6 +148,7 @@ end
 preview_fn = function(self, entry, status)
   highlight.set_previewer_highlights(status.preview_win)
   local old_buf = previewer.old_preview_buf
+  vim.api.nvim_win_set_option(status.preview_win, "wrap", true)
 
   if not display_running_buf(status, entry.value) then
     display_definition_buf(status, entry.value)
