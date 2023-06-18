@@ -38,13 +38,13 @@ function makefile.generator()
 end
 
 function get_task(path, target)
-  local relative_path = path:make_relative(vim.fn.getcwd())
   local cwd = path:parent():__tostring()
   local filename = path:__tostring()
   local binary = util.get_binary "make" or "make"
+  path:normalize(vim.fn.getcwd())
 
   local t = {
-    relative_path .. ": " .. target,
+    path:__tostring() .. ": " .. target,
     filename = filename,
     cmd = { binary, target },
     cwd = cwd,

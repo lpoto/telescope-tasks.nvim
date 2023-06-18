@@ -85,7 +85,7 @@ run_project_task = function(cwd, name, full_path)
     cmd = cmd,
     cwd = cwd,
     filename = full_path,
-    priority = enum.PRIORITY.LOW,
+    priority = enum.PRIORITY.LOW + 6,
     keywords = {
       "go",
       "project",
@@ -108,7 +108,7 @@ run_current_file_task = function(package, cwd, name, filename)
     cmd = cmd,
     cwd = cwd,
     filename = filename,
-    priority = enum.PRIORITY.MEDIUM,
+    priority = enum.PRIORITY.MEDIUM + 6,
     keywords = {
       "go",
       "file",

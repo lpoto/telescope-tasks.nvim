@@ -44,20 +44,20 @@ function get_tasks(path, pkg)
   then
     return {}
   end
-  local relative_path = path:make_relative(vim.fn.getcwd())
   local cwd = path:parent():__tostring()
   local filename = path:__tostring()
+  path:normalize(vim.fn.getcwd())
 
   local tasks = {}
 
   for k, v in pairs(pkg.scripts) do
     if type(v) == "string" then
       local t = {
-        relative_path .. ": " .. k,
+        path:__tostring() .. ": " .. k,
         filename = filename,
         cmd = v,
         cwd = cwd,
-        priority = enum.PRIORITY.LOW,
+        priority = enum.PRIORITY.LOW + 1,
         keywords = {
           "package.json",
           filename,
@@ -67,10 +67,6 @@ function get_tasks(path, pkg)
       local env = util.get_env "package.json"
       if type(env) == "table" and next(env) then
         t.env = env
-      end
-      env = util.get_env "package.json"
-      if type(env) == "table" and next(env) then
-        t.env = vim.tbl_extend("force", t.env or {}, env)
       end
       table.insert(tasks, t)
     end

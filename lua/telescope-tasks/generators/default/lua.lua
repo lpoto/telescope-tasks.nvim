@@ -33,7 +33,7 @@ function lua.generator(buf)
     "Run current Lua file",
     cmd = cmd,
     filename = name,
-    priority = enum.PRIORITY.MEDIUM,
+    priority = enum.PRIORITY.MEDIUM + 1,
     keywords = {
       "lua",
       name,

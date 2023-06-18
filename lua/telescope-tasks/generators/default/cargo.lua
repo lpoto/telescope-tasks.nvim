@@ -64,7 +64,7 @@ check_current_binary = function(buf, checked_targets)
     "Run current Cargo binary",
     cmd = { binary, "run", "--bin", target },
     filename = filename,
-    priority = enum.PRIORITY.MEDIUM,
+    priority = enum.PRIORITY.MEDIUM + 5,
     keywords = {
       "cargo",
       "current_binary",
@@ -133,7 +133,7 @@ run_cargo_project = function(cwd, full_path, checked_targets)
         cmd = cmd,
         cwd = cwd,
         filename = full_path,
-        priority = enum.PRIORITY.LOW,
+        priority = enum.PRIORITY.LOW + 5,
         keywords = {
           "cargo",
           target,

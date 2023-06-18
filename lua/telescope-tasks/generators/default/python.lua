@@ -35,7 +35,7 @@ function python.generator(buf)
     "Run current Python file",
     cmd = { get_binary(), name },
     filename = name,
-    priority = enum.PRIORITY.MEDIUM,
+    priority = enum.PRIORITY.MEDIUM + 3,
     keywords = {
       "python",
       "file",
@@ -68,7 +68,7 @@ check_main_files = function(entries, checked)
       cmd = { "python", "." },
       cwd = cwd,
       filename = full_path,
-      priority = enum.PRIORITY.LOW,
+      priority = enum.PRIORITY.LOW + 3,
       keywords = {
         "python",
         "project",
