@@ -175,8 +175,8 @@ State.ignore_directories = {
   ["lib"] = true,
   ["deps"] = true,
   ["venv"] = true,
-  ["env"] = true,
   ["var"] = true,
+  ["opt"] = true,
   ["Videos"] = true,
   ["Pictures"] = true,
   ["Games"] = true,
@@ -185,6 +185,10 @@ State.ignore_directories = {
   ["usr"] = true,
   ["tmp"] = true,
   [".git"] = true,
+  [".target"] = true,
+  [".obj"] = true,
+  [".venv"] = true,
+  [".env"] = true,
   [".build"] = true,
   [".out"] = true,
   [".lib"] = true,
@@ -193,6 +197,7 @@ State.ignore_directories = {
   [".dist"] = true,
   [".settings"] = true,
   [".project"] = true,
+  [".storage"] = true,
 }
 
 --- This will be called every time a file
