@@ -59,7 +59,7 @@ function get_task(yaml_file)
   local cmd = {
     binary,
     "-f",
-    path:__tostring(),
+    filename,
     "up",
     "--build",
   }
