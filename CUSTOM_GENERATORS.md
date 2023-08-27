@@ -6,38 +6,37 @@ The custom generators API is exposed through:
 local custom = require('telescope').extensions.tasks.generators.custom
 ```
 
-To add a custom generator, pass one or more [Generator](#generator-spec) objects
+To add a custom generator, pass one or more generators
 to the following function:
 
 ```lua
 custom.add(...)
 ```
 
+> **_NOTE_**: The generators are just functions returning nil, a single task or a table of tasks.
+
 An example:
 
 ```lua
-local util = require("telescope").extensions.tasks.util
+local tasks = require('telescope').extensions.tasks
 
-custom.add(
-  function(buf)
-    local root = util.find_current_file_root { "Makefile" }
+tasks.generators.custom.add(function(buf)
+    local filename = vim.api.nvim_buf_get_name(buf)
+    local extension = vim.fn.fnamemodify(filename, ":e")
+    local tail = vim.fn.fnamemodify(filename, ":t:r")
+    if extension ~= "c" then
+      -- Generate this task only for C files
+      return nil
+    end
+
     return {
-        "Example Task",
-        cwd = root,
-        filename = root .. "/Makefile",
-        cmd = { "make", "example" },
-        -- env = {...}
-        keywords = {
-            "makefile",
-            root,
-            "example",
-        }
-      }
-    -- NOTE: multiple tasks may be returned at once
-    -- NOTE: You may return nil aswell in case you want to add custom
-    -- conditions to the generator function itself
-  end
-)
+      "Run current C file",
+      filename = filename,
+      cwd = tasks.util.find_current_file_root { ".git" },
+      cmd = ("gcc -o %s.out %s && ./%s.out"):format(tail, filename, tail),
+    }
+    -- NOTE: multiple tasks may be returned aswell
+end)
 --- You may pass multiple generators at once ( `custom.add(g1, g2, ...)` )
 ```
 

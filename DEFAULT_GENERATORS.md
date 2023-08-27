@@ -5,6 +5,10 @@
 > Not many are added yet, and those added were not yet properly tested, hence
 > custom generators are preffered at the moment.
 
+> **_NOTE_**: The generator functions are called when opening the telescope tasks picker.
+> The default pickers are implemented in such a way that they reuse state, so they are
+> all executed very quickly.
+
 The default generators API is exposed through:
 
 ```lua
