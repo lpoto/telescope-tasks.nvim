@@ -49,6 +49,8 @@ require("telescope").setup {
         python = "python3",
         -- ...
       },
+      -- NOTE: environment and commands may be modified for each task separately from the picker
+
       -- other picker setup values
     },
   },
