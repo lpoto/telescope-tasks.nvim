@@ -33,7 +33,7 @@ function output.open(task, before_opening)
 
   output.close_output_windows()
 
-  open_last_task_output(task.name, buf)
+  open_last_task_output(task.name, task.cmd, buf)
 end
 
 local last_winid = nil
@@ -42,7 +42,7 @@ local last_winid = nil
 ---Warns when there wasn't any previous outputs opened,
 ---or the previous output buffer is no longer available.
 function output.toggle_last()
-  local buf, name = executor.get_last_task_output_buf()
+  local buf, name, cmd = executor.get_last_task_output_buf()
 
   if not buf then
     util.warn("There is no available output")
@@ -66,7 +66,7 @@ function output.toggle_last()
     return
   end
 
-  open_last_task_output(name, buf)
+  open_last_task_output(name, cmd, buf)
 end
 
 function output.close_output_windows()
@@ -91,10 +91,16 @@ function output.create_buffer(buf)
   return buffer.create(buf)
 end
 
-open_last_task_output = function(name, buf)
+open_last_task_output = function(name, footer, buf)
   -- NOTE: make sure a valid buffer was returned
   if type(buf) ~= "number" or vim.api.nvim_buf_is_valid(buf) ~= true then
     return
+  end
+
+  if type(footer) == "table" then
+    footer = table.concat(footer, " ")
+  elseif type(footer) ~= "string" then
+    footer = nil
   end
 
   last_winid = vim.fn.win_getid()
@@ -110,7 +116,7 @@ open_last_task_output = function(name, buf)
     return
   end
 
-  local ow = window.create(buf, name)
+  local ow = window.create(buf, name, footer)
   if not vim.api.nvim_win_is_valid(ow) then
     return
   end

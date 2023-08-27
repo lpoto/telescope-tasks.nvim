@@ -229,6 +229,7 @@ run_task = function(task, on_exit, lock, save_modified_command)
     task = task,
     idx = idx,
     name = task.name,
+    cmd = task.cmd,
   }
   idx = idx + 1
   return true
@@ -244,7 +245,7 @@ function executor.get_last_task_output_buf()
   end
   for _, t in ipairs(v) do
     if t.buf and vim.api.nvim_buf_is_valid(t.buf) then
-      return t.buf, t.name
+      return t.buf, t.name, t.cmd
     end
   end
   return nil

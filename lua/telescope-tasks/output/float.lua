@@ -9,7 +9,7 @@ local get_top_opts
 local get_right_opts
 local get_left_opts
 
-function float.create(buf, title)
+function float.create(buf, title, _, footer)
   local opts = {
     relative = "editor",
     focusable = true,
@@ -19,7 +19,7 @@ function float.create(buf, title)
     border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
     style = "minimal",
   }
-  if title then
+  if type(title) == "string" then
     opts.title = " " .. title .. " "
   end
 
@@ -44,7 +44,26 @@ function float.create(buf, title)
 
   opts = vim.tbl_extend("force", opts, f(vim.o.lines, vim.o.columns, scale))
 
-  return vim.api.nvim_open_win(buf, true, opts)
+  if type(footer) == "string" then
+    local l = vim.fn.strchars(footer)
+    if l < opts.width - 15 then
+      opts.footer = " cmd: " .. footer .. " "
+      opts.footer_pos = "right"
+    end
+  end
+
+  local ok, winid = pcall(vim.api.nvim_open_win, buf, true, opts)
+  if not ok then
+    if
+      winid == "invalid key: footer" or winid == "invalid key: footer_pos"
+    then
+      opts.footer = nil
+      opts.footer_pos = nil
+      return vim.api.nvim_open_win(buf, true, opts)
+    end
+    return -1
+  end
+  return winid
 end
 
 get_centered_opts = function(lines, columns, scale)
