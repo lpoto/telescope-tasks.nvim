@@ -50,9 +50,7 @@ function Generator_opts:check_in_current_context()
   end
   if next(self.ignore_patterns or {}) then
     for _, pattern in ipairs(self.ignore_patterns) do
-      if filename:match(pattern) then
-        return false
-      end
+      if filename:match(pattern) then return false end
     end
   end
   if next(self.patterns or {}) then
@@ -63,9 +61,7 @@ function Generator_opts:check_in_current_context()
         break
       end
     end
-    if not ok then
-      return false
-    end
+    if not ok then return false end
   end
   if next(self.parent_dir_includes or {}) then
     if not util.parent_dir_includes(self.parent_dir_includes) then

@@ -1,6 +1,6 @@
-local util = require("telescope-tasks.util")
-local executor = require("telescope-tasks.executor")
 local State = require("telescope-tasks.model.state")
+local executor = require("telescope-tasks.executor")
+local util = require("telescope-tasks.util")
 
 local should_run_generators
 
@@ -19,9 +19,7 @@ function runner.run(buf)
   state = State:new()
 
   local ok, tasks = pcall(function()
-    if not next(current_generators or {}) then
-      return {}
-    end
+    if not next(current_generators or {}) then return {} end
 
     if type(buf) ~= "number" or not vim.api.nvim_buf_is_valid(buf) then
       buf = vim.api.nvim_get_current_buf()
@@ -70,9 +68,7 @@ function runner.add_generators(generators)
 end
 
 ---@return State|nil
-function runner.get_state()
-  return state
-end
+function runner.get_state() return state end
 
 ---Checks whether the generators should be run in the provided buffer.
 ---@param buf number

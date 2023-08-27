@@ -1,7 +1,7 @@
 local Default = require("telescope-tasks.model.default_generator")
-local enum = require("telescope-tasks.enum")
 local Path = require("plenary.path")
 local State = require("telescope-tasks.model.state")
+local enum = require("telescope-tasks.enum")
 local setup = require("telescope-tasks.setup")
 
 local makefile = Default:new({
@@ -15,9 +15,7 @@ local get_task
 
 function makefile.generator()
   local files = (makefile:state():find_files(5) or {}).by_name
-  if not next(files or {}) then
-    return {}
-  end
+  if not next(files or {}) then return {} end
   local tasks = {}
 
   for _, n in ipairs({ "makefile", "Makefile" }) do
@@ -56,9 +54,7 @@ function get_task(path, target)
     },
   }
   local env = setup.opts.env.makefile
-  if type(env) == "table" and next(env) then
-    t.env = env
-  end
+  if type(env) == "table" and next(env) then t.env = env end
   return t
 end
 

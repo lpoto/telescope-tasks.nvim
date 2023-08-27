@@ -1,8 +1,8 @@
 local Default = require("telescope-tasks.model.default_generator")
-local setup = require("telescope-tasks.setup")
-local enum = require("telescope-tasks.enum")
 local Path = require("plenary.path")
 local State = require("telescope-tasks.model.state")
+local enum = require("telescope-tasks.enum")
+local setup = require("telescope-tasks.setup")
 
 ---Add a task for running the current python file.
 local python = Default:new({
@@ -24,12 +24,8 @@ function python.generator(buf)
   local tasks = check_main_files(entries, checked)
   local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
   local name = vim.api.nvim_buf_get_name(buf)
-  if filetype ~= "python" or checked[name] then
-    return tasks
-  end
-  if not tasks then
-    tasks = {}
-  end
+  if filetype ~= "python" or checked[name] then return tasks end
+  if not tasks then tasks = {} end
 
   local t = {
     "Run current Python file",
@@ -43,17 +39,13 @@ function python.generator(buf)
     },
   }
   local env = setup.opts.env.python
-  if type(env) == "table" and next(env) then
-    t.env = env
-  end
+  if type(env) == "table" and next(env) then t.env = env end
   table.insert(tasks, t)
   return tasks
 end
 
 check_main_files = function(entries, checked)
-  if type(entries) ~= "table" or not next(entries) then
-    return {}
-  end
+  if type(entries) ~= "table" or not next(entries) then return {} end
   local env = setup.opts.env.python
   local tasks = {}
   for _, entry in ipairs(entries) do
@@ -75,9 +67,7 @@ check_main_files = function(entries, checked)
         full_path,
       },
     }
-    if type(env) == "table" and next(env) then
-      t.env = env
-    end
+    if type(env) == "table" and next(env) then t.env = env end
     table.insert(tasks, t)
   end
   return tasks
@@ -114,8 +104,6 @@ function python.healthcheck()
   end
 end
 
-function python.on_load()
-  State.register_file_names({ "__main__.py" })
-end
+function python.on_load() State.register_file_names({ "__main__.py" }) end
 
 return python

@@ -1,6 +1,6 @@
+local Generator = require("telescope-tasks.model.generator")
 local runner = require("telescope-tasks.generators.runner")
 local util = require("telescope-tasks.util")
-local Generator = require("telescope-tasks.model.generator")
 
 local custom = {}
 
@@ -18,9 +18,7 @@ function custom.add(...)
       local generator = Generator:new(gen)
       table.insert(generators, generator)
     end)
-    if not ok and type(e) == "string" then
-      util.warn(e)
-    end
+    if not ok and type(e) == "string" then util.warn(e) end
   end
 
   runner.add_generators(generators)

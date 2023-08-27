@@ -1,6 +1,6 @@
-local previewers = require("telescope.previewers")
 local executor = require("telescope-tasks.executor")
 local highlight = require("telescope-tasks.output.highlight")
+local previewers = require("telescope.previewers")
 local util = require("telescope-tasks.util")
 
 local previewer = {}
@@ -33,16 +33,12 @@ end
 
 scroll_fn = function(self, direction)
   local ok, e = pcall(function()
-    if not self.state then
-      return
-    end
+    if not self.state then return end
 
     local winid = self.state.winid
     local n = vim.api.nvim_win_get_height(winid)
     n = math.min(math.max(math.ceil(n / 2), 5), 15)
-    if direction < 0 then
-      n = -n
-    end
+    if direction < 0 then n = -n end
     local pos = vim.api.nvim_win_get_cursor(winid)
     local cur_y, cur_x = pos[1], pos[2]
 
@@ -50,15 +46,11 @@ scroll_fn = function(self, direction)
     -- ignore error that may occur if new_y out of range
     pcall(vim.api.nvim_win_set_cursor, winid, { new_y, cur_x })
   end)
-  if not ok and type(e) == "string" then
-    util.warn(e)
-  end
+  if not ok and type(e) == "string" then util.warn(e) end
 end
 
 local function display_running_buf(status, task)
-  if executor.buffer_is_to_be_deleted(task.name) then
-    return false
-  end
+  if executor.buffer_is_to_be_deleted(task.name) then return false end
   local running_buf = executor.get_task_output_buf(task.name)
   if running_buf and vim.api.nvim_buf_is_valid(running_buf) then
     vim.api.nvim_win_set_buf(status.preview_win, running_buf)
@@ -140,9 +132,7 @@ local function display_definition_buf(status, task)
     status.preview_win,
     previewer.old_preview_buf
   )
-  if ok == false then
-    util.error(e)
-  end
+  if ok == false then util.error(e) end
 end
 
 preview_fn = function(self, entry, status)
@@ -167,9 +157,7 @@ end
 teardown_fn = function(self)
   self.state = nil
   pcall(vim.api.nvim_buf_delete, previewer.old_preview_buf, { force = true })
-  if self.status == nil or self.status.preview_win == nil then
-    return
-  end
+  if self.status == nil or self.status.preview_win == nil then return end
   local winid = self.status.preview_win
   if
     type(winid) ~= "number"

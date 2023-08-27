@@ -1,6 +1,6 @@
 local Default = require("telescope-tasks.model.default_generator")
-local setup = require("telescope-tasks.setup")
 local enum = require("telescope-tasks.enum")
+local setup = require("telescope-tasks.setup")
 
 ---Add a task for running the current lua file.
 local lua = Default:new({
@@ -20,9 +20,7 @@ local lua = Default:new({
 
 function lua.generator(buf)
   local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
-  if filetype ~= "lua" then
-    return nil
-  end
+  if filetype ~= "lua" then return nil end
   local name = vim.api.nvim_buf_get_name(buf)
 
   local cmd = {
@@ -40,9 +38,7 @@ function lua.generator(buf)
     },
   }
   local env = setup.opts.env.lua
-  if type(env) == "table" and next(env) then
-    t.env = env
-  end
+  if type(env) == "table" and next(env) then t.env = env end
   return t
 end
 

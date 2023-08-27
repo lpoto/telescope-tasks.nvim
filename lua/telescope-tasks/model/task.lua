@@ -1,6 +1,6 @@
-local util = require("telescope-tasks.util")
 local enum = require("telescope-tasks.enum")
 local storage = require("telescope-tasks.storage")
+local util = require("telescope-tasks.util")
 
 ---@class Task
 ---@field name string: This is taken from the key in vim.g.telescope_tasks table
@@ -51,9 +51,7 @@ function Task:new(o)
         break
       end
     end
-    if ok then
-      o = { o }
-    end
+    if ok then o = { o } end
   end
   assert(type(o) == "table", "Task should be a table or a string!")
 
@@ -128,7 +126,8 @@ function Task:new(o)
   a.__orig_env = vim.deepcopy(a.env)
 
   if
-    type(o.keywords) == "table" and not next(o.keywords) or o.keywords == nil
+    type(o.keywords) == "table" and not next(o.keywords)
+    or o.keywords == nil
   then
     local keywords = { "__derived" }
     if type(a.filename) == "string" then
@@ -139,9 +138,7 @@ function Task:new(o)
       table.insert(keywords, "__name")
       table.insert(keywords, a.name)
     end
-    if #keywords > 1 then
-      a.keywords = keywords
-    end
+    if #keywords > 1 then a.keywords = keywords end
   elseif type(o.keywords) == "table" then
     for k, v in pairs(o.keywords) do
       assert(
@@ -230,17 +227,13 @@ function Task:get_definition()
   if self.__experimental then
     table.insert(def, { key = "#  Experimental" })
   end
-  if self:modified() then
-    table.insert(def, { key = "#  Modified" })
-  end
+  if self:modified() then table.insert(def, { key = "#  Modified" }) end
   return def
 end
 
 function Task:__update_from_storage()
   local task_stored_data = storage.get(self.keywords)
-  if type(task_stored_data) ~= "table" then
-    return self
-  end
+  if type(task_stored_data) ~= "table" then return self end
   if
     type(task_stored_data.cmd) == "string"
     or type(task_stored_data.cmd) == "table"
@@ -272,9 +265,7 @@ function Task:modify_command_from_input()
     default = cmd .. " ",
     cancelreturn = false,
   })
-  if type(cmd2) ~= "string" then
-    return false
-  end
+  if type(cmd2) ~= "string" then return false end
   if cmd2 == "" then
     cmd2 = orig_cmd
   else
@@ -303,17 +294,13 @@ function Task:modify_env_from_input()
     default = "",
     cancelreturn = false,
   })
-  if type(key) ~= "string" or key:len() == 0 then
-    return false
-  end
+  if type(key) ~= "string" or key:len() == 0 then return false end
   local value = vim.fn.input({
     prompt = "Environment variable value: ",
     default = "",
     cancelreturn = false,
   })
-  if type(value) ~= "string" then
-    return false
-  end
+  if type(value) ~= "string" then return false end
   if value == "" then
     if self.__orig_env[key] then
       local r = vim.fn.confirm(
@@ -344,9 +331,7 @@ function Task:modify_cwd_from_input()
     default = self.cwd,
     cancelreturn = false,
   })
-  if type(cwd) ~= "string" then
-    return false
-  end
+  if type(cwd) ~= "string" then return false end
   local new_cwd = cwd
   if cwd == "" then
     if type(self.__orig_cwd) ~= "string" or self.__orig_cwd:len() == 0 then
@@ -366,9 +351,7 @@ function Task:modify_cwd_from_input()
       return false
     end
   end
-  if new_cwd == self.__orig_cwd then
-    cwd = enum.NIL
-  end
+  if new_cwd == self.__orig_cwd then cwd = enum.NIL end
   storage.save(self.keywords, { cwd = cwd })
   self.cwd = new_cwd
   return true
@@ -390,17 +373,11 @@ function Task:modified()
   then
     return true
   end
-  if format_cmd(self.cmd) ~= format_cmd(self.__orig_cmd) then
-    return true
-  end
-  if self.cwd ~= self.__orig_cwd then
-    return true
-  end
+  if format_cmd(self.cmd) ~= format_cmd(self.__orig_cmd) then return true end
+  if self.cwd ~= self.__orig_cwd then return true end
   if type(self.env) == "table" then
     for k, v in pairs(self.env) do
-      if self.__orig_env[k] ~= v then
-        return true
-      end
+      if self.__orig_env[k] ~= v then return true end
     end
   end
   return false
@@ -409,21 +386,13 @@ end
 ---@param cmd string|table
 ---@return string
 format_cmd = function(cmd)
-  if cmd == nil then
-    return ""
-  end
+  if cmd == nil then return "" end
   local cmd2 = {}
-  if type(cmd) == "string" then
-    cmd = vim.split(cmd, " ")
-  end
+  if type(cmd) == "string" then cmd = vim.split(cmd, " ") end
   for _, v in ipairs(cmd) do
-    if type(v) == "string" and v:len() > 0 then
-      table.insert(cmd2, v)
-    end
+    if type(v) == "string" and v:len() > 0 then table.insert(cmd2, v) end
   end
-  if #cmd2 == 0 then
-    return ""
-  end
+  if #cmd2 == 0 then return "" end
   local s = table.concat(cmd2, " ")
   return (s:gsub("^%s*(.-)%s*$", "%1"))
 end

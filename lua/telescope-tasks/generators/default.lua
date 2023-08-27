@@ -15,9 +15,7 @@ function default.all()
 end
 
 ---Enable Go default generator
-function default.go()
-  require("telescope-tasks.generators.default.go"):load()
-end
+function default.go() require("telescope-tasks.generators.default.go"):load() end
 
 ---Enable Cargo default generator
 function default.cargo()

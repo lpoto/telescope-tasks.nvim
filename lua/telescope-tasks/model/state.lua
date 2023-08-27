@@ -1,5 +1,5 @@
-local scan = require("plenary.scandir")
 local Path = require("plenary.path")
+local scan = require("plenary.scandir")
 
 ---@class State
 ---@field iterated_subdirectories string?
@@ -12,9 +12,7 @@ local State = {
 State.__index = State
 
 ---@return State
-function State:new()
-  return setmetatable({}, State)
-end
+function State:new() return setmetatable({}, State) end
 
 ---@class FoundFiles
 ---@field by_extension table<string, table>
@@ -23,9 +21,7 @@ end
 ---@param check_parents_nr number?
 ---@return FoundFiles
 function State:find_files(check_parents_nr)
-  if type(check_parents_nr) ~= "number" then
-    check_parents_nr = 0
-  end
+  if type(check_parents_nr) ~= "number" then check_parents_nr = 0 end
   check_parents_nr = math.min(check_parents_nr, 10)
 
   local cwd = vim.fn.getcwd()
@@ -85,9 +81,7 @@ function State:__iterate_subdirectories()
 
   local home = os.getenv("HOME")
   local max_depth = 7
-  if cwd == home then
-    max_depth = 4
-  end
+  if cwd == home then max_depth = 4 end
 
   -- NOTE: always scan only a single directory,
   -- and add subdirectories to the stack, so
@@ -118,13 +112,9 @@ function State:__iterate_subdirectories()
         -- NOTE: scan only to a certain depth,
         -- tasks found in deeper directories
         -- are usually not relevant
-        if o.depth >= max_depth then
-          return
-        end
+        if o.depth >= max_depth then return end
         local tail = vim.fn.fnamemodify(entry, ":t")
-        if State.ignore_directories[tail] then
-          return
-        end
+        if State.ignore_directories[tail] then return end
         -- NOTE: the directory is not ignored,
         -- so we add it to the stack and scan it later
         table.insert(stack, { dir = entry, depth = o.depth + 1 })
@@ -134,12 +124,8 @@ function State:__iterate_subdirectories()
 end
 
 function State:__iterate_parents(n)
-  if n <= self.parents_checked then
-    return
-  end
-  if type(self.found_files) ~= "table" then
-    self.found_files = {}
-  end
+  if n <= self.parents_checked then return end
+  if type(self.found_files) ~= "table" then self.found_files = {} end
   local cur_name = vim.api.nvim_buf_get_name(0)
 
   ---@type Path
@@ -203,9 +189,7 @@ State.ignore_directories = {
 --- This will be called every time a file
 --- is found during a file scan process.
 on_insert = function(found_files, entry)
-  if vim.fn.filereadable(entry) ~= 1 then
-    return
-  end
+  if vim.fn.filereadable(entry) ~= 1 then return end
   local extension = vim.fn.fnamemodify(entry, ":e")
   local tail = vim.fn.fnamemodify(entry, ":t")
   if
@@ -219,21 +203,15 @@ on_insert = function(found_files, entry)
   -- might require to filter by extension (ex. *.go)
   -- and some by filename (ex. Makefile)
   if extension and extension:len() > 0 then
-    if not found_files.by_extension then
-      found_files.by_extension = {}
-    end
+    if not found_files.by_extension then found_files.by_extension = {} end
     if not found_files.by_extension[extension] then
       found_files.by_extension[extension] = {}
     end
     table.insert(found_files.by_extension[extension], entry)
   end
   if tail and tail:len() > 0 then
-    if not found_files.by_name then
-      found_files.by_name = {}
-    end
-    if not found_files.by_name[tail] then
-      found_files.by_name[tail] = {}
-    end
+    if not found_files.by_name then found_files.by_name = {} end
+    if not found_files.by_name[tail] then found_files.by_name[tail] = {} end
     table.insert(found_files.by_name[tail], entry)
   end
 end

@@ -26,18 +26,12 @@ mappings.keys = {
 function mappings.attach_mappings(prompt_bufnr, map)
   for key, f in pairs(mappings.keys or {}) do
     if key == "<CR>" then
-      telescope_actions.select_default:replace(function()
-        f(prompt_bufnr)
-      end)
+      telescope_actions.select_default:replace(function() f(prompt_bufnr) end)
     else
       local modes = { "n" }
-      if key:sub(1, 2) == "<C" then
-        table.insert(modes, "i")
-      end
+      if key:sub(1, 2) == "<C" then table.insert(modes, "i") end
       for _, mode in ipairs(modes) do
-        map(mode, key, function()
-          f(prompt_bufnr)
-        end)
+        map(mode, key, function() f(prompt_bufnr) end)
       end
     end
   end

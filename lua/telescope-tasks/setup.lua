@@ -1,5 +1,5 @@
-local util = require("telescope-tasks.util")
 local enum = require("telescope-tasks.enum")
+local util = require("telescope-tasks.util")
 
 local setup = {}
 
@@ -120,14 +120,10 @@ function setup.setup(opts)
   setup.opts = vim.tbl_extend("force", setup.opts, opts)
 end
 
-function setup.get_errors()
-  return errors
-end
+function setup.get_errors() return errors end
 
 function parse_output_opts(opts)
-  if not errors then
-    errors = {}
-  end
+  if not errors then errors = {} end
   local o = {}
   if opts.scale ~= nil then
     if type(opts.scale) ~= "number" or opts.scale < 0.1 or opts.scale > 1 then

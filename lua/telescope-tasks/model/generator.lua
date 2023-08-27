@@ -1,5 +1,5 @@
-local util = require("telescope-tasks.util")
 local Task = require("telescope-tasks.model.task")
+local util = require("telescope-tasks.util")
 
 ---@class Generator
 ---@field generator function
@@ -11,9 +11,7 @@ Generator.__index = Generator
 ---@param o table|function
 ---@return Generator
 function Generator:new(o)
-  if type(o) == "function" then
-    o = { generator = o }
-  end
+  if type(o) == "function" then o = { generator = o } end
   assert(type(o) == "table", "Generator should be a table")
   local generator = setmetatable(o or {}, Generator)
   assert(
@@ -33,14 +31,10 @@ function Generator:run()
     util.error(tasks)
     return nil
   elseif type(tasks) ~= "table" then
-    if tasks ~= nil then
-      util.error("Genrator should return a table")
-    end
+    if tasks ~= nil then util.error("Genrator should return a table") end
     return nil
   end
-  if tasks.name or tasks.cmd or tasks.env then
-    tasks = { tasks }
-  end
+  if tasks.name or tasks.cmd or tasks.env then tasks = { tasks } end
   local found_tasks = {}
   for _, o in pairs(tasks) do
     local err
@@ -48,9 +42,7 @@ function Generator:run()
       local task = Task:new(o)
       found_tasks[task.name] = task
     end)
-    if not ok and type(err) == "string" then
-      util.warn(err)
-    end
+    if not ok and type(err) == "string" then util.warn(err) end
   end
   return found_tasks
 end

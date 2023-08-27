@@ -1,21 +1,20 @@
-
-local setup = require("telescope-tasks.setup")
-local enum = require("telescope-tasks.enum")
-local Path = require("plenary.path")
 local Default_generator = require("telescope-tasks.model.default_generator")
+local Path = require("plenary.path")
 local State = require("telescope-tasks.model.state")
+local enum = require("telescope-tasks.enum")
+local setup = require("telescope-tasks.setup")
 
 ---cargo run [options] [-- args]
 ---
 ---NOTE: this returns only tasks for running rust with cargo
 local cargo = Default_generator:new({
   errorformat = [[%Eerror: %\%%(aborting %\|could not compile%\)%\@!%m,]]
-      .. [[%Eerror[E%n]: %m,]]
-      .. [[%Inote: %m,]]
-      .. [[%Wwarning: %\%%(%.%# warning%\)%\@!%m,]]
-      .. [[%C %#--> %f:%l:%c,]]
-      .. [[%E  left:%m,%C right:%m %f:%l:%c,%Z,]]
-      .. [[%.%#panicked at \'%m\'\, %f:%l:%c]],
+    .. [[%Eerror[E%n]: %m,]]
+    .. [[%Inote: %m,]]
+    .. [[%Wwarning: %\%%(%.%# warning%\)%\@!%m,]]
+    .. [[%C %#--> %f:%l:%c,]]
+    .. [[%E  left:%m,%C right:%m %f:%l:%c,%Z,]]
+    .. [[%.%#panicked at \'%m\'\, %f:%l:%c]],
   opts = {
     name = "Default Cargo Generator",
     experimental = true,
@@ -27,9 +26,7 @@ local check_cargo_files
 local check_current_binary
 
 function cargo.generator(buf)
-  if not cargo:state() then
-    return {}
-  end
+  if not cargo:state() then return {} end
   local files = (cargo:state():find_files(5) or {}).by_name
   local entries = (files or {})["Cargo.toml"]
   local checked_targets = {}
@@ -43,20 +40,14 @@ end
 
 check_current_binary = function(buf, checked_targets)
   local filtype = vim.api.nvim_buf_get_option(buf, "filetype")
-  if filtype ~= "rust" then
-    return
-  end
+  if filtype ~= "rust" then return end
   local filename = vim.api.nvim_buf_get_name(buf)
   local target = filename:match("src/bin/(.-)%.rs")
-  if not target or checked_targets[target] then
-    return
-  end
+  if not target or checked_targets[target] then return end
   local path = Path:new(filename)
   local cwd = path:parent():parent():parent()
   local cargo_toml = cwd:joinpath("Cargo.toml")
-  if not cargo_toml:is_file() then
-    return
-  end
+  if not cargo_toml:is_file() then return end
 
   local env = setup.opts.env.cargo
   local binary = setup.opts.binary.cargo or "cargo"
@@ -73,23 +64,19 @@ check_current_binary = function(buf, checked_targets)
       filename,
     },
   }
-  if type(env) == "table" and next(env) then
-    t.env = env
-  end
+  if type(env) == "table" and next(env) then t.env = env end
   return t
 end
 
 check_cargo_files = function(entries, checked_targets)
-  if not entries or not next(entries) then
-    return {}
-  end
+  if not entries or not next(entries) then return {} end
   local tasks = {}
   for _, entry in ipairs(entries) do
     local path = Path:new(entry)
     local full_path = path:__tostring()
     local cwd = path:parent():__tostring()
     for _, v in
-    ipairs(run_cargo_project(cwd, full_path, checked_targets) or {})
+      ipairs(run_cargo_project(cwd, full_path, checked_targets) or {})
     do
       table.insert(tasks, v)
     end
@@ -112,12 +99,8 @@ run_cargo_project = function(cwd, full_path, checked_targets)
     end
     if next_name then
       local t = l:match('^%s*name%s*=%s*"(.-)"%s*$')
-      if not t then
-        t = l:match("^%s*name%s*=%s*'(.-)'%s*$")
-      end
-      if t then
-        targets[t] = true
-      end
+      if not t then t = l:match("^%s*name%s*=%s*'(.-)'%s*$") end
+      if t then targets[t] = true end
     end
   end
   local t = {}
@@ -141,9 +124,7 @@ run_cargo_project = function(cwd, full_path, checked_targets)
           full_path,
         },
       }
-      if type(env) == "table" and next(env) then
-        task.env = env
-      end
+      if type(env) == "table" and next(env) then task.env = env end
       table.insert(t, task)
     end
   end
@@ -162,8 +143,6 @@ function cargo.healthcheck()
   end
 end
 
-function cargo.on_load()
-  State.register_file_names({ "Cargo.toml" })
-end
+function cargo.on_load() State.register_file_names({ "Cargo.toml" }) end
 
 return cargo
