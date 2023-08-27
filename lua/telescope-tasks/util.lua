@@ -1,5 +1,5 @@
-local enum = require("telescope-tasks.enum")
 local Path = require("plenary.path")
+local enum = require("telescope-tasks.enum")
 
 local util = {}
 
@@ -7,17 +7,11 @@ local log_level = nil
 local find_root
 local notify
 
-function util.warn(...)
-  notify(vim.log.levels.WARN, ...)
-end
+function util.warn(...) notify(vim.log.levels.WARN, ...) end
 
-function util.error(...)
-  notify(vim.log.levels.ERROR, ...)
-end
+function util.error(...) notify(vim.log.levels.ERROR, ...) end
 
-function util.info(...)
-  notify(vim.log.levels.INFO, ...)
-end
+function util.info(...) notify(vim.log.levels.INFO, ...) end
 
 ---Find a parent directory of the current working directory
 ---containing at least one file or directory
@@ -60,21 +54,7 @@ end
 
 ---@param s string
 ---@return string
-function util.trim_string(s)
-  return (s:gsub("^%s*(.-)%s*$", "%1"))
-end
-
----@param n string
-function util.get_env(n)
-  if
-    type(vim.g.telescope_tasks) ~= "table"
-    or type(vim.g.telescope_tasks.env) ~= "table"
-    or type(vim.g.telescope_tasks.env[n]) ~= "table"
-  then
-    return nil
-  end
-  return vim.g.telescope_tasks.env[n]
-end
+function util.trim_string(s) return (s:gsub("^%s*(.-)%s*$", "%1")) end
 
 find_root = function(patterns, start)
   local start_path = Path:new(start)
@@ -95,16 +75,12 @@ find_root = function(patterns, start)
 end
 
 function notify(lvl, ...)
-  if log_level ~= nil and log_level > lvl then
-    return
-  end
+  if log_level ~= nil and log_level > lvl then return end
   local args = { select(1, ...) }
   vim.schedule(function()
     local s = ""
     for _, v in ipairs(args) do
-      if type(v) ~= "string" then
-        v = vim.inspect(v)
-      end
+      if type(v) ~= "string" then v = vim.inspect(v) end
       if s:len() > 0 then
         s = s .. " " .. v
       else
@@ -117,19 +93,6 @@ function notify(lvl, ...)
       })
     end
   end)
-end
-
-function util.get_binary(n)
-  if type(vim.g.telescope_tasks) ~= "table" then
-    return nil
-  end
-  if type(vim.g.telescope_tasks.binaries) ~= "table" then
-    return nil
-  end
-  if type(vim.g.telescope_tasks.binaries[n]) ~= "string" then
-    return nil
-  end
-  return vim.g.telescope_tasks.binaries[n]
 end
 
 return util

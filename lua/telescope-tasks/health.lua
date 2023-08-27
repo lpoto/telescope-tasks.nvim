@@ -20,14 +20,10 @@ function health.check()
     end
   end
   for _, v in ipairs(checks) do
-    if type(v) == "function" then
-      v()
-    end
+    if type(v) == "function" then v() end
   end
 end
 
-function health.__add_check(f)
-  table.insert(checks, f)
-end
+function health.__add_check(f) table.insert(checks, f) end
 
 return health

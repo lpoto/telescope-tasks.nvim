@@ -1,8 +1,8 @@
 local Default = require("telescope-tasks.model.default_generator")
-local util = require("telescope-tasks.util")
-local enum = require("telescope-tasks.enum")
 local Path = require("plenary.path")
 local State = require("telescope-tasks.model.state")
+local enum = require("telescope-tasks.enum")
+local setup = require("telescope-tasks.setup")
 
 ---Add a task for running the current python file.
 local python = Default:new({
@@ -24,12 +24,8 @@ function python.generator(buf)
   local tasks = check_main_files(entries, checked)
   local filetype = vim.api.nvim_buf_get_option(buf, "filetype")
   local name = vim.api.nvim_buf_get_name(buf)
-  if filetype ~= "python" or checked[name] then
-    return tasks
-  end
-  if not tasks then
-    tasks = {}
-  end
+  if filetype ~= "python" or checked[name] then return tasks end
+  if not tasks then tasks = {} end
 
   local t = {
     "Run current Python file",
@@ -42,19 +38,15 @@ function python.generator(buf)
       name,
     },
   }
-  local env = util.get_env("python")
-  if type(env) == "table" and next(env) then
-    t.env = env
-  end
+  local env = setup.opts.env.python
+  if type(env) == "table" and next(env) then t.env = env end
   table.insert(tasks, t)
   return tasks
 end
 
 check_main_files = function(entries, checked)
-  if type(entries) ~= "table" or not next(entries) then
-    return {}
-  end
-  local env = util.get_env("python")
+  if type(entries) ~= "table" or not next(entries) then return {} end
+  local env = setup.opts.env.python
   local tasks = {}
   for _, entry in ipairs(entries) do
     local path = Path:new(entry)
@@ -75,16 +67,14 @@ check_main_files = function(entries, checked)
         full_path,
       },
     }
-    if type(env) == "table" and next(env) then
-      t.env = env
-    end
+    if type(env) == "table" and next(env) then t.env = env end
     table.insert(tasks, t)
   end
   return tasks
 end
 
 function get_binary()
-  local binary = util.get_binary("python")
+  local binary = setup.opts.binary.python
   if type(binary) ~= "string" then
     binary = "python"
     if
@@ -105,7 +95,7 @@ function python.healthcheck()
   local binary, err, warn = get_binary()
   if err ~= nil then
     vim.health.warn(err, {
-      "Install 'python' or set a different binary with vim.g.telescope_tasks = { binaries = { python=<new-binary> }}",
+      "Install 'python' or set a different binary in setup",
     })
   elseif warn ~= nil then
     vim.health.warn(warn)
@@ -114,8 +104,6 @@ function python.healthcheck()
   end
 end
 
-function python.on_load()
-  State.register_file_names({ "__main__.py" })
-end
+function python.on_load() State.register_file_names({ "__main__.py" }) end
 
 return python

@@ -1,5 +1,5 @@
-local util = require("telescope-tasks.util")
 local enum = require("telescope-tasks.enum")
+local util = require("telescope-tasks.util")
 
 local setup = {}
 
@@ -43,18 +43,87 @@ function setup.setup(opts)
       opts = theme(opts)
     end
   end
+  if opts.binary ~= nil and type(opts.binary) ~= "table" then
+    local msg = "'binary' should be a table"
+    table.insert(errors, msg)
+    util.warn(msg)
+    opts.binary = nil
+  elseif opts.binary == nil then
+    opts.binary = {}
+  else
+    for k, v in pairs(opts.binary) do
+      if type(k) ~= "string" then
+        local msg = "binary key " .. vim.inspect(k) .. " should be a string"
+        table.insert(errors, msg)
+        util.warn(msg)
+        opts.binary = nil
+        break
+      elseif type(v) ~= "string" then
+        local msg = "binary value for key '" .. k .. "' should be a string"
+        table.insert(errors, msg)
+        util.warn(msg)
+        opts.binary = nil
+        break
+      end
+    end
+  end
+  if opts.env ~= nil and type(opts.env) ~= "table" then
+    local msg = "'env' should be a table"
+    table.insert(errors, msg)
+    util.warn(msg)
+    opts.env = nil
+  elseif opts.env == nil then
+    opts.env = {}
+  else
+    for k, v in pairs(opts.env) do
+      if type(k) ~= "string" then
+        local msg = "env key " .. vim.inspect(k) .. " should be a string"
+        table.insert(errors, msg)
+        util.warn(msg)
+        opts.env = nil
+        break
+      elseif type(v) ~= "table" then
+        local msg = "env value for key '" .. k .. "' should be a table"
+        table.insert(errors, msg)
+        util.warn(msg)
+        opts.env = nil
+        break
+      else
+        for k2, v2 in pairs(v) do
+          if type(k2) ~= "string" then
+            local msg = "env value for key '"
+              .. k
+              .. "' has a key "
+              .. vim.inspect(k2)
+              .. " that should be a string"
+            table.insert(errors, msg)
+            util.warn(msg)
+            opts.env = nil
+            break
+          end
+          if type(v2) ~= "string" then
+            local msg = "env value for key '"
+              .. k
+              .. "."
+              .. k2
+              .. "' should have a string value"
+            table.insert(errors, msg)
+            util.warn(msg)
+            opts.env = nil
+            break
+          end
+        end
+      end
+    end
+  end
   opts.output = output_opts
   setup.opts = vim.tbl_extend("force", setup.opts, opts)
 end
 
-function setup.get_errors()
-  return errors
-end
+function setup.get_errors() return errors end
 
 function parse_output_opts(opts)
-  if not errors then
-    errors = {}
-  end
+  if not errors then errors = {} end
   local o = {}
   if opts.scale ~= nil then
     if type(opts.scale) ~= "number" or opts.scale < 0.1 or opts.scale > 1 then

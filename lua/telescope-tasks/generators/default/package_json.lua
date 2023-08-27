@@ -1,8 +1,8 @@
 local Default = require("telescope-tasks.model.default_generator")
-local enum = require("telescope-tasks.enum")
 local Path = require("plenary.path")
 local State = require("telescope-tasks.model.state")
-local util = require("telescope-tasks.util")
+local enum = require("telescope-tasks.enum")
+local setup = require("telescope-tasks.setup")
 
 local package_json = Default:new({
   opts = {
@@ -15,9 +15,7 @@ local get_tasks
 
 function package_json.generator()
   local files = (package_json:state():find_files(5) or {}).by_name
-  if not next(files or {}) then
-    return {}
-  end
+  if not next(files or {}) then return {} end
   local tasks = {}
 
   for _, m in ipairs(files["package.json"] or {}) do
@@ -64,18 +62,16 @@ function get_tasks(path, pkg)
           k,
         },
       }
-      local env = util.get_env("package.json")
-      if type(env) == "table" and next(env) then
-        t.env = env
-      end
+      local env = setup.opts.env["package_json"]
+      if type(env) == "table" and next(env) then t.env = env end
+      env = setup.opts.env["package.json"]
+      if type(env) == "table" and next(env) then t.env = env end
       table.insert(tasks, t)
     end
   end
   return tasks
 end
 
-function package_json.on_load()
-  State.register_file_names({ "package.json" })
-end
+function package_json.on_load() State.register_file_names({ "package.json" }) end
 
 return package_json

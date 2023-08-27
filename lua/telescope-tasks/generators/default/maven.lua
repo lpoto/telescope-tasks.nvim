@@ -1,8 +1,8 @@
-local Path = require("plenary.path")
 local Default = require("telescope-tasks.model.default_generator")
-local util = require("telescope-tasks.util")
-local enum = require("telescope-tasks.enum")
+local Path = require("plenary.path")
 local State = require("telescope-tasks.model.state")
+local enum = require("telescope-tasks.enum")
+local setup = require("telescope-tasks.setup")
 
 ---Generate tasks for running maven projects in subdirectories,
 ---
@@ -23,9 +23,7 @@ local run_project_task
 function maven.generator()
   local tasks = {}
 
-  if not maven:state() then
-    return
-  end
+  if not maven:state() then return end
   local files = (maven:state():find_files(5) or {}).by_name
   local pom = "pom.xml"
   if type(files) ~= "table" or not next(files[pom] or {}) then
@@ -52,7 +50,7 @@ function maven.generator()
 end
 
 run_project_task = function(cwd, name, full_path)
-  local binary = util.get_env("maven") or "mvn"
+  local binary = setup.opts.binary.maven or "mvn"
   local cmd = { binary, "clean", "package", "-DskipTests" }
 
   local t = {
@@ -66,11 +64,9 @@ run_project_task = function(cwd, name, full_path)
       full_path,
     },
   }
-  local env = util.get_env("java")
-  if type(env) == "table" and next(env) then
-    t.env = env
-  end
-  env = util.get_env("maven")
+  local env = setup.opts.env.java
+  if type(env) == "table" and next(env) then t.env = env end
+  env = setup.opts.env.maven
   if type(env) == "table" and next(env) then
     t.env = vim.tbl_extend("force", t.env or {}, env)
   end
@@ -82,19 +78,13 @@ end
 is_build_pom = function(file)
   local ok, ok2 = pcall(function()
     local t = vim.fn.fnamemodify(file, ":t")
-    if t ~= "pom.xml" then
-      return false
-    end
+    if t ~= "pom.xml" then return false end
     local path = Path:new(file)
-    if not path:is_file() then
-      return false
-    end
+    if not path:is_file() then return false end
 
     local lines = path:readlines()
     for _, line in ipairs(lines) do
-      if line:match("<build>") then
-        return true
-      end
+      if line:match("<build>") then return true end
     end
     return false
   end)
@@ -102,18 +92,16 @@ is_build_pom = function(file)
 end
 
 function maven.healthcheck()
-  local binary = util.get_binary("maven") or "mvn"
+  local binary = setup.opts.binary.maven or "mvn"
   if vim.fn.executable(binary) == 0 then
     vim.health.warn("Maven binary '" .. binary .. "' is not executable", {
-      "Install 'maven' or set a different binary with vim.g.telescope_tasks = { binaries = { maven=<new-binary> }}",
+      "Install 'maven' or set a different binary in setup",
     })
   else
     vim.health.ok("'" .. binary .. "' is executable")
   end
 end
 
-function maven.on_load()
-  State.register_file_names({ "pom.xml" })
-end
+function maven.on_load() State.register_file_names({ "pom.xml" }) end
 
 return maven

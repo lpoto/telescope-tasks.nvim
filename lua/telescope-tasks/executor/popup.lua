@@ -46,17 +46,25 @@ function popup.handle_window(bufnr, winid, selection_callback)
     end,
   })
   for _, k in ipairs({ "<Esc>", "q" }) do
-    vim.keymap.set("", k, function()
-      vim.api.nvim_exec_autocmds("FocusLost", { buffer = bufnr })
-    end)
+    vim.keymap.set(
+      "",
+      k,
+      function() vim.api.nvim_exec_autocmds("FocusLost", { buffer = bufnr }) end
+    )
   end
 
-  vim.keymap.set("", "<Tab>", function()
-    popup.scroll(bufnr, winid, false)
-  end, { buffer = bufnr })
-  vim.keymap.set("", "<S-Tab>", function()
-    popup.scroll(bufnr, winid, true)
-  end, { buffer = bufnr })
+  vim.keymap.set(
+    "",
+    "<Tab>",
+    function() popup.scroll(bufnr, winid, false) end,
+    { buffer = bufnr }
+  )
+  vim.keymap.set(
+    "",
+    "<S-Tab>",
+    function() popup.scroll(bufnr, winid, true) end,
+    { buffer = bufnr }
+  )
 
   vim.keymap.set("", "<CR>", function()
     local line = vim.api.nvim_get_current_line()
@@ -71,9 +79,7 @@ function popup.determine_win_size(choices)
   local height = math.max(#choices, 1)
   local width = 20
   for _, s in ipairs(choices) do
-    if s:len() + 10 > width then
-      width = s:len() + 10
-    end
+    if s:len() + 10 > width then width = s:len() + 10 end
   end
   return height, width
 end

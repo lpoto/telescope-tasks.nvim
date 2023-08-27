@@ -1,5 +1,5 @@
-local util = require("telescope-tasks.util")
 local output_buffer = require("telescope-tasks.output.buffer")
+local util = require("telescope-tasks.util")
 
 local idx = 0
 local running_tasks = {}
@@ -16,28 +16,20 @@ local executor = {}
 ---@param name string: name of an task
 ---@return number?: the buffer number
 function executor.get_task_output_buf(name)
-  if running_tasks[name] == nil then
-    return nil
-  end
+  if running_tasks[name] == nil then return nil end
   local buf = running_tasks[name].buf
-  if not buf or not vim.api.nvim_buf_is_valid(buf) then
-    return nil
-  end
+  if not buf or not vim.api.nvim_buf_is_valid(buf) then return nil end
   return buf
 end
 
-function executor.is_running(name)
-  return executor.get_job_id(name) ~= nil
-end
+function executor.is_running(name) return executor.get_job_id(name) ~= nil end
 
 ---Returns the timestamp of the last run of the task
 ---identified by the provided name.
 ---
 ---@param name string: name of an task
 ---@return number?: the timestamp
-function executor.get_task_latest_timestamp(name)
-  return timestamps[name]
-end
+function executor.get_task_latest_timestamp(name) return timestamps[name] end
 
 ---Returns the buffer number for the task identified
 ---by the provided name.
@@ -45,9 +37,7 @@ end
 ---@param name string: name of an task
 ---@return number?: the buffer number
 function executor.get_job_id(name)
-  if running_tasks[name] == nil then
-    return nil
-  end
+  if running_tasks[name] == nil then return nil end
   return running_tasks[name].job
 end
 
@@ -68,9 +58,7 @@ end
 function executor.get_name_of_first_task_with_output()
   for _, o in pairs(running_tasks or {}) do
     local buf = executor.get_task_output_buf(o.task.name)
-    if buf and vim.api.nvim_buf_is_valid(buf) then
-      return o.task.name
-    end
+    if buf and vim.api.nvim_buf_is_valid(buf) then return o.task.name end
   end
   return nil
 end
@@ -99,9 +87,7 @@ function executor.run(task, on_exit, on_start, lock, save_modified_command)
 
   local on_exit2 = function(...)
     timestamps[task.name] = os.time()
-    if type(on_exit) == "function" then
-      on_exit(...)
-    end
+    if type(on_exit) == "function" then on_exit(...) end
   end
 
   local safely_run = function()
@@ -124,9 +110,7 @@ end
 ---
 ---@param task Task: The task to kill
 function executor.kill(task)
-  if running_tasks[task.name] == nil then
-    return false
-  end
+  if running_tasks[task.name] == nil then return false end
   local job = running_tasks[task.name].job
   pcall(vim.fn.jobstop, job)
   return true
@@ -144,9 +128,7 @@ function executor.delete_task_buffer(task)
     return
   end
   local ok, err = pcall(function()
-    if job then
-      pcall(vim.fn.jobstop, job)
-    end
+    if job then pcall(vim.fn.jobstop, job) end
     vim.api.nvim_buf_delete(buf, { force = true })
     util.info(task.name .. ": output buffer deleted")
   end)
@@ -158,9 +140,7 @@ function executor.delete_task_buffer(task)
   running_tasks[task.name] = nil
 end
 
-function executor.buffer_is_to_be_deleted(name)
-  return buffers_to_delete[name]
-end
+function executor.buffer_is_to_be_deleted(name) return buffers_to_delete[name] end
 
 function executor.set_buffer_as_to_be_deleted(name)
   buffers_to_delete[name] = true
@@ -173,9 +153,7 @@ local function on_task_exit(task, callback)
     if running_tasks[task.name] ~= nil then
       running_tasks[task.name].job = nil
     end
-    if callback then
-      callback(code)
-    end
+    if callback then callback(code) end
     util.info(task.name .. ": exited with code:", code)
   end
 end
@@ -186,13 +164,9 @@ end
 local function name_output_buf(buf, task)
   for i = 0, 100 do
     local name = task.name
-    if i > 0 then
-      name = name .. "_" .. i
-    end
+    if i > 0 then name = name .. "_" .. i end
     local ok, _ = pcall(vim.api.nvim_buf_set_name, buf, name)
-    if ok then
-      break
-    end
+    if ok then break end
   end
 end
 
@@ -211,9 +185,7 @@ run_task = function(task, on_exit, lock, save_modified_command)
   -- NOTE: Gather job options from the task
   local job =
     task:create_job(on_task_exit(task, on_exit), lock, save_modified_command)
-  if not job then
-    return
-  end
+  if not job then return end
 
   local job_id = job(term_buf)
 
@@ -237,12 +209,8 @@ end
 
 function executor.get_last_task_output_buf()
   local v = vim.tbl_values(running_tasks)
-  table.sort(v, function(a, b)
-    return a.idx > b.idx
-  end)
-  if next(v) == nil then
-    return nil
-  end
+  table.sort(v, function(a, b) return a.idx > b.idx end)
+  if next(v) == nil then return nil end
   for _, t in ipairs(v) do
     if t.buf and vim.api.nvim_buf_is_valid(t.buf) then
       return t.buf, t.name, t.cmd
@@ -281,9 +249,7 @@ end
 
 function executor.get_task_from_buffer(buf)
   for _, t in pairs(running_tasks) do
-    if t.buf == buf then
-      return t.task
-    end
+    if t.buf == buf then return t.task end
   end
   return nil
 end

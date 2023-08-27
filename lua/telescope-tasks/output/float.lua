@@ -1,5 +1,5 @@
-local setup = require("telescope-tasks.setup")
 local enum = require("telescope-tasks.enum")
+local setup = require("telescope-tasks.setup")
 
 local float = {}
 
@@ -19,14 +19,10 @@ function float.create(buf, title, _, footer)
     border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
     style = "minimal",
   }
-  if type(title) == "string" then
-    opts.title = " " .. title .. " "
-  end
+  if type(title) == "string" then opts.title = " " .. title .. " " end
 
   local scale = setup.opts.output and setup.opts.output.scale
-  if type(scale) ~= "number" or scale < 0.1 or scale > 1 then
-    scale = 0.4
-  end
+  if type(scale) ~= "number" or scale < 0.1 or scale > 1 then scale = 0.4 end
 
   local layout = setup.opts.output and setup.opts.output.layout
   local f
@@ -73,15 +69,9 @@ get_centered_opts = function(lines, columns, scale)
 
   local row = 1
   local col = (columns - w) / 2
-  if columns % 2 ~= 0 then
-    col = col - 1
-  end
-  if w == columns then
-    col = 0
-  end
-  if h == lines then
-    row = 0
-  end
+  if columns % 2 ~= 0 then col = col - 1 end
+  if w == columns then col = 0 end
+  if h == lines then row = 0 end
 
   return {
     width = w,

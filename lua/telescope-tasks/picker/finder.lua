@@ -1,8 +1,8 @@
-local finders = require("telescope.finders")
-local util = require("telescope-tasks.util")
 local entry_display = require("telescope.pickers.entry_display")
 local executor = require("telescope-tasks.executor")
+local finders = require("telescope.finders")
 local runner = require("telescope-tasks.generators.runner")
+local util = require("telescope-tasks.util")
 
 local finder = {}
 
@@ -24,9 +24,7 @@ function finder.available_tasks_finder(
   sort,
   find_tasks
 )
-  if find_tasks == nil then
-    find_tasks = true
-  end
+  if find_tasks == nil then find_tasks = true end
   if find_tasks then
     tasks = runner.run(buf) or {}
     if exit_on_no_results and not next(tasks) then
@@ -43,9 +41,7 @@ function finder.available_tasks_finder(
         value = entry,
         ordinal = entry.name,
         filename = entry.filename,
-        display = function(entry2)
-          return get_task_display(entry2.value)
-        end,
+        display = function(entry2) return get_task_display(entry2.value) end,
       }
     end,
   })
@@ -80,9 +76,7 @@ end
 
 local task_names = {}
 local function get_tasks_ordering(tasks_tbl, new)
-  if not new and next(task_names) then
-    return task_names
-  end
+  if not new and next(task_names) then return task_names end
   local priorities = {}
   task_names = {}
   for _, task in pairs(tasks_tbl) do
@@ -126,14 +120,10 @@ function order_tasks(tasks_tbl, regen_ordering)
   local ordering = get_tasks_ordering(tasks_tbl, regen_ordering) or {}
   for _, name in ipairs(ordering) do
     inserted[name] = true
-    if tasks[name] then
-      table.insert(new_tasks, tasks_tbl[name])
-    end
+    if tasks[name] then table.insert(new_tasks, tasks_tbl[name]) end
   end
   for name, task in pairs(tasks_tbl) do
-    if not inserted[name] then
-      table.insert(new_tasks, task)
-    end
+    if not inserted[name] then table.insert(new_tasks, task) end
   end
   return new_tasks
 end

@@ -1,5 +1,5 @@
-local util = require("telescope-tasks.util")
 local enum = require("telescope-tasks.enum")
+local util = require("telescope-tasks.util")
 
 local buffer = {}
 
@@ -19,9 +19,7 @@ function buffer.create(buf)
     end
   end
   local ok, err = pcall(handle_buffer, buf)
-  if ok == false and type(err) == "string" then
-    util.warn(err)
-  end
+  if ok == false and type(err) == "string" then util.warn(err) end
   return buf
 end
 
@@ -47,9 +45,7 @@ handle_buffer = function(buf)
       vim.cmd("stopinsert")
       vim.api.nvim_create_autocmd("TermEnter", {
         group = enum.TASKS_AUGROUP,
-        callback = function()
-          vim.cmd("stopinsert")
-        end,
+        callback = function() vim.cmd("stopinsert") end,
         buffer = buf,
       })
     end,

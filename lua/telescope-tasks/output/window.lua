@@ -1,9 +1,9 @@
 local enum = require("telescope-tasks.enum")
-local util = require("telescope-tasks.util")
-local setup = require("telescope-tasks.setup")
-local highlight = require("telescope-tasks.output.highlight")
-local float = require("telescope-tasks.output.float")
 local executor = require("telescope-tasks.executor")
+local float = require("telescope-tasks.output.float")
+local highlight = require("telescope-tasks.output.highlight")
+local setup = require("telescope-tasks.setup")
+local util = require("telescope-tasks.util")
 
 local window = {}
 
@@ -33,9 +33,7 @@ function window.create(buf, title, footer)
   end
 
   local ok2, err = pcall(handle_window, winid)
-  if ok2 == false and type(err) == "string" then
-    util.error(err)
-  end
+  if ok2 == false and type(err) == "string" then util.error(err) end
 
   add_autocmd(buf)
 
@@ -130,16 +128,12 @@ add_autocmd = function(buf)
     end,
   })
 
-  vim.keymap.set("n", "q", function()
-    close_win(buf)
-  end, {
+  vim.keymap.set("n", "q", function() close_win(buf) end, {
     buffer = buf,
   })
   vim.keymap.set("n", "<C-q>", function()
     local task = executor.get_task_from_buffer(buf)
-    if not task then
-      return
-    end
+    if not task then return end
     executor.to_qf(task)
   end, {
     buffer = buf,

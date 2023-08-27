@@ -1,9 +1,9 @@
-local enum = require("telescope-tasks.enum")
-local util = require("telescope-tasks.util")
-local executor = require("telescope-tasks.executor")
 local buffer = require("telescope-tasks.output.buffer")
-local window = require("telescope-tasks.output.window")
+local enum = require("telescope-tasks.enum")
+local executor = require("telescope-tasks.executor")
 local telescope_actions = require("telescope.actions")
+local util = require("telescope-tasks.util")
+local window = require("telescope-tasks.output.window")
 
 local output = {}
 
@@ -18,18 +18,14 @@ local open_last_task_output
 ---@param before_opening function?: Function to be called before
 ---opening the output. Is not called if the task has no output.
 function output.open(task, before_opening)
-  if task == nil then
-    return
-  end
+  if task == nil then return end
   -- NOTE: make sure the provided task is running.
   local buf = executor.get_task_output_buf(task.name)
   if buf == nil or vim.fn.bufexists(buf) ~= 1 then
     util.warn("Task '" .. task.name .. "' has no output!")
     return
   end
-  if before_opening ~= nil then
-    before_opening()
-  end
+  if before_opening ~= nil then before_opening() end
 
   output.close_output_windows()
 
@@ -87,9 +83,7 @@ end
 ---buf number is provided, that buffer will be used instead.
 ---@param buf number?: An existing buffer.
 ---@return number: The buffer number, -1 when invalid.
-function output.create_buffer(buf)
-  return buffer.create(buf)
-end
+function output.create_buffer(buf) return buffer.create(buf) end
 
 open_last_task_output = function(name, footer, buf)
   -- NOTE: make sure a valid buffer was returned
@@ -117,9 +111,7 @@ open_last_task_output = function(name, footer, buf)
   end
 
   local ow = window.create(buf, name, footer)
-  if not vim.api.nvim_win_is_valid(ow) then
-    return
-  end
+  if not vim.api.nvim_win_is_valid(ow) then return end
 end
 
 return output
