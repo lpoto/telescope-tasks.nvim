@@ -2,7 +2,7 @@ local Default = require("telescope-tasks.model.default_generator")
 local enum = require("telescope-tasks.enum")
 local Path = require("plenary.path")
 local State = require("telescope-tasks.model.state")
-local util = require("telescope-tasks.util")
+local setup = require("telescope-tasks.setup")
 
 local docker_compose = Default:new({
   opts = {
@@ -44,9 +44,9 @@ function get_task(yaml_file)
   local filename = path:__tostring()
   path:normalize(vim.fn.getcwd())
 
-  local binary = util.get_binary("docker-compose") or "docker compose"
+  local binary = setup.opts.binary["docker-compose"]
   if not binary then
-    binary = util.get_binary("docker_compose")
+    binary = setup.opts.binary["docker_compose"]
   end
   if not binary then
     if vim.fn.executable("docker-compose") == 1 then
@@ -77,11 +77,11 @@ function get_task(yaml_file)
       filename,
     },
   }
-  local env = util.get_env("docker-compose")
+  local env = setup.opts.env["docker-compose"]
   if type(env) == "table" and next(env) then
     t.env = env
   else
-    env = util.get_env("docker_compose")
+    env = setup.opts.env["docker_compose"]
     if type(env) == "table" and next(env) then
       t.env = env
     end

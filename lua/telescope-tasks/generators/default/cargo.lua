@@ -1,4 +1,5 @@
-local util = require("telescope-tasks.util")
+
+local setup = require("telescope-tasks.setup")
 local enum = require("telescope-tasks.enum")
 local Path = require("plenary.path")
 local Default_generator = require("telescope-tasks.model.default_generator")
@@ -9,12 +10,12 @@ local State = require("telescope-tasks.model.state")
 ---NOTE: this returns only tasks for running rust with cargo
 local cargo = Default_generator:new({
   errorformat = [[%Eerror: %\%%(aborting %\|could not compile%\)%\@!%m,]]
-    .. [[%Eerror[E%n]: %m,]]
-    .. [[%Inote: %m,]]
-    .. [[%Wwarning: %\%%(%.%# warning%\)%\@!%m,]]
-    .. [[%C %#--> %f:%l:%c,]]
-    .. [[%E  left:%m,%C right:%m %f:%l:%c,%Z,]]
-    .. [[%.%#panicked at \'%m\'\, %f:%l:%c]],
+      .. [[%Eerror[E%n]: %m,]]
+      .. [[%Inote: %m,]]
+      .. [[%Wwarning: %\%%(%.%# warning%\)%\@!%m,]]
+      .. [[%C %#--> %f:%l:%c,]]
+      .. [[%E  left:%m,%C right:%m %f:%l:%c,%Z,]]
+      .. [[%.%#panicked at \'%m\'\, %f:%l:%c]],
   opts = {
     name = "Default Cargo Generator",
     experimental = true,
@@ -57,8 +58,8 @@ check_current_binary = function(buf, checked_targets)
     return
   end
 
-  local env = util.get_env("cargo")
-  local binary = util.get_binary("cargo") or "cargo"
+  local env = setup.opts.env.cargo
+  local binary = setup.opts.binary.cargo or "cargo"
 
   local t = {
     "Run current Cargo binary",
@@ -88,7 +89,7 @@ check_cargo_files = function(entries, checked_targets)
     local full_path = path:__tostring()
     local cwd = path:parent():__tostring()
     for _, v in
-      ipairs(run_cargo_project(cwd, full_path, checked_targets) or {})
+    ipairs(run_cargo_project(cwd, full_path, checked_targets) or {})
     do
       table.insert(tasks, v)
     end
@@ -120,9 +121,9 @@ run_cargo_project = function(cwd, full_path, checked_targets)
     end
   end
   local t = {}
-  local env = util.get_env("cargo")
+  local env = setup.opts.env.cargo
 
-  local binary = util.get_binary("cargo") or "cargo"
+  local binary = setup.opts.binary.cargo or "cargo"
 
   for target, _ in pairs(targets) do
     if not checked_targets[target] then
@@ -151,10 +152,10 @@ run_cargo_project = function(cwd, full_path, checked_targets)
 end
 
 function cargo.healthcheck()
-  local binary = util.get_binary("cargo") or "cargo"
+  local binary = setup.opts.binary.cargo or "cargo"
   if vim.fn.executable(binary) == 0 then
     vim.health.warn("Cargo binary '" .. binary .. "' is not executable", {
-      "Install 'cargo' or set a different binary with vim.g.telescope_tasks = { binaries = { cargo=<new-binary> }}",
+      "Install 'cargo' or set a different binary in setup",
     })
   else
     vim.health.ok("'" .. binary .. "' is executable")

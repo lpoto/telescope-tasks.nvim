@@ -1,6 +1,6 @@
 local Path = require("plenary.path")
 local Default = require("telescope-tasks.model.default_generator")
-local util = require("telescope-tasks.util")
+local setup = require("telescope-tasks.setup")
 local enum = require("telescope-tasks.enum")
 local State = require("telescope-tasks.model.state")
 
@@ -52,7 +52,7 @@ function maven.generator()
 end
 
 run_project_task = function(cwd, name, full_path)
-  local binary = util.get_env("maven") or "mvn"
+  local binary = setup.opts.binary.maven or "mvn"
   local cmd = { binary, "clean", "package", "-DskipTests" }
 
   local t = {
@@ -66,11 +66,11 @@ run_project_task = function(cwd, name, full_path)
       full_path,
     },
   }
-  local env = util.get_env("java")
+  local env = setup.opts.env.java
   if type(env) == "table" and next(env) then
     t.env = env
   end
-  env = util.get_env("maven")
+  env = setup.opts.env.maven
   if type(env) == "table" and next(env) then
     t.env = vim.tbl_extend("force", t.env or {}, env)
   end
@@ -102,10 +102,10 @@ is_build_pom = function(file)
 end
 
 function maven.healthcheck()
-  local binary = util.get_binary("maven") or "mvn"
+  local binary = setup.opts.binary.maven or "mvn"
   if vim.fn.executable(binary) == 0 then
     vim.health.warn("Maven binary '" .. binary .. "' is not executable", {
-      "Install 'maven' or set a different binary with vim.g.telescope_tasks = { binaries = { maven=<new-binary> }}",
+      "Install 'maven' or set a different binary in setup",
     })
   else
     vim.health.ok("'" .. binary .. "' is executable")

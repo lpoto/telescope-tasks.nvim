@@ -1,4 +1,5 @@
 local util = require("telescope-tasks.util")
+local setup = require("telescope-tasks.setup")
 local enum = require("telescope-tasks.enum")
 local Path = require("plenary.path")
 local Default = require("telescope-tasks.model.default_generator")
@@ -77,7 +78,7 @@ check_go_files = function(entries, buf)
 end
 
 run_project_task = function(cwd, name, full_path)
-  local binary = util.get_binary("go") or "go"
+  local binary = setup.opts.binary.go or "go"
   local cmd = { binary, "run", "." }
 
   local t = {
@@ -92,7 +93,7 @@ run_project_task = function(cwd, name, full_path)
       full_path,
     },
   }
-  local env = util.get_env("go")
+  local env = setup.opts.env.go
   if type(env) == "table" and next(env) then
     t.env = env
   end
@@ -100,7 +101,7 @@ run_project_task = function(cwd, name, full_path)
 end
 
 run_current_file_task = function(package, cwd, name, filename)
-  local binary = util.get_binary("go") or "go"
+  local binary = setup.opts.binary.go or "go"
   local cmd = { binary, "run", package }
 
   local t = {
@@ -115,7 +116,7 @@ run_current_file_task = function(package, cwd, name, filename)
       package,
     },
   }
-  local env = util.get_env("go")
+  local env = setup.opts.env.go
   if type(env) == "table" and next(env) then
     t.env = env
   end
@@ -148,10 +149,10 @@ is_main_file = function(file)
 end
 
 function go.healthcheck()
-  local binary = util.get_binary("go") or "go"
+  local binary = setup.opts.binary.go or "go"
   if vim.fn.executable(binary) == 0 then
     vim.health.warn("Go binary '" .. binary .. "' is not executable", {
-      "Install 'go' or set a different binary with vim.g.telescope_tasks = { binaries = { go=<new-binary> }}",
+      "Install 'go' or set a different binary with in setup",
     })
   else
     vim.health.ok("'" .. binary .. "' is executable")

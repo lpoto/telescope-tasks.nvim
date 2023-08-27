@@ -36,6 +36,19 @@ require("telescope").setup {
         scale = 0.4, -- output window to editor size ratio
         -- NOTE: scale and "center" layout are only relevant when style == "float"
       },
+      env = {
+        cargo = {
+          -- Example environment used when running cargo projects
+          RUST_LOG = "debug",
+          -- ...
+        },
+        -- ...
+      },
+      binary = {
+        -- Example binary used when running python projects
+        python = "python3",
+        -- ...
+      },
       -- other picker setup values
     },
   },

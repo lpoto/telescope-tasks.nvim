@@ -1,5 +1,5 @@
 local Default = require("telescope-tasks.model.default_generator")
-local util = require("telescope-tasks.util")
+local setup = require("telescope-tasks.setup")
 local enum = require("telescope-tasks.enum")
 local Path = require("plenary.path")
 local State = require("telescope-tasks.model.state")
@@ -42,7 +42,7 @@ function python.generator(buf)
       name,
     },
   }
-  local env = util.get_env("python")
+  local env = setup.opts.env.python
   if type(env) == "table" and next(env) then
     t.env = env
   end
@@ -54,7 +54,7 @@ check_main_files = function(entries, checked)
   if type(entries) ~= "table" or not next(entries) then
     return {}
   end
-  local env = util.get_env("python")
+  local env = setup.opts.env.python
   local tasks = {}
   for _, entry in ipairs(entries) do
     local path = Path:new(entry)
@@ -84,7 +84,7 @@ check_main_files = function(entries, checked)
 end
 
 function get_binary()
-  local binary = util.get_binary("python")
+  local binary = setup.opts.binary.python
   if type(binary) ~= "string" then
     binary = "python"
     if
@@ -105,7 +105,7 @@ function python.healthcheck()
   local binary, err, warn = get_binary()
   if err ~= nil then
     vim.health.warn(err, {
-      "Install 'python' or set a different binary with vim.g.telescope_tasks = { binaries = { python=<new-binary> }}",
+      "Install 'python' or set a different binary in setup",
     })
   elseif warn ~= nil then
     vim.health.warn(warn)

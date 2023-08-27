@@ -2,7 +2,7 @@ local Default = require("telescope-tasks.model.default_generator")
 local enum = require("telescope-tasks.enum")
 local Path = require("plenary.path")
 local State = require("telescope-tasks.model.state")
-local util = require("telescope-tasks.util")
+local setup = require("telescope-tasks.setup")
 
 local package_json = Default:new({
   opts = {
@@ -64,7 +64,11 @@ function get_tasks(path, pkg)
           k,
         },
       }
-      local env = util.get_env("package.json")
+      local env = setup.opts.env["package_json"]
+      if type(env) == "table" and next(env) then
+        t.env = env
+      end
+      env = setup.opts.env["package.json"]
       if type(env) == "table" and next(env) then
         t.env = env
       end

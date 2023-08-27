@@ -64,18 +64,6 @@ function util.trim_string(s)
   return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
----@param n string
-function util.get_env(n)
-  if
-    type(vim.g.telescope_tasks) ~= "table"
-    or type(vim.g.telescope_tasks.env) ~= "table"
-    or type(vim.g.telescope_tasks.env[n]) ~= "table"
-  then
-    return nil
-  end
-  return vim.g.telescope_tasks.env[n]
-end
-
 find_root = function(patterns, start)
   local start_path = Path:new(start)
   local parents = start_path:parents()
@@ -117,19 +105,6 @@ function notify(lvl, ...)
       })
     end
   end)
-end
-
-function util.get_binary(n)
-  if type(vim.g.telescope_tasks) ~= "table" then
-    return nil
-  end
-  if type(vim.g.telescope_tasks.binaries) ~= "table" then
-    return nil
-  end
-  if type(vim.g.telescope_tasks.binaries[n]) ~= "string" then
-    return nil
-  end
-  return vim.g.telescope_tasks.binaries[n]
 end
 
 return util
