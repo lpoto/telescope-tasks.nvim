@@ -13,14 +13,16 @@ local add_autocmd
 local close_win
 
 ---@param buf number: A buffer number to create a window for
----@rarapm title string?: The title of the window, relevant only for floats
+---@param title string?: The title of the window, relevant only for floats
+---@param footer string?: The footer of the window, relevant only for floats
 ---@return number: A window id, -1 when invalid
-function window.create(buf, title)
+function window.create(buf, title, footer)
   title = title or "Terminal"
 
   local layout = setup.opts.output and setup.opts.output.layout
 
-  local ok, winid = pcall(determine_output_window_type(), buf, title, layout)
+  local ok, winid =
+    pcall(determine_output_window_type(), buf, title, layout, footer)
   if ok == false then
     util.error(winid)
     return -1
