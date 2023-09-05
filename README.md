@@ -4,9 +4,12 @@
 that allows running tasks directly from the telescope prompt and displaying their
 definitions and outputs in the telescope's previewer.
 
-## Demo
 
-https://github.com/lpoto/telescope-tasks.nvim/assets/67372390/bf527ce3-602c-4d7a-9563-b5c1290f7113
+
+https://github.com/lpoto/telescope-tasks.nvim/assets/67372390/b085a6f3-3ab4-49f0-9109-6530f70e13e3
+> **_NOTE_** This demo uses default generators for _Go_ and _Python_ projects. All available default generators
+may be seen [here](./DEFAULT_GENERATORS.md), but you can easily write [custom](./CUSTOM_GENERATORS.md)
+generators.
 
 ## Installation
 
